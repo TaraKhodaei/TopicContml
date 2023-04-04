@@ -25,7 +25,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-gt GAPS_TYPE, --gaps_type GAPS_TYPE**
-> String "rm_row": removes gaps(-) in each sequence by the row. String "rm_col": romoves the column if there is at least one gap(-) in that column. Otherwise, it keeps the gaps(-)
+> String "rm_row": removes gaps(-) in each sequence by the row. String "rm_col": romoves the column if there is at least one gap(-) in that column. Otherwise, it does not make changes in sequences.
 
 <br/>
 
@@ -34,7 +34,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 <br/>
 
-**-kr KMER_RANGE, --kr KMER_RANGE**
+**-kr KMER_RANGE, --kmer_range KMER_RANGE**
 > range of kmers extraction
 
 <br/>
