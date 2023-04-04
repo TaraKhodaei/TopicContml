@@ -13,7 +13,7 @@ def readData(myfile, type='STANDARD'):     #testdata.phy : sequences
     f.close()
     
     
-    numind,numsites = (data.pop(0)).split()
+    numind,numsites, *rest = (data.pop(0)).split()
     for i in data:
     
         if i=='':
