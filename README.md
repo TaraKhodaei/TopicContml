@@ -65,5 +65,3 @@ The dataset of sequences should be in the directory in a folder called **"loci"*
 
 
 
-1 locus, no merging:
-python TopicPContml.py -e -gt rm_row -n 1
