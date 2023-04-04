@@ -45,7 +45,7 @@ def myparser():
     parser.add_argument('-e','--extended', dest='phylip_type',
                         default=None, action='store_true',
                         help='If the phylip dataset is in the extended format, use this.')
-    parser.add_argument('-g','--gaps_type', dest='gaps_type',
+    parser.add_argument('-gt','--gaps_type', dest='gaps_type',
                         default=None, action='store',type=str,
                         help='String "rm_row": removes gaps(-) in each sequence by the row. String "rm_col": romoves the column if there is at least one gap(-) in that column. Otherwise, it keeps the gaps(-) ')
     parser.add_argument('-m','--merging', dest='merging',
