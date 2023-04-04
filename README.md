@@ -47,15 +47,15 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 > **Experiment 1.1**.<br/>
+> > The bird sequences are collected from 14 loci and 9 different locations:
 > ```
 > python TopicPContml.py -e -m -gt rm_row -n 19
 > ```
 > <div align="center"><img src="https://github.com/TaraKhodaei/TPContml/blob/main/images/experiment1_birds.jpg" width="300"/></div>
 
 
-19 loci, merging populations in each locus:
-python TPContml.py -e -m -g rm_row  -kr 2,10,2 -n 19
 
 
-1ocus, no merging:
-python TPContml.py -e -g rm_row  -kr 2,10,2 -n 1
+
+1 locus, no merging:
+python TopicPContml.py -e -gt rm_row -n 1
