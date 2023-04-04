@@ -1,4 +1,4 @@
-<div align="center"><img src="https://github.com/TaraKhodaei/TPContml/blob/main/images/workflow.jpg" width="350"/></div>
+<div align="center"><img src="images/workflow.jpg" width="350"/></div>
 
 Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, an unsupervised machine learning approach based on natural language processing, to construct evolutionary relationships among species from unaligned DNA sequences.
 
@@ -59,7 +59,7 @@ The dataset of sequences should be in the directory in a folder called **"loci"*
 > ```
 > python TopicContml.py -e -m -gt rm_row -n 19
 > ```
-> <div align="center"><img src="https://github.com/TaraKhodaei/TPContml/blob/main/images/experiment1_birds.jpg" width="300"/></div>
+> <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
 
 
 
