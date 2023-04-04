@@ -6,8 +6,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 
 # $\color{purple}{\textsf{Usage}}$
-    pathtrees.py [-h] [-e] [-g] [-m] [-kr KMER_RANGE]
-                        [-kt KMER_TYPE] [-n NUM_LOCI] 
+    pathtrees.py [-h] [-e] [-g] [-m] [-kr KMER_RANGE] [-kt KMER_TYPE] [-n NUM_LOCI] 
                         
                         
 19 loci, merging populations in each locus:
