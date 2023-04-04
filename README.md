@@ -50,7 +50,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 > ```
 > python TopicPContml.py -e -m -gt rm_row -n 19
 > ```
-> <div align="center"><img src="https://github.com/TaraKhodaei/TPContml/blob/main/images/experiment1_birds.jpg" width="1000"/></div>
+> <div align="center"><img src="https://github.com/TaraKhodaei/TPContml/blob/main/images/experiment1_birds.jpg" width="300"/></div>
 
 
 19 loci, merging populations in each locus:
