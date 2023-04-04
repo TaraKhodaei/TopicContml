@@ -35,18 +35,22 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-kr KMER_RANGE, --kmer_range KMER_RANGE**
-> range of kmers extraction
+> range of kmers extraction. default range is 2,10,2
 
 <br/>
 
 **-n NUM_LOCI, --num_loci NUM_LOCI**
 > number of loci
 
-> <br/>
 
 
+<br/>
 
-
+> **Experiment 1.1**.<br/>
+> ```
+> python TopicPContml.py -e -m -gt rm_row -n 19
+> ```
+> <div align="center"><img src="https://raw.githubusercontent.com/TaraKhodaei/pathtrees_project/main/images/D1_GTP_rbf_s1e-10_n3.png" width="1000"/></div>
 
 
 19 loci, merging populations in each locus:
