@@ -47,7 +47,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 > **Experiment 1.1**.<br/>
-> > The bird sequences are collected from 14 loci and 9 different locations:
+> > **loci_birds:** The bird sequences are collected from 14 loci and 9 different locations:
 > ```
 > python TopicPContml.py -e -m -gt rm_row -n 19
 > ```
