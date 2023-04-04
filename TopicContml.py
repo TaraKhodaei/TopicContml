@@ -52,7 +52,7 @@ def myparser():
                         default=None, action='store_true',
                         help='It merges sequences with the same population.')
     parser.add_argument('-kr','--kmer_range', dest='kmer_range',
-                        default=None, action='store',
+                        default='2,10,2', action='store',
                         help='range of kmers extraction')
     parser.add_argument('-kt','--kmer_type', dest='kmers_type',
                         default='not_overlap', action='store',type=str,
