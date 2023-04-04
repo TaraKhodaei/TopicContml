@@ -1,4 +1,4 @@
-<div align="center"><img src="https://raw.githubusercontent.com/TaraKhodaei/pathtrees_project/main/images/workflow.jpg" width="350"/></div>
+<div align="center"><img src="https://raw.githubusercontent.com/TaraKhodaei/TPContml/main/images/workflow.jpg" width="350"/></div>
 
 Python package **TPContml** enables the construction, visualization and exploration of the continuous tree landscape interior of the convex hull of given starting trees, using insights from the Billera-Holmes-Vogtmann treespace.
 
