@@ -49,6 +49,11 @@ The dataset of sequences should be in the directory in a folder called **"loci"*
 
 <br/>
 
+
+# $\color{purple}{\textsf{Application to Real Data}}$
+
+## $\color{purple}{\textsf{1. First Dataset : Birds}}$
+
 > **Experiment 1.1**.<br/>
 > > **loci_birds:** The bird sequences are collected from 14 loci and 9 different locations.
 > ```
