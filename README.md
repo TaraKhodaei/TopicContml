@@ -4,7 +4,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 
 # $\color{purple}{\textsf{Usage}}$
-    pathtrees.py [-h] [-e] [-m] [-gt GAPS_TYPE] [-kt KMER_TYPE] [-kr KMER_RANGE] [-n NUM_LOCI] 
+    topiccontml.py [-h] [-e] [-m] [-gt GAPS_TYPE] [-kt KMER_TYPE] [-kr KMER_RANGE] [-n NUM_LOCI] 
                         
 
 # $\color{purple}{\textsf{Arguments}}$

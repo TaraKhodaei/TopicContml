@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #Import Libraries
 
 # import numpy for matrix operation
@@ -25,6 +27,7 @@ import phylip
 
 
 import os
+import sys
 import itertools
 
 current = os.getcwd()
@@ -57,6 +60,9 @@ def myparser():
     parser.add_argument('-kt','--kmer_type', dest='kmers_type',
                         default='not_overlap', action='store',type=str,
                         help='default "not_overlap": extract kmers without overlapping. String "not_overlap": extract kmers with overlapping.')
+    parser.add_argument('-f','--folder', dest='folder',
+                        action='store', default='loci', type=str,
+                        help='the folder that contains the data')
     parser.add_argument('-n','--num_loci', dest='num_loci',
                         default=1, action='store', type=int,
                         help='number of loci')
@@ -107,7 +113,7 @@ def topicmodeling(num_loci, num_topics, chunksize , passes , iterations , eval_e
                 
         #===================== Extract labels and sequences ====================
         locus_i = 'locus'+str(i)+'.txt'
-        locus = os.path.join(current,'loci',locus_i)
+        locus = os.path.join(current,folder,locus_i)
         
         label,sequence,varsites = phylip.readData(locus, ttype)
         #print(f"label = {label}")
@@ -229,7 +235,13 @@ def infile(topics_loci, letters):
 #====================================================================================
 def run_contml(infile):
     os.system('rm outfile outtree')
-    os.system('echo "y" | /Users/tara/bin/contml')
+    contmljumble = RANDOMSEED
+    contmltimes  = 10
+    with open('contmlinput','w') as f:
+        contmlinput = f'g\nj\n{contmljumble}\n{contmltimes}\ny'
+        #contmlinput = f'g\n'
+        f.write(contmlinput)
+    os.system(f'cat contmlinput | {PROGRAMPATH}contml')
     
     #read the outtree file
     with open('outtree', 'r') as f:
@@ -251,6 +263,8 @@ if __name__ == "__main__":
     kmers_type = args.kmers_type
     
     num_loci = args.num_loci
+
+    folder = args.folder
     
     phylip_type = args.phylip_type
     if phylip_type:
@@ -268,7 +282,12 @@ if __name__ == "__main__":
     passes = 50
     iterations = 1000
     eval_every = 1
-    
+
+    PROGRAMPATH = '/Users/beerli/bin/'
+    # generates a random number seed for jumble in contml
+    RANDOMSEED  = np.random.randint(1,2**16,size=1)[0]
+    if RANDOMSEED % 2 == 0:
+        RANDOMSEED += 1
     letters, topics_loci = topicmodeling(num_loci, num_topics, chunksize , passes , iterations , eval_every )
 
     #for each locus remove last column from topic matrix
@@ -293,4 +312,4 @@ if __name__ == "__main__":
 
 
     #Figtree
-    os.system("/Users/tara/bin/figtree outtree")
+    os.system(f"{PROGRAMPATH}figtree outtree")
