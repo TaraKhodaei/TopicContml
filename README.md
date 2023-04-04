@@ -44,10 +44,13 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 
 
+# $\color{purple}{\textsf{Dataset}}$
+The dataset of sequences should be in the directory in a folder called **"loci"**, and inside that each locus dataset is included in separate folders called **"loci0", "loci1", ...**
+
 <br/>
 
 > **Experiment 1.1**.<br/>
-> > **loci_birds:** The bird sequences are collected from 14 loci and 9 different locations:
+> > **loci_birds:** The bird sequences are collected from 14 loci and 9 different locations.
 > ```
 > python TopicPContml.py -e -m -gt rm_row -n 19
 > ```
