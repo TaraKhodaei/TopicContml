@@ -42,7 +42,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 **-n NUM_LOCI, --num_loci NUM_LOCI**
 > number of loci
 
-
+<br/>
 
 # $\color{purple}{\textsf{Dataset}}$
 The dataset of sequences should be in the directory in a folder called **"loci"**, and inside that each locus dataset is included in separate folders called **"loci0", "loci1", ...**
