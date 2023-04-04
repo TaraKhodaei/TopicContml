@@ -1,4 +1,7 @@
 <div align="center"><img src="https://github.com/TaraKhodaei/TPContml/blob/main/images/workflow.jpg" width="350"/></div>
+
+Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, an unsupervised machine learning approach based on natural language processing, to construct evolutionary relationships among species from unaligned DNA sequences.
+
 Python package **TPContml** enables the construction, visualization and exploration of the continuous tree landscape interior of the convex hull of given starting trees, using insights from the Billera-Holmes-Vogtmann treespace.
 
 
