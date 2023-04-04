@@ -3,12 +3,52 @@
 Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, an unsupervised machine learning approach based on natural language processing, to construct evolutionary relationships among species from unaligned DNA sequences.
 
 
-
-
 # $\color{purple}{\textsf{Usage}}$
-    pathtrees.py [-h] [-e] [-g] [-m] [-kr KMER_RANGE] [-kt KMER_TYPE] [-n NUM_LOCI] 
+    pathtrees.py [-h] [-e] [-m] [-gt GAPS_TYPE] [-kt KMER_TYPE] [-kr KMER_RANGE] [-n NUM_LOCI] 
                         
-                        
+
+# $\color{purple}{\textsf{Arguments}}$
+
+**-h, --help**
+> show this help message and exi  
+
+<br/>
+
+**-e, --extended**
+> If the phylip dataset is in the extended format, use this. 
+ 
+> <br/>
+
+**-m, --merging**
+> It merges sequences with the same population
+
+<br/>
+
+**-gt GAPS_TYPE, --gaps_type GAPS_TYPE**
+> String "rm_row": removes gaps(-) in each sequence by the row. String "rm_col": romoves the column if there is at least one gap(-) in that column. Otherwise, it keeps the gaps(-)
+
+<br/>
+
+**-kt KMER_TYPE, --kmer_type KMER_TYPE**
+> default "not_overlap": extract kmers without overlapping. String "not_overlap": extract kmers with overlapping.
+
+<br/>
+
+**-kr KMER_RANGE, --kr KMER_RANGE**
+> range of kmers extraction
+
+<br/>
+
+**-n NUM_LOCI, --num_loci NUM_LOCI**
+> number of loci
+
+> <br/>
+
+
+
+
+
+
 19 loci, merging populations in each locus:
 python TPContml.py -e -m -g rm_row  -kr 2,10,2 -n 19
 
