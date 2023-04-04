@@ -35,7 +35,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-kr KMER_RANGE, --kmer_range KMER_RANGE**
-> range of kmers extraction (default range is 2,10,2, which means it creates words with lengths 2, 4, 6, 8).
+> range of kmers extraction (default range is 2,10,2, which means it creates words with lengths 2, 4, 6, and 8).
 
 <br/>
 
