@@ -53,8 +53,9 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     ```
 2. `CONTML`
 3. `FigTree`
+* After clone the repository, in `TopicContml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
 * The  **dataset** of sequences should be in the directory in a folder, including loci in separate text files called **"loci0.txt", "loci1.txt", ...**
-* After clone the repository, in `ToipcContml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
+
 
 <br/>
 
