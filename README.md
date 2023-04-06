@@ -48,7 +48,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 # $\color{purple}{\textsf{Requirements}}$
 > * The following packages are required: <br/>
 > gensim: <br/>
-> pip install gensim  <br/>
+    pip install gensim  <br/>
 
 
 
