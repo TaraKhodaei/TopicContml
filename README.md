@@ -46,12 +46,12 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 
 # $\color{purple}{\textsf{Requirements}}$
-> * The following **packages** are required: <br/>
-> `gensim`:
->```bash
-> pip install gensim
->```
-> * The  **dataset** of sequences should be in the directory in a folder, including loci in separate text files called **"loci0.txt", "loci1.txt", ...**
+* The following **packages** are required: <br/>
+1. `gensim`:
+    ```bash
+    pip install gensim
+    ```
+* The  **dataset** of sequences should be in the directory in a folder, including loci in separate text files called **"loci0.txt", "loci1.txt", ...**
 `
 
 <br/>
