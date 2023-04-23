@@ -44,6 +44,16 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 <br/>
 
+**-f FOLDER, --folder FOLDER**
+> the folder that contains the data (loci in separate text files called "loci0.txt", "loci1.txt", ...). The defult is "loci"
+
+<br/>
+
+**-sd SIM_DIVERGE, --siminfile_diverge_time SIM_DIVERGE**
+> To do siminfile analysis for the folder with the given float number of sim_diverge
+
+<br/>
+
 
 # $\color{purple}{\textsf{Requirements}}$
 * The following **packages** are required: <br/>
@@ -53,7 +63,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     ```
 2. `CONTML`
 3. `FigTree`
-* After clone the repository, in `TopicContml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
+* After clone the repository, in `topiccontml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
 * The  **dataset** of sequences should be in the directory in a folder, including loci in separate text files called **"loci0.txt", "loci1.txt", ...**
 
 
