@@ -62,26 +62,22 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 # $\color{purple}{\textsf{Application to Real Data}}$
 
-## $\color{purple}{\textsf{1. First Dataset : Birds}}$
+## $\color{purple}{\textsf{1. Birds Dataset}}$
 
 > **Experiment 1.1**.<br/>
 > > **loci_birds:** The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals.
 > ```
-> python TopicContml.py -e -m -gt rm_row -n 19
+> python TopicContml.py -f loci_birds  -m -gt rm_row -n 14
 > ```
 > <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
 
+## $\color{purple}{\textsf{2. Simulated Dataset}}$
+> **Experiment 2.1**.<br/>
+> ```
+> python TopicContml.py -f sim_100_0.0_100 -sd 0.0  -m -gt rm_row -n 100
+> python TopicContml.py -f sim_100_0.01_100 -sd 0.01  -m -gt rm_row -n 100
+> python TopicContml.py -f sim_100_0.05_100 -sd 0.05  -m -gt rm_row -n 100
+> python TopicContml.py -f sim_100_0.1_100 -sd 0.1  -m -gt rm_row -n 100
+> python TopicContml.py -f sim_100_0.2_100 -sd 0.2  -m -gt rm_row -n 100
+> ```
 
-#small siminfile
-python TopicContml_simfile.py -f simfiles -m -gt rm_row -n 100
-
-
-#large siminfile
-python TopicContml_simfile.py -f simfiles -m -gt rm_row -n 100
-
-python TopicContml_simfile.py -f sim_100_0.0_100 -m -gt rm_row -n 100
-
-
-
-
-python TopicContml.py -f sim_100_0.0_100 -sd 0.0  -m -gt rm_row -n 100
