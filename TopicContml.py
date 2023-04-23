@@ -25,6 +25,10 @@ import matplotlib.pyplot as plt
 #To extract my sequences from myfile.phy
 import phylip
 
+#To calculate distance of trees
+import dendropy
+from dendropy.calculate import treecompare
+
 
 import os
 import sys
@@ -62,10 +66,13 @@ def myparser():
                         help='default "not_overlap": extract kmers without overlapping. String "not_overlap": extract kmers with overlapping.')
     parser.add_argument('-f','--folder', dest='folder',
                         action='store', default='loci', type=str,
-                        help='the folder that contains the data')
+                        help='the folder that contains the data (loci in separate text files called "loci0.txt", "loci1.txt", ...). The defult is "loci"')
     parser.add_argument('-n','--num_loci', dest='num_loci',
                         default=1, action='store', type=int,
                         help='number of loci')
+    parser.add_argument('-sd','--siminfile_diverge_time', dest='sim_diverge',
+                        default=None, action='store',
+                        help='To do siminfile analysis for the folder with the given float number')
 
                             
 
@@ -200,7 +207,6 @@ def topicmodeling(num_loci, num_topics, chunksize , passes , iterations , eval_e
         docs_tuples = model[corpus]
                 
         #=================== topics list for current locus ======================
-        delta_type='dirichlet'
         topics = []
         for num, doc in enumerate(docs_tuples):
             first=[]
@@ -260,6 +266,8 @@ if __name__ == "__main__":
     
     merging = args.merging
     
+    sim_diverge = args.sim_diverge
+    
     kmers_type = args.kmers_type
     
     num_loci = args.num_loci
@@ -283,33 +291,101 @@ if __name__ == "__main__":
     iterations = 1000
     eval_every = 1
 
-    PROGRAMPATH = '/Users/beerli/bin/'
+    PROGRAMPATH = '/Users/tara/bin/'
     # generates a random number seed for jumble in contml
     RANDOMSEED  = np.random.randint(1,2**16,size=1)[0]
     if RANDOMSEED % 2 == 0:
         RANDOMSEED += 1
-    letters, topics_loci = topicmodeling(num_loci, num_topics, chunksize , passes , iterations , eval_every )
+        
+    #=================== main: if siminfile analysis ======================
+    if sim_diverge is not None:
+#        lengths = [float(item) for item in siminfile.split(',')]
+        diverge_time = float(sim_diverge)       #diverge_time=0.0/0.01/0.05/0.1/0.2
+#        print(diverge_time)
+#        sys.exit()
+        tree_newick = '((Arb:1,Fra:1):1,Kre:1,Rom:1);'    #We need just topology to compare
+        tns = dendropy.TaxonNamespace()
+        true_tree = dendropy.Tree.get(data=tree_newick,schema="newick",taxon_namespace=tns)
+        true_tree.encode_bipartitions()
+        
+        simfiles_folder = os.path.join(current,folder)
+        print(simfiles_folder)
+        current = simfiles_folder
+        siminfiles_trees=[]
+        
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        num_iter =[2,5,10,20,50,100]
+#        num_iter =[2,5]
 
-    #for each locus remove last column from topic matrix
-    topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
+        sims_num = list(range(0,100))
+#        sims_num = list(range(0,20))
+        count_equaltrue=[]
+        for num in num_iter:
+            num_loci = num
+            distances =[]
+            for sim_num in sims_num:
+                siminfile_sl ='siminfile_'+str(sim_num)+'_100_'+str(diverge_time)+'_100'
+                folder = os.path.join(simfiles_folder,siminfile_sl)
+                #sys.exit()
+                letters, topics_loci = topicmodeling(num_loci, num_topics, chunksize , passes , iterations , eval_every )
+
+                #for each locus remove last column from topic matrix
+                topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
 
 
-    #concatenation of the topics for all loci
-    topics_loci_concatenated = topics_loci_missingLast[0]
-    for i in range(1,len(topics_loci_missingLast)):
-        topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
-    #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
+                #concatenation of the topics for all loci
+                topics_loci_concatenated = topics_loci_missingLast[0]
+                for i in range(1,len(topics_loci_missingLast)):
+                    topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
+                #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
+
+                #generate infile
+                infile(topics_loci_concatenated, letters)
+
+                #run CONTML
+                ourtree = run_contml(infile)
+                print(ourtree)
+                
+                
+                our_tree = dendropy.Tree.get(data=ourtree,schema="newick",taxon_namespace=tns)
+                our_tree.encode_bipartitions()
+                distance=treecompare.unweighted_robinson_foulds_distance(true_tree, our_tree, is_bipartitions_updated=True)
+                distances.append(distance)
+
+                #Figtree
+#                os.system(f"{PROGRAMPATH}figtree outtree")
+
+            count_equaltrue.append(distances.count(0))
+            
+        np.savetxt('count_equaltrue_sim_{}'.format(diverge_time), count_equaltrue,  fmt='%s')
+
+    
+    
+    
+    #===================  main: if NOT siminfile analysis  ======================
+    else:
+        letters, topics_loci = topicmodeling(num_loci, num_topics, chunksize , passes , iterations , eval_every )
+
+        #for each locus remove last column from topic matrix
+        topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
+
+
+        #concatenation of the topics for all loci
+        topics_loci_concatenated = topics_loci_missingLast[0]
+        for i in range(1,len(topics_loci_missingLast)):
+            topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
+        #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
 
 
 
-    #generate infile
-    infile(topics_loci_concatenated, letters)
+        #generate infile
+        infile(topics_loci_concatenated, letters)
 
 
-    #run CONTML
-    ourtree = run_contml(infile)
-    print(ourtree)
+        #run CONTML
+        ourtree = run_contml(infile)
+        print(ourtree)
 
 
-    #Figtree
-    os.system(f"{PROGRAMPATH}figtree outtree")
+        #Figtree
+        os.system(f"{PROGRAMPATH}figtree outtree")

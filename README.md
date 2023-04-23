@@ -62,6 +62,16 @@ The dataset of sequences should be in the directory in a folder called **"loci"*
 > <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
 
 
+#small siminfile
+python TopicContml_simfile.py -f simfiles -m -gt rm_row -n 100
+
+
+#large siminfile
+python TopicContml_simfile.py -f simfiles -m -gt rm_row -n 100
+
+python TopicContml_simfile.py -f sim_100_0.0_100 -m -gt rm_row -n 100
 
 
 
+
+python TopicContml.py -f sim_100_0.0_100 -sd 0.0  -m -gt rm_row -n 100
