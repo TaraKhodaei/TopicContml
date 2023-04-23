@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 #Import Libraries
 
 # import numpy for matrix operation
@@ -299,10 +298,7 @@ if __name__ == "__main__":
         
     #=================== main: if siminfile analysis ======================
     if sim_diverge is not None:
-#        lengths = [float(item) for item in siminfile.split(',')]
         diverge_time = float(sim_diverge)       #diverge_time=0.0/0.01/0.05/0.1/0.2
-#        print(diverge_time)
-#        sys.exit()
         tree_newick = '((Arb:1,Fra:1):1,Kre:1,Rom:1);'    #We need just topology to compare
         tns = dendropy.TaxonNamespace()
         true_tree = dendropy.Tree.get(data=tree_newick,schema="newick",taxon_namespace=tns)
@@ -315,10 +311,7 @@ if __name__ == "__main__":
         
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         num_iter =[2,5,10,20,50,100]
-#        num_iter =[2,5]
-
         sims_num = list(range(0,100))
-#        sims_num = list(range(0,20))
         count_equaltrue=[]
         for num in num_iter:
             num_loci = num
@@ -360,8 +353,6 @@ if __name__ == "__main__":
         np.savetxt('count_equaltrue_sim_{}'.format(diverge_time), count_equaltrue,  fmt='%s')
 
     
-    
-    
     #===================  main: if NOT siminfile analysis  ======================
     else:
         letters, topics_loci = topicmodeling(num_loci, num_topics, chunksize , passes , iterations , eval_every )
@@ -376,16 +367,12 @@ if __name__ == "__main__":
             topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
         #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
 
-
-
         #generate infile
         infile(topics_loci_concatenated, letters)
-
 
         #run CONTML
         ourtree = run_contml(infile)
         print(ourtree)
-
 
         #Figtree
         os.system(f"{PROGRAMPATH}figtree outtree")
