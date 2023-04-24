@@ -443,7 +443,7 @@ if __name__ == "__main__":
     iterations = 1000
     eval_every = 1
 
-    PROGRAMPATH = '/Users/beerli/bin/'
+    PROGRAMPATH = '~/bin/'
     CONTML = 'contml2'
     FIGTREE = 'figtree'
     NMLENGTH = 15

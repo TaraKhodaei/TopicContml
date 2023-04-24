@@ -55,6 +55,10 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 <br/>
 
+**-b BOOTSTRAP, --bootstrap BOOTSTRAP
+> number of bootstrap replicates
+
+<br/>
 
 # $\color{purple}{\textsf{Requirements}}$
 * The following **packages** are required: <br/>
