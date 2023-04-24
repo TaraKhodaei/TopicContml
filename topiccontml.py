@@ -50,32 +50,34 @@ def myparser():
     parser = argparse.ArgumentParser(description='generates topic frequencies for the dataset to be applied as an input to CONTML to generate the phylogeny')
     parser.add_argument('-e','--extended', dest='phylip_type',
                         default=None, action='store_true',
-                        help='If the phylip dataset is in the extended format, use this.')
+                        help='If the phylip dataset is in the extended format, use this [individual names are still limited to a max of 15 characters].')
     parser.add_argument('-gt','--gaps_type', dest='gaps_type',
                         default=None, action='store',type=str,
-                        help='String "rm_row": removes gaps(-) in each sequence by the row. String "rm_col": romoves the column if there is at least one gap(-) in that column. Otherwise, it keeps the gaps(-) ')
+                        help='String "rm_row": removes gaps(-) in each sequence (by row). String "rm_col": removes site columns thathave at least one gap(-). Without this option the gaps(-) are included.')
     parser.add_argument('-m','--merging', dest='merging',
                         default=None, action='store_true',
-                        help='It merges sequences with the same population.')
+                        help='Merge sequences that start with the same 4 letters [e.g. population or species labels].')
     parser.add_argument('-kr','--kmer_range', dest='kmer_range',
                         default='2,10,2', action='store',
-                        help='range of kmers extraction')
+                        help='range of kmers extraction, lowerbound,max+1,step [for example: 2,10,2 leads to non overlapping k-mers: 2,4,6,8')
     parser.add_argument('-kt','--kmer_type', dest='kmers_type',
                         default='not_overlap', action='store',type=str,
                         help='default "not_overlap": extract kmers without overlapping. String "not_overlap": extract kmers with overlapping.')
     parser.add_argument('-f','--folder', dest='folder',
                         action='store', default='loci', type=str,
-                        help='the folder that contains the data (loci in separate text files called "loci0.txt", "loci1.txt", ...). The defult is "loci"')
+                        help='the folder that contains the data (loci in separate text files called "loci0.txt", "loci1.txt", ...). The default is "loci"')
     parser.add_argument('-n','--num_loci', dest='num_loci',
                         default=1, action='store', type=int,
                         help='number of loci')
     parser.add_argument('-sd','--siminfile_diverge_time', dest='sim_diverge',
                         default=None, action='store',
                         help='To do siminfile analysis for the folder with the given float number')
-
+    parser.add_argument('-b','--bootstrap', dest='bootstrap',
+                        default=0, action='store', type=int,
+                        help='number of bootstrap replicates')
+    
                             
-
-    args = parser.parse_args()
+    args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
     return args
     
 #====================================================================================
@@ -112,19 +114,33 @@ def tokenize(seq_list, k, gaps_type, kmers_type):  #gaps:rm_row/rm_com     #kmer
 
 
 #====================================================================================
-def topicmodeling(num_loci, num_topics, chunksize , passes , iterations , eval_every ):
-    topics_loci=[]
+def read_data(current, folder, num_loci,prefix='locus',suffix='.txt'):
+    labels=[]
+    sequences=[]
+    varsitess=[]
     for i in range(num_loci):
-        print(f'\n~~~~~~~~~~~~~~~~~~~~~ locus {i} ~~~~~~~~~~~~~~~~~~~~~~~\n')
-                
         #===================== Extract labels and sequences ====================
-        locus_i = 'locus'+str(i)+'.txt'
-        locus = os.path.join(current,folder,locus_i)
-        
+        locus_i = prefix+str(i)+suffix
+        locus = os.path.join(current,folder,locus_i)        
         label,sequence,varsites = phylip.readData(locus, ttype)
         #print(f"label = {label}")
         #print(f"sequence = {sequence}")
-        
+        labels.append(label)
+        sequences.append(sequence)
+        varsitess.append(varsites)
+    return [labels,sequences,varsitess]
+
+
+
+#====================================================================================
+def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , iterations , eval_every ):
+    labels, sequences, varsitess = myloci
+    topics_loci=[]
+    for i in range(num_loci):
+        print(f'\n~~~~~~~~~~~~~~~~~~~~~ locus {i} ~~~~~~~~~~~~~~~~~~~~~~~\n')
+        label = labels[i]        
+        sequence = sequences[i]
+        varsites = varsitess[i]
         #========================= Extract k-mers ==============================
         docs=[]
         for k in range(kmer_range_list[0],kmer_range_list[1],kmer_range_list[2]):
@@ -133,7 +149,12 @@ def topicmodeling(num_loci, num_topics, chunksize , passes , iterations , eval_e
                 docs =[docs[i]+tokenize_k[i] for i in range(len(tokenize_k))]
             else:
                 docs = tokenize_k
-                
+        if bootstrap == 'kmer' and nbootstrap>0:
+            #sys.exit()
+            print(f"bootstrapping k-mers")
+            for i in range(len(docs)):
+                docs[i] = np.random.choice(docs[i],size=len(docs[i]),replace=True)
+            
         #count number of all words in docs
         count = 0
         for doc in docs:
@@ -234,9 +255,24 @@ def infile(topics_loci, letters):
         f.write('\n')
         for i in range(num_pop):
             myname = letters[i]
-            f.write(f'{myname}{" "*(11-len(myname))}{" ".join(map(str, topics_loci[i]))}\n')
+            #f.write(f'{myname:<15}{" "*(11-len(myname))}{" ".join(map(str, topics_loci[i]))}\n')
+            f.write(f'{myname:<15}{" ".join(map(str, topics_loci[i]))}\n')
     f.close()
 
+
+def bootstrap_sequences(sequences):
+    newsequences = []
+    for locus in sequences:
+        nind = len(locus)
+        nsites = len(locus[0])
+        pick = np.random.randint(0,nsites,nsites)
+        locusnewseq=[]
+        for ni in range(nind):
+            newseq = "".join([locus[ni][i] for i in  pick])
+            locusnewseq.append(newseq)
+        newsequences.append(locusnewseq)
+    return newsequences
+    
 #====================================================================================
 def run_contml(infile):
     os.system('rm outfile outtree')
@@ -246,14 +282,124 @@ def run_contml(infile):
         contmlinput = f'g\nj\n{contmljumble}\n{contmltimes}\ny'
         #contmlinput = f'g\n'
         f.write(contmlinput)
-    os.system(f'cat contmlinput | {PROGRAMPATH}contml')
+    os.system(f'cat contmlinput | {PROGRAMPATH}contml2')
     
     #read the outtree file
     with open('outtree', 'r') as f:
         tree = f.read().replace('\n', ' ')
     return tree
 
+def simulation():
+    diverge_time = float(sim_diverge)       #diverge_time=0.0/0.01/0.05/0.1/0.2
+    tree_newick = '((Arb:1,Fra:1):1,Kre:1,Rom:1);'    #We need just topology to compare
+    tns = dendropy.TaxonNamespace()
+    true_tree = dendropy.Tree.get(data=tree_newick,schema="newick",taxon_namespace=tns)
+    true_tree.encode_bipartitions()
+        
+    simfiles_folder = os.path.join(current,folder)
+    print(simfiles_folder)
+    current = simfiles_folder
+    siminfiles_trees=[]
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    num_iter =[2,5,10,20,50,100]
+    sims_num = list(range(0,100))
+    count_equaltrue=[]
+    for num in num_iter:
+        num_loci = num
+        distances =[]
+        for sim_num in sims_num:
+            siminfile_sl ='siminfile_'+str(sim_num)+'_100_'+str(diverge_time)+'_100'
+            folder = os.path.join(simfiles_folder,siminfile_sl)
+            #sys.exit()
+            loci = read_data(current, folder, num_loci, 'locus', '.txt')
+            letters, topics_loci = topicmodeling('NoBootstrap',loci, num_loci, num_topics, chunksize , passes , iterations , eval_every )
+            
+            #for each locus remove last column from topic matrix
+            topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
+            
+            
+            #concatenation of the topics for all loci
+            topics_loci_concatenated = topics_loci_missingLast[0]
+            for i in range(1,len(topics_loci_missingLast)):
+                topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
+            #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
 
+            #generate infile
+            infile(topics_loci_concatenated, letters)
+            
+            #run CONTML
+            ourtree = run_contml(infile)
+            print(ourtree)
+            
+            our_tree = dendropy.Tree.get(data=ourtree,schema="newick",taxon_namespace=tns)
+            our_tree.encode_bipartitions()
+            distance=treecompare.unweighted_robinson_foulds_distance(true_tree, our_tree, is_bipartitions_updated=True)
+            distances.append(distance)
+            #Figtree
+            #                os.system(f"{PROGRAMPATH}figtree outtree")
+        count_equaltrue.append(distances.count(0))
+            
+    np.savetxt('count_equaltrue_sim_{}'.format(diverge_time), count_equaltrue,  fmt='%s')
+#end of function simulation()
+
+# a single analysis that shows the tree using figtree with show=True
+def single_run(show=True):
+    loci = read_data(current, folder, num_loci, 'locus', '.txt')
+    letters, topics_loci = topicmodeling('NoBootstrap',loci, num_loci, num_topics, chunksize , passes , iterations , eval_every )
+    
+    #for each locus remove last column from topic matrix
+    topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
+    
+    
+    #concatenation of the topics for all loci
+    topics_loci_concatenated = topics_loci_missingLast[0]
+    for i in range(1,len(topics_loci_missingLast)):
+        topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
+        #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
+        
+        #generate infile
+    infile(topics_loci_concatenated, letters)
+    
+    #run CONTML
+    ourtree = run_contml(infile)
+    print(ourtree)
+    if show:
+        #Figtree
+        os.system(f"{PROGRAMPATH}figtree outtree")
+    return ourtree
+        # end function  single_run()
+
+
+def bootstrap_run(bootstrap='kmer'):
+    count_boot = 1
+    outtrees=[]
+    loci = read_data(current, folder, num_loci, 'locus', '.txt')
+    for bi in range(nbootstrap):
+        labels,sequences,varsitess = loci
+        if not bootstrap=='kmer':
+            bsequences = bootstrap_sequences(sequences)
+            bloci = [labels,bsequences,varsitess]
+        else:
+            bloci = loci
+        count_boot += 1
+        #print(len(bloci))
+        #print(len(bloci[1][0]))
+        #sys.exit()      
+        letters, topics_loci = topicmodeling(bootstrap,bloci, num_loci, num_topics, chunksize , passes , iterations , eval_every )
+        #for each locus remove last column from topic matrix
+        topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
+        #concatenation of the topics for all loci
+        topics_loci_concatenated = topics_loci_missingLast[0]
+        for i in range(1,len(topics_loci_missingLast)):
+            topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
+            #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
+        #generate infile
+        infile(topics_loci_concatenated, letters)
+        #run CONTML
+        ourtree = run_contml(infile)
+        outtrees.append(ourtree)
+    return outtrees
 
 #====================================================================================
 
@@ -272,6 +418,13 @@ if __name__ == "__main__":
     num_loci = args.num_loci
 
     folder = args.folder
+
+    nbootstrap = args.bootstrap
+    if nbootstrap == 0:
+        bootstrap = 'none'
+    else:
+        bootstrap = 'kmer' # alternative would be 'seq'
+
     
     phylip_type = args.phylip_type
     if phylip_type:
@@ -281,6 +434,7 @@ if __name__ == "__main__":
         ttype = 'STANDARD'
         filetype = 'PHYLIP'
 
+        
     
     kmer_range_list = list(map(int, args.kmer_range.split(',')))
     
@@ -290,7 +444,7 @@ if __name__ == "__main__":
     iterations = 1000
     eval_every = 1
 
-    PROGRAMPATH = '/Users/tara/bin/'
+    PROGRAMPATH = '/Users/beerli/bin/'
     # generates a random number seed for jumble in contml
     RANDOMSEED  = np.random.randint(1,2**16,size=1)[0]
     if RANDOMSEED % 2 == 0:
@@ -298,81 +452,17 @@ if __name__ == "__main__":
         
     #=================== main: if siminfile analysis ======================
     if sim_diverge is not None:
-        diverge_time = float(sim_diverge)       #diverge_time=0.0/0.01/0.05/0.1/0.2
-        tree_newick = '((Arb:1,Fra:1):1,Kre:1,Rom:1);'    #We need just topology to compare
-        tns = dendropy.TaxonNamespace()
-        true_tree = dendropy.Tree.get(data=tree_newick,schema="newick",taxon_namespace=tns)
-        true_tree.encode_bipartitions()
-        
-        simfiles_folder = os.path.join(current,folder)
-        print(simfiles_folder)
-        current = simfiles_folder
-        siminfiles_trees=[]
-        
-        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        num_iter =[2,5,10,20,50,100]
-        sims_num = list(range(0,100))
-        count_equaltrue=[]
-        for num in num_iter:
-            num_loci = num
-            distances =[]
-            for sim_num in sims_num:
-                siminfile_sl ='siminfile_'+str(sim_num)+'_100_'+str(diverge_time)+'_100'
-                folder = os.path.join(simfiles_folder,siminfile_sl)
-                #sys.exit()
-                letters, topics_loci = topicmodeling(num_loci, num_topics, chunksize , passes , iterations , eval_every )
-
-                #for each locus remove last column from topic matrix
-                topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
-
-
-                #concatenation of the topics for all loci
-                topics_loci_concatenated = topics_loci_missingLast[0]
-                for i in range(1,len(topics_loci_missingLast)):
-                    topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
-                #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
-
-                #generate infile
-                infile(topics_loci_concatenated, letters)
-
-                #run CONTML
-                ourtree = run_contml(infile)
-                print(ourtree)
-                
-                
-                our_tree = dendropy.Tree.get(data=ourtree,schema="newick",taxon_namespace=tns)
-                our_tree.encode_bipartitions()
-                distance=treecompare.unweighted_robinson_foulds_distance(true_tree, our_tree, is_bipartitions_updated=True)
-                distances.append(distance)
-
-                #Figtree
-#                os.system(f"{PROGRAMPATH}figtree outtree")
-
-            count_equaltrue.append(distances.count(0))
-            
-        np.savetxt('count_equaltrue_sim_{}'.format(diverge_time), count_equaltrue,  fmt='%s')
-
-    
+        simulation()
     #===================  main: if NOT siminfile analysis  ======================
+    elif bootstrap=='kmer':
+        ourtree = single_run(False)
+        with open('best.tre','w') as btrees:
+            btrees.write(ourtree+'\n')
+        
+        outtrees = bootstrap_run('seq')
+        with open('bootstrap.tre','w') as btrees:
+            for tr in outtrees:
+                btrees.write(tr+'\n')
+        os.system(f"sumtrees.py --decimals=0 --percentages --output-tree-filepath=result.tre --target=best.tre bootstrap.tre")
     else:
-        letters, topics_loci = topicmodeling(num_loci, num_topics, chunksize , passes , iterations , eval_every )
-
-        #for each locus remove last column from topic matrix
-        topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
-
-
-        #concatenation of the topics for all loci
-        topics_loci_concatenated = topics_loci_missingLast[0]
-        for i in range(1,len(topics_loci_missingLast)):
-            topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
-        #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
-
-        #generate infile
-        infile(topics_loci_concatenated, letters)
-
-        #run CONTML
-        ourtree = run_contml(infile)
-        print(ourtree)
-
-        #Figtree
-        os.system(f"{PROGRAMPATH}figtree outtree")
+        single_run()
