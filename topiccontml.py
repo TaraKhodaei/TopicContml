@@ -247,7 +247,7 @@ def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , 
 
 #====================================================================================
 def infile(topics_loci, letters):
-    letters_limited = [x[:10] for x in letters]      #CONTML accepts population names lass than 10 letters
+    #letters_limited = [x[:10] for x in letters]      #CONTML accepts population names lass than 10 letters
     num_pop= len(topics_loci)
     with  open("infile", "w") as f:
         f.write('     {}    {}\n'.format(num_pop, num_loci))
@@ -255,8 +255,7 @@ def infile(topics_loci, letters):
         f.write('\n')
         for i in range(num_pop):
             myname = letters[i]
-            #f.write(f'{myname:<15}{" "*(11-len(myname))}{" ".join(map(str, topics_loci[i]))}\n')
-            f.write(f'{myname:<15}{" ".join(map(str, topics_loci[i]))}\n')
+            f.write(f'{myname:<{NMLENGTH}}{" ".join(map(str, topics_loci[i]))}\n')
     f.close()
 
 
@@ -282,7 +281,7 @@ def run_contml(infile):
         contmlinput = f'g\nj\n{contmljumble}\n{contmltimes}\ny'
         #contmlinput = f'g\n'
         f.write(contmlinput)
-    os.system(f'cat contmlinput | {PROGRAMPATH}contml2')
+    os.system(f'cat contmlinput | {PROGRAMPATH}{CONTML}')
     
     #read the outtree file
     with open('outtree', 'r') as f:
@@ -366,7 +365,7 @@ def single_run(show=True):
     print(ourtree)
     if show:
         #Figtree
-        os.system(f"{PROGRAMPATH}figtree outtree")
+        os.system(f"{PROGRAMPATH}{FIGTREE} outtree")
     return ourtree
         # end function  single_run()
 
@@ -445,6 +444,9 @@ if __name__ == "__main__":
     eval_every = 1
 
     PROGRAMPATH = '/Users/beerli/bin/'
+    CONTML = 'contml2'
+    FIGTREE = 'figtree'
+    NMLENGTH = 15
     # generates a random number seed for jumble in contml
     RANDOMSEED  = np.random.randint(1,2**16,size=1)[0]
     if RANDOMSEED % 2 == 0:
@@ -463,6 +465,6 @@ if __name__ == "__main__":
         with open('bootstrap.tre','w') as btrees:
             for tr in outtrees:
                 btrees.write(tr+'\n')
-        os.system(f"sumtrees.py --decimals=0 --percentages --output-tree-filepath=result.tre --target=best.tre bootstrap.tre")
+        os.system(f"sumtrees.py --decimals=0 --percentages --min-clade-freq=0.50 --output-tree-filepath=result.tre --target=best.tre bootstrap.tre")
     else:
         single_run()

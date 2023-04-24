@@ -62,10 +62,18 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     ```
     pip install gensim
     ```
-2. `CONTML`
-3. `FigTree`
-* After clone the repository, in `topiccontml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
-* The  **dataset** of sequences should be in the directory in a folder, including loci in separate text files called **"loci0.txt", "loci1.txt", ...**
+2. `CONTML` You will need to compile a customized version of `CONTML`, we call it `CONTML2` because if you want to run bootstrap the standard contml may fail if two individuals have the same frequencies, the custom version allows for that, it also uses a default of 15 characters for the individual names. We suggest that you create bin directory in your homedirectory and place the binaries there. The full Phylip version is here: <a html="https://evolution.genetics.washington.edu/phylip.html">https://evolution.genetics.washington.edu/phylip.html</a>
+
+    ```
+    #use this commandline snippet to compile the custom version of contml
+    cd phylip-part-3.69/src
+    make contml
+    # you may need to use this once: mkdir -p ~/bin
+    cp contml ~/bin/contml2
+    ```
+3. `FigTree`, download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a>
+* After cloning the repository, in `topiccontml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
+* The  **dataset** of sequences should be in the directory in a folder, all loci are in separate text files called **"loci0.txt", "loci1.txt", ...** that follow the Phylip syntax.
 
 
 <br/>
