@@ -119,7 +119,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     python nexus.py -e -n 14 -s birdspecies  -w myfile -f loci_birds
     ```
  2. Use "myfile.nex" as an input in `PAUP` to get the the SVDquartets bootsrap tree called "`svdq_tree`":
- > TopicContml>paup  <br/>
+ > TopicContml> paup  <br/>
  > paup> exe myfile.nex  <br/>
  > paup> svdq partition=birdspecies showScores=no seed=1234568 bootstrap nreps=100  <br/>
  > paup> savetrees file=svdq_tree format=altnex  <br/>
