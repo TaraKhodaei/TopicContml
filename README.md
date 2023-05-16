@@ -109,7 +109,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 
 # $\color{purple}{\textsf{Bootsrap Analysis}}$
-1. generate concatenated nexus file of common sequences in all loci, "`myfile.nex`", and a copy of dataset folder, "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
+1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`", and a copy of dataset folder "loci_birds", called  "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
     ```
     python nexus.py -e -n 14 -s birdspecies  -w myfile -f loci_birds
     ```
