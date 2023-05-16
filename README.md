@@ -124,6 +124,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     ```
     python topiccontml.py -f loci_birds_copy  -m -gt rm_row -n 14 -b 100
     ```
+<br/>
 > **With gaps**<br/>
     ```
     python topiccontml.py -f loci_birds_copy  -m  -n 14 -b 100
