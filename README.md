@@ -55,8 +55,13 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 <br/>
 
-**-b BOOTSTRAP, --bootstrap BOOTSTRAP
+**-b BOOTSTRAP, --bootstrap BOOTSTRAP**
 > number of bootstrap replicates
+
+<br/>
+
+**-bt BOOTSTRAP_TYPE, --bootstrap_type BOOTSTRAP_TYPE**
+> default "kmer": do the bootsrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootsrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the case the sequences have the same lengths)
 
 <br/>
 
