@@ -114,8 +114,8 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     python nexus.py -e -n 14 -s birdspecies  -w myfile -f loci_birds
     ```
  2. Do SVDquartets analysis to get the the output "`svdq_tree`":
- > TopicContml>paup
- > paup> exe myfile.nex
- > paup> svdq partition=birdspecies showScores=no seed=1234568 bootstrap nreps=100
- > paup> savetrees file=svdq_tree format=altnex 
+ > TopicContml>paup  <br/>
+ > paup> exe myfile.nex  <br/>
+ > paup> svdq partition=birdspecies showScores=no seed=1234568 bootstrap nreps=100  <br/>
+ > paup> savetrees file=svdq_tree format=altnex  <br/>
 
