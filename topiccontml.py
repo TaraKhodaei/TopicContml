@@ -65,7 +65,7 @@ def myparser():
                         help='default "not_overlap": extract kmers without overlapping. String "not_overlap": extract kmers with overlapping.')
     parser.add_argument('-f','--folder', dest='folder',
                         action='store', default='loci', type=str,
-                        help='the folder that contains the data (loci in separate text files called "loci0.txt", "loci1.txt", ...). The default is "loci"')
+                        help='the folder that contains the data (loci in separate text files called "locus0.txt", "locus1.txt", ...). The default is "loci"')
     parser.add_argument('-n','--num_loci', dest='num_loci',
                         default=1, action='store', type=int,
                         help='number of loci')
@@ -75,6 +75,9 @@ def myparser():
     parser.add_argument('-b','--bootstrap', dest='bootstrap',
                         default=0, action='store', type=int,
                         help='number of bootstrap replicates')
+    parser.add_argument('-bt','--bootstrap_type', dest='bootstrap_type',
+                        default='kmer', action='store',type=str,
+                        help='default "kmer": do the bootsrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootsrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the ccase the sequences have the same lengths)')
     
                             
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
@@ -247,7 +250,7 @@ def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , 
 
 #====================================================================================
 def infile(topics_loci, letters):
-    #letters_limited = [x[:10] for x in letters]      #CONTML accepts population names lass than 10 letters
+    letters_limited = [x[:10] for x in letters]      #CONTML accepts population names lass than 10 letters
     num_pop= len(topics_loci)
     with  open("infile", "w") as f:
         f.write('     {}    {}\n'.format(num_pop, num_loci))
@@ -255,23 +258,11 @@ def infile(topics_loci, letters):
         f.write('\n')
         for i in range(num_pop):
             myname = letters[i]
-            f.write(f'{myname:<{NMLENGTH}}{" ".join(map(str, topics_loci[i]))}\n')
+            #f.write(f'{myname:<15}{" "*(11-len(myname))}{" ".join(map(str, topics_loci[i]))}\n')
+            f.write(f'{myname:<15}{" ".join(map(str, topics_loci[i]))}\n')
+#            f.write(f'{myname:<10}{" ".join(map(str, topics_loci[i]))}\n')
     f.close()
 
-
-def bootstrap_sequences(sequences):
-    newsequences = []
-    for locus in sequences:
-        nind = len(locus)
-        nsites = len(locus[0])
-        pick = np.random.randint(0,nsites,nsites)
-        locusnewseq=[]
-        for ni in range(nind):
-            newseq = "".join([locus[ni][i] for i in  pick])
-            locusnewseq.append(newseq)
-        newsequences.append(locusnewseq)
-    return newsequences
-    
 #====================================================================================
 def run_contml(infile):
     os.system('rm outfile outtree')
@@ -281,13 +272,15 @@ def run_contml(infile):
         contmlinput = f'g\nj\n{contmljumble}\n{contmltimes}\ny'
         #contmlinput = f'g\n'
         f.write(contmlinput)
-    os.system(f'cat contmlinput | {PROGRAMPATH}{CONTML}')
+    os.system(f'cat contmlinput | {PROGRAMPATH}contml2')
+#    os.system(f'cat contmlinput | {PROGRAMPATH}contml')
     
     #read the outtree file
     with open('outtree', 'r') as f:
         tree = f.read().replace('\n', ' ')
     return tree
 
+#====================================================================================
 def simulation():
     diverge_time = float(sim_diverge)       #diverge_time=0.0/0.01/0.05/0.1/0.2
     tree_newick = '((Arb:1,Fra:1):1,Kre:1,Rom:1);'    #We need just topology to compare
@@ -342,6 +335,8 @@ def simulation():
     np.savetxt('count_equaltrue_sim_{}'.format(diverge_time), count_equaltrue,  fmt='%s')
 #end of function simulation()
 
+
+#====================================================================================
 # a single analysis that shows the tree using figtree with show=True
 def single_run(show=True):
     loci = read_data(current, folder, num_loci, 'locus', '.txt')
@@ -357,7 +352,7 @@ def single_run(show=True):
         topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
         #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
         
-        #generate infile
+    #generate infile
     infile(topics_loci_concatenated, letters)
     
     #run CONTML
@@ -365,11 +360,25 @@ def single_run(show=True):
     print(ourtree)
     if show:
         #Figtree
-        os.system(f"{PROGRAMPATH}{FIGTREE} outtree")
+        os.system(f"{PROGRAMPATH}figtree outtree")
     return ourtree
         # end function  single_run()
-
-
+        
+#====================================================================================
+def bootstrap_sequences(sequences):
+    newsequences = []
+    for locus in sequences:
+        nind = len(locus)
+        nsites = len(locus[0])
+        pick = np.random.randint(0,nsites,nsites)
+        locusnewseq=[]
+        for ni in range(nind):
+            newseq = "".join([locus[ni][i] for i in  pick])
+            locusnewseq.append(newseq)
+        newsequences.append(locusnewseq)
+    return newsequences
+    
+#====================================================================================
 def bootstrap_run(bootstrap='kmer'):
     count_boot = 1
     outtrees=[]
@@ -417,12 +426,16 @@ if __name__ == "__main__":
     num_loci = args.num_loci
 
     folder = args.folder
+    
+    bootstrap_type = args.bootstrap_type
 
     nbootstrap = args.bootstrap
     if nbootstrap == 0:
         bootstrap = 'none'
     else:
-        bootstrap = 'kmer' # alternative would be 'seq'
+        bootstrap = bootstrap_type
+#        bootstrap = 'kmer' # alternative would be 'seq'
+#        bootstrap = 'seq'
 
     
     phylip_type = args.phylip_type
@@ -435,6 +448,7 @@ if __name__ == "__main__":
 
         
     
+        
     kmer_range_list = list(map(int, args.kmer_range.split(',')))
     
     num_topics= 5
@@ -443,10 +457,7 @@ if __name__ == "__main__":
     iterations = 1000
     eval_every = 1
 
-    PROGRAMPATH = '~/bin/'
-    CONTML = 'contml2'
-    FIGTREE = 'figtree'
-    NMLENGTH = 15
+    PROGRAMPATH = '/Users/tara/bin/'
     # generates a random number seed for jumble in contml
     RANDOMSEED  = np.random.randint(1,2**16,size=1)[0]
     if RANDOMSEED % 2 == 0:
@@ -461,10 +472,11 @@ if __name__ == "__main__":
         with open('best.tre','w') as btrees:
             btrees.write(ourtree+'\n')
         
-        outtrees = bootstrap_run('seq')
+        outtrees = bootstrap_run()
         with open('bootstrap.tre','w') as btrees:
             for tr in outtrees:
                 btrees.write(tr+'\n')
-        os.system(f"sumtrees.py --decimals=0 --percentages --min-clade-freq=0.50 --output-tree-filepath=result.tre --target=best.tre bootstrap.tre")
+#        os.system(f"sumtrees.py --decimals=0 --percentages --output-tree-filepath=result.tre --target=best.tre bootstrap.tre")
+        os.system(f"sumtrees.py --decimals=0 --percentages --output-tree-filepath=result.tre bootstrap.tre")
     else:
         single_run()
