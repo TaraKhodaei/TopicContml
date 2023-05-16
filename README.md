@@ -125,11 +125,12 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
  > paup> savetrees file=svdq_tree format=altnex  <br/>
 
 3. Use "loci_birds_copy" folder to get the TopicContml bootsrap tree: <br/>
->> **No gaps** 
+> **No gaps** 
 > ```
 > python topiccontml.py -f loci_birds_copy  -m -gt rm_row -n 14 -b 100
 > ```
->> **With gaps** 
+<br/>
+> **With gaps** 
 > ```
 > python topiccontml.py -f loci_birds_copy  -m  -n 14 -b 100
 > ```
