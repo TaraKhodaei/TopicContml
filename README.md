@@ -104,3 +104,8 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 > python topiccontml.py -f sim_100_0.2_100 -sd 0.2  -m -gt rm_row -n 100
 > ```
 
+
+<br/>
+
+
+# $\color{purple}{\textsf{Bootsrap Analysis}}$
