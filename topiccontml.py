@@ -77,7 +77,7 @@ def myparser():
                         help='number of bootstrap replicates')
     parser.add_argument('-bt','--bootstrap_type', dest='bootstrap_type',
                         default='kmer', action='store',type=str,
-                        help='default "kmer": do the bootsrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootsrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the ccase the sequences have the same lengths)')
+                        help='default "kmer": do the bootstrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootstrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the ccase the sequences have the same lengths)')
     
                             
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
