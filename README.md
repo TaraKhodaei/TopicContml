@@ -61,7 +61,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-bt BOOTSTRAP_TYPE, --bootstrap_type BOOTSTRAP_TYPE**
-> default "kmer": do the bootsrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootsrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the case the sequences have the same lengths)
+> default "kmer": do the bootstrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootstrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the case the sequences have the same lengths)
 
 <br/>
 
@@ -118,13 +118,13 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     ```
     python nexus.py -e -n 14 -s birdspecies  -w myfile -f loci_birds
     ```
- 2. Use "myfile.nex" as an input in `PAUP` to get the the SVDquartets bootsrap tree called "`svdq_tree`":
+ 2. Use "myfile.nex" as an input in `PAUP` to get the the SVDquartets bootstrap tree called "`svdq_tree`":
  > TopicContml> paup  <br/>
  > paup> ```exe myfile.nex```  <br/>
  > paup> ```svdq partition=birdspecies showScores=no seed=1234568 bootstrap nreps=100```  <br/>
  > paup> ```savetrees file=svdq_tree format=altnex```  <br/>
 
-3. Use "loci_birds_copy" folder to get the TopicContml bootsrap tree: <br/>
+3. Use "loci_birds_copy" folder to get the TopicContml bootstrap tree: <br/>
 > **No gaps** 
 > ```
 > python topiccontml.py -f loci_birds_copy  -m -gt rm_row -n 14 -b 100
