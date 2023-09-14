@@ -20,17 +20,17 @@ def readData(myfile, type='STANDARD'):     #testdata.phy : sequences
             continue
         if type=='STANDARD':
             l = i[:10]    #this assumes standard phylip format
-            s = i[11:]    #
-#            l = i[:34]    #this assumes standard phylip format
-#            s = i[35:]    #
+            s = i[11:]
         else:
             index = i.rfind('  ')
             l = i[:index]
             s = i[index+1:]
             
         label.append(l.strip().replace(' ','_'))
-        #print("myread()",l.replace(' ','_').strip())
+        if DEBUG:
+            print("myread()",l.replace(' ','_').strip())
         sequence.append(s.strip())
+        
     if DEBUG:
         print ("Phylip file:", myfile, file=sys.stderr)
         print ("    species:", numind, file=sys.stderr)
@@ -38,12 +38,19 @@ def readData(myfile, type='STANDARD'):     #testdata.phy : sequences
         print ("first label:",label[0], file=sys.stderr)
         print ("last  label:",label[-1], file=sys.stderr)
     varsites = [list(si) for si in sequence if len(si)>0]
-    #print(len(varsites),len(varsites[0]))
+    
+    if DEBUG:
+        print(len(varsites),len(varsites[0]))
+        
     varsites = [len([i for i in list(set(si)) if i!='-']) for si in zip(*varsites)]
-    varsites = [sum([vi>1 for vi in varsites]),len(varsites)] 
-    #print(varsites)
-    #print(label)
+    varsites = [sum([vi>1 for vi in varsites]),len(varsites)]
+    
+    if DEBUG:
+        print(varsites)
+        print(label)
+        
     return label,sequence,varsites
+    
 
 def readTreeString(myfile):     #testdata.tre : Newick trees
     f = open(myfile,'r')
