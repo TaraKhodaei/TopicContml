@@ -34,7 +34,7 @@ import sys
 import itertools
 
 current = os.getcwd()
-#print(current)
+
 
 DEBUG = False
 if DEBUG:
@@ -55,8 +55,8 @@ def myparser():
                         default=None, action='store',type=str,
                         help='String "rm_row": removes gaps(-) in each sequence (by row). String "rm_col": removes site columns thathave at least one gap(-). Without this option the gaps(-) are included.')
     parser.add_argument('-m','--merging', dest='merging',
-                        default=None, action='store_true',
-                        help='Merge sequences that start with the same 4 letters [e.g. population or species labels].')
+                        default=None, action='store',type=int,
+                        help='Merge sequences that start with the same 3 letters [e.g. population or species labels].')
     parser.add_argument('-kr','--kmer_range', dest='kmer_range',
                         default='2,10,2', action='store',
                         help='range of kmers extraction, lowerbound,max+1,step [for example: 2,10,2 leads to non overlapping k-mers: 2,4,6,8')
@@ -77,11 +77,12 @@ def myparser():
                         help='number of bootstrap replicates')
     parser.add_argument('-bt','--bootstrap_type', dest='bootstrap_type',
                         default='kmer', action='store',type=str,
-                        help='default "kmer": do the bootstrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootstrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the ccase the sequences have the same lengths)')
+                        help='default "kmer": do the bootsrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootsrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the ccase the sequences have the same lengths)')
     
                             
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
     return args
+    
     
 #====================================================================================
 #Tokenize Documents
@@ -126,8 +127,9 @@ def read_data(current, folder, num_loci,prefix='locus',suffix='.txt'):
         locus_i = prefix+str(i)+suffix
         locus = os.path.join(current,folder,locus_i)        
         label,sequence,varsites = phylip.readData(locus, ttype)
-        #print(f"label = {label}")
-        #print(f"sequence = {sequence}")
+        if DEBUG:
+            print(f"len(label) = {len(label)}")
+            print(f"len(sequence) = {len(sequence)}")
         labels.append(label)
         sequences.append(sequence)
         varsitess.append(varsites)
@@ -138,7 +140,8 @@ def read_data(current, folder, num_loci,prefix='locus',suffix='.txt'):
 #====================================================================================
 def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , iterations , eval_every ):
     labels, sequences, varsitess = myloci
-    topics_loci=[]
+    topics_loci = []
+    letters_loci = []
     for i in range(num_loci):
         print(f'\n~~~~~~~~~~~~~~~~~~~~~ locus {i} ~~~~~~~~~~~~~~~~~~~~~~~\n')
         label = labels[i]        
@@ -166,19 +169,25 @@ def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , 
         
         
         letters = label
+        if DEBUG:
+            print(f"len(letters) = {len(letters)} ")
+            print(f"letters = {letters} ")
+
         
         #====================== k-mers after merging ===========================
+
         if merging:
-            #extraxt distinct sequence names based on first 3 letters
-            letters = list(dict.fromkeys([x[:3] for x in label ]))  #remove duplicates from a list, while preserving order using"dict.fromkeys" insted of "list(set)"
-            print(letters)
-            
-            merging_nums=[]
+
+            letters = list(dict.fromkeys([x[:merging] for x in label ]))  #remove duplicates from a list, while preserving order using"dict.fromkeys" insted of "list(set)"
+            if DEBUG:
+                print(f"letters = {letters} ")
+        
+            merging_num=[]
             for item in letters:
                 merg_indxs= [label.index(i) for i in label if item in i]
-                merging_nums.append(merg_indxs)
+                merging_num.append(merg_indxs)
                 
-            merging_nums=[len(i) for i in merging_nums]
+            merging_nums=[len(i) for i in merging_num]
             print(f"merging_nums = {merging_nums}")
             
             docs_merged=[]
@@ -187,15 +196,19 @@ def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , 
                 doc_merged = list(itertools.chain.from_iterable(docs[j:j+num]))
                 docs_merged.append(doc_merged)
                 j +=num
-
+            print(f"len(docs_merged) = {len(docs_merged)} ")
+            
+            
             #count number of all words in docs
             count = 0
             for doc in docs_merged:
                 count += len(doc)
-            print(f"Test ===> Number of all words in docs_merged = {count}")
+                
+            if DEBUG:
+                print(f"Number of all words in docs_merged = {count}")
             
             docs = docs_merged
-            
+#        sys.exit()    #debug
         #================= Dictionary of Unique Tokens ===========================
         
         dictionary = Dictionary(docs)
@@ -243,13 +256,29 @@ def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , 
                 topics_freq.append(second[first.index(i)])
 
             topics.append(topics_freq)
-            
-        #print(f'\nTopics :\n{topics}')
+
         topics_loci.append(topics)
-    return letters, topics_loci
+        letters_loci.append(letters)
+        
+        
+        common_letters = list(set.intersection(*map(set, letters_loci)))
+        if DEBUG:
+            print(f"common_letters = {common_letters}")
+        common_letters_loci_indx = [[l.index(c) for c in common_letters] for l in letters_loci]
+        if DEBUG:
+            print(f"common_letters_loci_indx = {common_letters_loci_indx}")
+        common_topics_loci = [[l[i] for i in common_letters_loci_indx[num]] for num,l in enumerate(topics_loci)]
+        if DEBUG:
+            print(f"common_topics_loci = {common_topics_loci}")
+        
+
+    return common_letters, common_topics_loci
+
+    
 
 #====================================================================================
-def infile(topics_loci, letters):
+def infile(topics_loci, letters, num_loci):
+    print(f"num_loci3 = {num_loci}")
     letters_limited = [x[:10] for x in letters]      #CONTML accepts population names lass than 10 letters
     num_pop= len(topics_loci)
     with  open("infile", "w") as f:
@@ -258,9 +287,7 @@ def infile(topics_loci, letters):
         f.write('\n')
         for i in range(num_pop):
             myname = letters[i]
-            #f.write(f'{myname:<15}{" "*(11-len(myname))}{" ".join(map(str, topics_loci[i]))}\n')
             f.write(f'{myname:<15}{" ".join(map(str, topics_loci[i]))}\n')
-#            f.write(f'{myname:<10}{" ".join(map(str, topics_loci[i]))}\n')
     f.close()
 
 #====================================================================================
@@ -281,7 +308,7 @@ def run_contml(infile):
     return tree
 
 #====================================================================================
-def simulation():
+def simulation(current, folder):
     diverge_time = float(sim_diverge)       #diverge_time=0.0/0.01/0.05/0.1/0.2
     tree_newick = '((Arb:1,Fra:1):1,Kre:1,Rom:1);'    #We need just topology to compare
     tns = dendropy.TaxonNamespace()
@@ -315,10 +342,9 @@ def simulation():
             topics_loci_concatenated = topics_loci_missingLast[0]
             for i in range(1,len(topics_loci_missingLast)):
                 topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
-            #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
 
             #generate infile
-            infile(topics_loci_concatenated, letters)
+            infile(topics_loci_concatenated, letters, num_loci)
             
             #run CONTML
             ourtree = run_contml(infile)
@@ -329,11 +355,12 @@ def simulation():
             distance=treecompare.unweighted_robinson_foulds_distance(true_tree, our_tree, is_bipartitions_updated=True)
             distances.append(distance)
             #Figtree
-            #                os.system(f"{PROGRAMPATH}figtree outtree")
+            #os.system(f"{PROGRAMPATH}figtree outtree")
         count_equaltrue.append(distances.count(0))
             
-    np.savetxt('count_equaltrue_sim_{}'.format(diverge_time), count_equaltrue,  fmt='%s')
-#end of function simulation()
+    np.savetxt('trueAgreement_simulation{}'.format(diverge_time), count_equaltrue,  fmt='%s')
+    print(f"\nResults of agreement with true tree using RF-distanc is witten to the file 'trueAgreement_simulation{diverge_time}'")
+
 
 
 #====================================================================================
@@ -353,7 +380,7 @@ def single_run(show=True):
         #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
         
     #generate infile
-    infile(topics_loci_concatenated, letters)
+    infile(topics_loci_concatenated, letters, num_loci)
     
     #run CONTML
     ourtree = run_contml(infile)
@@ -362,7 +389,7 @@ def single_run(show=True):
         #Figtree
         os.system(f"{PROGRAMPATH}figtree outtree")
     return ourtree
-        # end function  single_run()
+
         
 #====================================================================================
 def bootstrap_sequences(sequences):
@@ -379,20 +406,19 @@ def bootstrap_sequences(sequences):
     return newsequences
     
 #====================================================================================
-def bootstrap_run(bootstrap='kmer'):
+def bootstrap_run(bootstrap):
     count_boot = 1
     outtrees=[]
     loci = read_data(current, folder, num_loci, 'locus', '.txt')
     for bi in range(nbootstrap):
+        print(f"TEST===> bootstrap ={bootstrap}")
         labels,sequences,varsitess = loci
-        if not bootstrap=='kmer':
+        if not bootstrap=='kmer':      #in case of "seq"
             bsequences = bootstrap_sequences(sequences)
             bloci = [labels,bsequences,varsitess]
         else:
             bloci = loci
         count_boot += 1
-        #print(len(bloci))
-        #print(len(bloci[1][0]))
         #sys.exit()      
         letters, topics_loci = topicmodeling(bootstrap,bloci, num_loci, num_topics, chunksize , passes , iterations , eval_every )
         #for each locus remove last column from topic matrix
@@ -401,42 +427,32 @@ def bootstrap_run(bootstrap='kmer'):
         topics_loci_concatenated = topics_loci_missingLast[0]
         for i in range(1,len(topics_loci_missingLast)):
             topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
-            #print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
         #generate infile
-        infile(topics_loci_concatenated, letters)
+        infile(topics_loci_concatenated, letters, num_loci)
         #run CONTML
         ourtree = run_contml(infile)
         outtrees.append(ourtree)
     return outtrees
 
+
+
 #====================================================================================
 
 if __name__ == "__main__":
-    
     args = myparser() # parses the commandline arguments
-    
     gaps_type = args.gaps_type
-    
     merging = args.merging
-    
     sim_diverge = args.sim_diverge
-    
     kmers_type = args.kmers_type
-    
     num_loci = args.num_loci
-
     folder = args.folder
-    
     bootstrap_type = args.bootstrap_type
 
     nbootstrap = args.bootstrap
     if nbootstrap == 0:
         bootstrap = 'none'
     else:
-        bootstrap = bootstrap_type
-#        bootstrap = 'kmer' # alternative would be 'seq'
-#        bootstrap = 'seq'
-
+        bootstrap = bootstrap_type        #bootstrap = 'kmer' or 'seq'
     
     phylip_type = args.phylip_type
     if phylip_type:
@@ -446,9 +462,6 @@ if __name__ == "__main__":
         ttype = 'STANDARD'
         filetype = 'PHYLIP'
 
-        
-    
-        
     kmer_range_list = list(map(int, args.kmer_range.split(',')))
     
     num_topics= 5
@@ -457,26 +470,28 @@ if __name__ == "__main__":
     iterations = 1000
     eval_every = 1
 
+
     PROGRAMPATH = '/Users/tara/bin/'
     # generates a random number seed for jumble in contml
     RANDOMSEED  = np.random.randint(1,2**16,size=1)[0]
     if RANDOMSEED % 2 == 0:
         RANDOMSEED += 1
-        
+     
+
     #=================== main: if siminfile analysis ======================
     if sim_diverge is not None:
-        simulation()
+        simulation(current, folder)
     #===================  main: if NOT siminfile analysis  ======================
-    elif bootstrap=='kmer':
+    elif bootstrap!= 'none':
         ourtree = single_run(False)
         with open('best.tre','w') as btrees:
             btrees.write(ourtree+'\n')
-        
-        outtrees = bootstrap_run()
-        with open('bootstrap.tre','w') as btrees:
+            
+        outtrees = bootstrap_run(bootstrap)
+        with open('bootstrap_replicates.tre','w') as btrees:
             for tr in outtrees:
                 btrees.write(tr+'\n')
-#        os.system(f"sumtrees.py --decimals=0 --percentages --output-tree-filepath=result.tre --target=best.tre bootstrap.tre")
-        os.system(f"sumtrees.py --decimals=0 --percentages --output-tree-filepath=result.tre bootstrap.tre")
+        os.system(f"sumtrees.py --decimals=0 --percentages --output-tree-filepath=bootstrap_target_best.tre --target=best.tre bootstrap_replicates.tre")
+        os.system(f"sumtrees.py --decimals=0 --percentages --output-tree-filepath=bootstrap.tre bootstrap_replicates.tre")
     else:
         single_run()
