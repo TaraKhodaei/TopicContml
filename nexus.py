@@ -5,6 +5,7 @@ import phylip
 import os
 import sys
 import shutil
+import numpy as np
 
 DEBUG=False
 
@@ -61,69 +62,123 @@ def concatenate_sequences(myloci, prefix='locus',suffix='.txt'):
             print(f"labels[{i}] = {labels[i]}")
     
     labels = [[x.lower() for x in label] for label in labels]
-    common = sorted(set.intersection(*map(set, labels)) , key = labels[0].index)   # common element extraction from N lists
-    if DEBUG:
-        print(f"\ncommon = {common}")
-        
-    common_indxs=[]
-    for i in range(len(labels)):
-        mylabel = labels[i]
-        indxs = [mylabel.index(j) for j in common]
-        common_indxs.append(indxs)
-    if DEBUG:
-        print(f"\ncommon_indxs = {common_indxs}")
-
-
-    label=common
-    numsites= [len(sequences[i][0]) for i in range(len(sequences))]
-    common_sequences = [[sequences[i][j] for j in common_indxs[i]] for i in range(len(common_indxs))]
+    print(f"\nlen(labels) = {[len(l) for l in labels]}")
     
-    if DEBUG:
-        print(f"\ncommon_sequences = {common_sequences}")
-        print(f"\nnumsites = {numsites}")
-        
-    for i in range(len(common_sequences)-1):
-        sequence = [a+b for a,b in zip(common_sequences[i],common_sequences[i+1])]
-        common_sequences[i+1]= sequence
-        
-        
+    common = sorted(set.intersection(*map(set, labels)) , key = labels[0].index)   # common element extraction from N lists
+    print(f"\ncommon = {common}")
+    
+    counting = [min([l.count(item) for l in labels]) for item in common]
+    print(f"\ncounting = {counting}")
+    
+    numsites= [len(sequences[i][0]) for i in range(len(sequences))]
+            
     dir = folder_copy
     if os.path.exists(dir):
         shutil.rmtree(dir)
     shutil.copytree(folder, dir )
-
-
-    res_list = [[item for item in label if item not in common] for label in labels]
-    if DEBUG:
-        print(f"len(res_list) ={[len(item) for item in res_list]}")
-        
-    # in new folder, in each locus, remove sequences other than "common":
-    for i in range(num_loci):
-        locus_i = prefix+str(i)+suffix
-        locus = os.path.join(current,folder_copy,locus_i)
-        if DEBUG:
-            print(f"i ={i} \nlocus = {locus}")
-        with open(locus, 'r') as fp:
-            lines = fp.readlines()
-        
-        i_numind,i_numsites, *rest = (lines[0]).split()
-        if DEBUG:
-            print(f"i_numind = {i_numind}, i_numsites = {i_numsites}")
-        with open(locus, 'w') as fp:
-            lines[0] = str(len(common)) +' '+ i_numsites+'\n'
-            #check if any of the items of the list "common" is in a line of the file,if not, then remove that line
-            for number, line in enumerate(lines):
-                if not any(word in line.lower() for word in res_list[i]):
-                    fp.write(line)
-    return label, sequence, numsites
     
+    
+    if max(counting)<=1:    # in the case in each locus we DO NOT have individuals with the same name ( like Scott Astralia bird dataset)
+        common_indxs=[]
+        for i in range(len(labels)):
+            mylabel = labels[i]
+            indxs = [mylabel.index(j) for j in common]
+            common_indxs.append(indxs)
+        if DEBUG:
+            print(f"\ncommon_indxs = {common_indxs}")
 
+        label=common
+        common_sequences = [[sequences[i][j] for j in common_indxs[i]] for i in range(len(common_indxs))]
+        
+        
+        if DEBUG:
+            print(f"\ncommon_sequences = {common_sequences}")
+            print(f"\nnumsites = {numsites}")
+            
+        for i in range(len(common_sequences)-1):
+            sequence = [a+b for a,b in zip(common_sequences[i],common_sequences[i+1])]
+            common_sequences[i+1]= sequence
+        print(f"len(sequences) = {len(sequences)}")
+        print(f"len(common_sequences) = {len(common_sequences)}")
+        
+        
+        res_list = [[item for item in label if item not in common] for label in labels]
+        if DEBUG:
+            print(f"len(res_list) ={[len(item) for item in res_list]}")
+        # in new folder, in each locus, remove sequences other than "common":
+        for i in range(num_loci):
+            locus_i = prefix+str(i)+suffix
+            locus = os.path.join(current,folder_copy,locus_i)
+            if DEBUG:
+                print(f"i ={i} \nlocus = {locus}")
+            with open(locus, 'r') as fp:
+                lines = fp.readlines()
+            
+            i_numind,i_numsites, *rest = (lines[0]).split()
+            if DEBUG:
+                print(f"i_numind = {i_numind}, i_numsites = {i_numsites}")
+            with open(locus, 'w') as fp:
+                lines[0] = str(len(common)) +' '+ i_numsites+'\n'
+                #check if any of the items of the list "common" is in a line of the file,if not, then remove that line
+                for number, line in enumerate(lines):
+                    if not any(word in line.lower() for word in res_list[i]):
+                        fp.write(line)
+            
+    else:     # in the case in each locus we  have individuals with the same name ( like Fasta bird dataset)
+        indxs = [[np.where(np.array(label) == c)[0].tolist() for c in common] for label in labels]
+        
+        remain_indxs=[]
+        for indx in indxs:
+            remain=[]
+            for i in range(len(indx)):
+                remain.extend(indx[i][:counting[i]])
+            remain_indxs.append(remain)
+        if DEBUG:
+            print(f"\nremain_indxs = {remain_indxs}")
+        common_num = sum(counting)
+        if DEBUG:
+            print(f"\ncommon_num = {common_num}")
+        
+        # in new folder, in each locus, remove sequences other than "common":
+        for i in range(num_loci):
+            locus_i = prefix+str(i)+suffix
+            locus = os.path.join(current,folder_copy,locus_i)
+            if DEBUG:
+                print(f"i ={i} \nlocus = {locus}")
+            with open(locus, 'r') as fp:
+                lines = fp.readlines()
+            i_numind,i_numsites, *rest = (lines[0]).split()
+
+            if DEBUG:
+                print(f"i_numind = {i_numind}, i_numsites = {i_numsites}")
+            with open(locus, 'w') as fp:
+                fp.write(str(common_num) +' '+ i_numsites+'\n')
+                for number in range(1,len(lines)):
+                    if number in remain_indxs[i]:
+                        fp.write(lines[number])
+        label= [labels[0][i] for i in remain_indxs[0]]
+        if DEBUG:
+            print(f"len(label) = {len(label)}")
+            print(f"label = {label}")
+        
+        common_sequences=[]
+        for i, loc_labels_num in enumerate(remain_indxs ):
+            loc_seq = [sequences[i][j] for j in loc_labels_num]
+            common_sequences.append(loc_seq)
+        print(f"len(common_sequences) = {len(common_sequences)}")
+        if DEBUG:
+            print(f"common_sequences = {common_sequences}")
+        
+        for i in range(num_loci-1):
+            sequence = [a+b for a,b in zip(common_sequences[i],common_sequences[i+1])]
+            common_sequences[i+1]= sequence
+        #sys.exit()
+    return label, sequence, numsites
 
 
 def write_files(label, sequence, numsites, letters, merging_nums, species_name, myfile):
     ntax= len(label)
     nchar = len(sequence[0])
-#    with  open("myfile.nex", "w") as f:
     with  open(myfile+'.nex', "w") as f:
         f.write('#nexus\n\n')
         f.write('begin data;\n')
@@ -131,7 +186,7 @@ def write_files(label, sequence, numsites, letters, merging_nums, species_name, 
         f.write('         format datatype=dna gap=-;\n')
         f.write('         matrix\n')
         for i in range(ntax):
-            f.write(f'{label[i]:<15}{"".join(map(str, sequence[i]))}\n')
+            f.write(f'{label[i]:<20}{"".join(map(str, sequence[i]))}\n')
         f.write(';\nend;\nbegin sets;\n')
         f.write('    charpartition loci = locus0:1-{},\n'.format(numsites[0]))
         count = numsites[0]+1
@@ -190,9 +245,8 @@ if __name__ == '__main__':
     print(f"\nnumsites = {numsites}")
 
     
-    
-    letters = list(dict.fromkeys([x[:3] for x in label ]))  #remove duplicates from a list, while preserving order using"dict.fromkeys" insted of "list(set)"
 
+    letters = list(dict.fromkeys([x for x in label ]))  #remove duplicates from a list, while preserving order using"dict.fromkeys" insted of "list(set)"
     print(f"\nletters = {letters}")
         
     merging_nums=[]
@@ -202,7 +256,6 @@ if __name__ == '__main__':
         
     print(f"\nmerging_nums = {merging_nums}")
         
-
     write_files(label, sequence, numsites, letters, merging_nums, species_name, myfile)
     
                 
