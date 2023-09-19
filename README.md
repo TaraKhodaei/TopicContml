@@ -93,7 +93,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 ## $\color{purple}{\textsf{1. Birds Dataset}}$
 
 > **Experiment 1.1**.<br/>
-> > **loci_birds:** The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals.
+> > **loci_birds:** The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals.  In each locus, we merge the words from the same location (using 3 first letters) and then apply LDA.
 > ```
 > python topiccontml.py -f loci_birds -m 3 -gt rm_row -n 14
 > ```
