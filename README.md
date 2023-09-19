@@ -102,11 +102,11 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 ## $\color{purple}{\textsf{2. Simulated Dataset}}$
 > **Experiment 2.1**.<br/>
 > ```
-> python topiccontml.py -f sim_100_0.0_100 -sd 0.0  -m 3 -gt rm_row -n 100
-> python topiccontml.py -f sim_100_0.01_100 -sd 0.01  -m 3 -gt rm_row -n 100
-> python topiccontml.py -f sim_100_0.05_100 -sd 0.05  -m 3 -gt rm_row -n 100
-> python topiccontml.py -f sim_100_0.1_100 -sd 0.1  -m 3 -gt rm_row -n 100
-> python topiccontml.py -f sim_100_0.2_100 -sd 0.2  -m 3 -gt rm_row -n 100
+> python topiccontml.py -f sim_100_0.0_100 -sd 0.0 -m 3 -gt rm_row -n 100
+> python topiccontml.py -f sim_100_0.01_100 -sd 0.01 -m 3 -gt rm_row -n 100
+> python topiccontml.py -f sim_100_0.05_100 -sd 0.05 -m 3 -gt rm_row -n 100
+> python topiccontml.py -f sim_100_0.1_100 -sd 0.1 -m 3 -gt rm_row -n 100
+> python topiccontml.py -f sim_100_0.2_100 -sd 0.2 -m 3 -gt rm_row -n 100
 > ```
 
 
@@ -116,7 +116,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 # $\color{purple}{\textsf{Bootstrap Analysis}}$
 1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`", and a copy of dataset folder "loci_birds", called  "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
     ```
-    python nexus.py -e -n 14 -s birdspecies  -w myfile -f loci_birds
+    python nexus.py -e -n 14 -s birdspecies -w myfile -f loci_birds
     ```
  2. Use "myfile.nex" as an input in `PAUP` to get the the SVDquartets bootstrap tree called "`svdq_tree`":
  > TopicContml> paup  <br/>
