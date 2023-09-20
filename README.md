@@ -5,7 +5,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 # $\color{purple}{\textsf{Usage}}$
     topiccontml.py [-h] [-e] [-m MERGING] [-gt GAPS_TYPE] [-kt KMER_TYPE] [-kr KMER_RANGE]
-                   [-n NUM_LOCI] [-f FOLDER] [-sd SIM_DIVERGE] [-b BOOTSTRAP] [-bt BOOTSTRAP_TYPE]
+                   [-nl NUM_LOCI] [-nt NUM_TOPICS] [-f FOLDER] [-sd SIM_DIVERGE] [-nb BOOTSTRAP] [-bt BOOTSTRAP_TYPE]
                         
 
 # $\color{purple}{\textsf{Arguments}}$
@@ -40,8 +40,13 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 <br/>
 
-**-n NUM_LOCI, --num_loci NUM_LOCI**
+**-nl NUM_LOCI, --num_loci NUM_LOCI**
 > number of loci
+
+<br/>
+
+**-nt NUM_TOPICS, --num_topics NUM_TOPICS**
+> number of topics. Defult value is 5 topics.
 
 <br/>
 
@@ -55,7 +60,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 <br/>
 
-**-b BOOTSTRAP, --bootstrap BOOTSTRAP**
+**-nb BOOTSTRAP, --bootstrap BOOTSTRAP**
 > number of bootstrap replicates
 
 <br/>
@@ -95,18 +100,18 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 > **Experiment 1.1**.<br/>
 > > **loci_birds:** The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals.  In each locus, we merge the words from the same location (using 3 first letters) and then apply LDA.
 > ```
-> python topiccontml.py -f loci_birds -m 3 -gt rm_row -n 14
+> python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14
 > ```
 > <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
 
 ## $\color{purple}{\textsf{2. Simulated Dataset}}$
 > **Experiment 2.1**.<br/>
 > ```
-> python topiccontml.py -f sim_100_0.0_100 -sd 0.0 -m 3 -gt rm_row -n 100
-> python topiccontml.py -f sim_100_0.01_100 -sd 0.01 -m 3 -gt rm_row -n 100
-> python topiccontml.py -f sim_100_0.05_100 -sd 0.05 -m 3 -gt rm_row -n 100
-> python topiccontml.py -f sim_100_0.1_100 -sd 0.1 -m 3 -gt rm_row -n 100
-> python topiccontml.py -f sim_100_0.2_100 -sd 0.2 -m 3 -gt rm_row -n 100
+> python topiccontml.py -f sim_100_0.0_100 -sd 0.0 -m 3 -gt rm_row -nl 100
+> python topiccontml.py -f sim_100_0.01_100 -sd 0.01 -m 3 -gt rm_row -nl 100
+> python topiccontml.py -f sim_100_0.05_100 -sd 0.05 -m 3 -gt rm_row -nl 100
+> python topiccontml.py -f sim_100_0.1_100 -sd 0.1 -m 3 -gt rm_row -nl 100
+> python topiccontml.py -f sim_100_0.2_100 -sd 0.2 -m 3 -gt rm_row -nl 100
 > ```
 
 
@@ -116,7 +121,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 # $\color{purple}{\textsf{Bootstrap Analysis}}$
 1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`", and a copy of dataset folder "loci_birds", called  "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
     ```
-    python nexus.py -e -n 14 -s birdspecies -w myfile -f loci_birds
+    python nexus.py -e -nl 14 -s birdspecies -w myfile -f loci_birds
     ```
  2. Use "myfile.nex" as an input in `PAUP` to get the the SVDquartets bootstrap tree called "`svdq_tree`":
  > TopicContml> paup  <br/>
@@ -127,10 +132,10 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 3. Use "loci_birds_copy" folder to get the TopicContml bootstrap tree: <br/>
 > **No gaps** 
 > ```
-> python topiccontml.py -f loci_birds_copy  -m -gt rm_row -n 14 -b 100
+> python topiccontml.py -f loci_birds_copy  -m -gt rm_row -nl 14 -nb 100
 > ```
 > **With gaps** 
 > ```
-> python topiccontml.py -f loci_birds_copy  -m  -n 14 -b 100
+> python topiccontml.py -f loci_birds_copy  -m  -nl 14 -nb 100
 > ```
 
