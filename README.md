@@ -5,7 +5,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 # $\color{red}{\textsf{Usage}}$
 # <code style="color : purple">Usage</code>
-# ${This\ is\ a\ {\color{red}Big}}\ Title$
+
     topiccontml.py [-h] [-e] [-m MERGING] [-gt GAPS_TYPE] [-kt KMER_TYPE] [-kr KMER_RANGE]
                    [-nl NUM_LOCI] [-nt NUM_TOPICS] [-f FOLDER] [-sd SIM_DIVERGE] [-nb BOOTSTRAP] [-bt BOOTSTRAP_TYPE]
                         
