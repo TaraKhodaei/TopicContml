@@ -107,7 +107,7 @@ $\large{\color{purple}{\textsf{1. Birds Dataset}}}$
 > ```
 > <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
 
-## $\color{purple}{\textsf{2. Simulated Dataset}}$
+$\large{\color{purple}{\textsf{2. Simulated Dataset}}}$
 > **Experiment 2.1**.<br/>
 > ```
 > python topiccontml.py -f sim_100_0.0_100 -sd 0.0 -m 3 -gt rm_row -nl 100
@@ -121,7 +121,7 @@ $\large{\color{purple}{\textsf{1. Birds Dataset}}}$
 <br/>
 
 
-# $\color{purple}{\textsf{Bootstrap Analysis}}$
+$\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
 1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`", and a copy of dataset folder "loci_birds", called  "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
     ```
     python nexus.py -e -nl 14 -s birdspecies -w myfile -f loci_birds
