@@ -2,9 +2,6 @@
 
 Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, an unsupervised machine learning approach based on natural language processing, to construct evolutionary relationships among multilocus species from unaligned DNA sequences.
 
-# $\textcolor{purple}{Usage}$
-
-## $\LARGE{\color{purple}{\textsf{Usage}}}$
 
 $\huge{\color{purple}{\textsf{Usage}}}$
 
@@ -12,7 +9,7 @@ $\huge{\color{purple}{\textsf{Usage}}}$
                    [-nl NUM_LOCI] [-nt NUM_TOPICS] [-f FOLDER] [-sd SIM_DIVERGE] [-nb BOOTSTRAP] [-bt BOOTSTRAP_TYPE]
                         
 
-# $\color{purple}{\textsf{Arguments}}$
+$\huge{\color{purple}{\textsf{Arguments}}}$
 
 **-h, --help**
 > show this help message and exi  
@@ -74,7 +71,9 @@ $\huge{\color{purple}{\textsf{Usage}}}$
 
 <br/>
 
-# $\color{purple}{\textsf{Requirements}}$
+
+$\huge{\color{purple}{\textsf{Requirements}}}$
+
 * The following **packages** are required: <br/>
 1. `gensim`:
     ```
