@@ -4,6 +4,9 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 
 # $\color{purple}{\textsf{Usage}}$
+
+$\color{purple}{\textsf{Usage}}
+
 # <code style="color : purple">Usage</code>
 
 
