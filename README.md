@@ -4,7 +4,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 # $\textcolor{purple}{Usage}$
 
-$\LARGE{\color{purple}{\textsf{Usage}}}$
+#$\LARGE{\color{purple}{\textsf{Usage}}}$
 
 $\Huge{\color{purple}{\textsf{Usage}}}$
 
