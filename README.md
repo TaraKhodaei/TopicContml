@@ -200,9 +200,9 @@ We do the same bootstrap analysis to the unaligned dataset.
 
 $\large{\color{purple}{\textsf{SVDquartets Bootstrap}}}$<br/>
 we apply SVDquartets to the aligned dataset using 1000 bootstrap replicates and report the majority-rule consensus tree (output `svdq_tree`).
-> 1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`":
+> 1. generate concatenated nexus file of sequences in all loci called "`myfile.nex`":
 >   ```
->   python nexus.py -e -nl 14 -s birdspecies -w myfile -f loci_birds
+>   python nexus.py -e -nl 14 -t total -m 3 -s birdspecies -w myfile -f loci_birds
 >   ```
 > 2. Use "myfile.nex" as an input in `PAUP` to get the the SVDquartets bootstrap tree called "`svdq_tree`":
 > TopicContml> paup  <br/>
