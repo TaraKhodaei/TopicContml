@@ -5,8 +5,8 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 $\huge{\color{purple}{\textsf{Usage}}}$
 
-    topiccontml.py [-h] [-e] [-m MERGING] [-gt GAPS_TYPE] [-kt KMER_TYPE] [-kr KMER_RANGE]
-                   [-nl NUM_LOCI] [-nt NUM_TOPICS] [-f FOLDER] [-sd SIM_DIVERGE] [-nb BOOTSTRAP] [-bt BOOTSTRAP_TYPE]
+    topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-kr KMER_RANGE] [-kt KMER_TYPE] [-f FOLDER] [-nf NEXUS_File] 
+                    [-nl NUM_LOCI] [-sd SIM_DIVERGE] [-nb BOOTSTRAP] [-bt BOOTSTRAP_TYPE] [-nt NUM_TOPICS] 
                         
 
 $\huge{\color{purple}{\textsf{Arguments}}}$
@@ -21,13 +21,18 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
  
 > <br/>
 
+**-gt GAPS_TYPE, --gaps_type GAPS_TYPE**
+> String "rm_row": removes gaps(-) in each sequence by the row. String "rm_col": romoves the column if there is at least one gap(-) in that column. Otherwise, it does not make changes in sequences.
+
+<br/>
+
 **-m MERGING, --merging MERGING**
 > Merge sequences that start with the same number of MERGING letters.
 
 <br/>
 
-**-gt GAPS_TYPE, --gaps_type GAPS_TYPE**
-> String "rm_row": removes gaps(-) in each sequence by the row. String "rm_col": romoves the column if there is at least one gap(-) in that column. Otherwise, it does not make changes in sequences.
+**-kr KMER_RANGE, --kmer_range KMER_RANGE**
+> range of kmers extraction, lowerbound,max+1,step [for example: 2,10,2 leads to non overlapping k-mers: 2,4,6,8']
 
 <br/>
 
@@ -36,8 +41,13 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 
 <br/>
 
-**-kr KMER_RANGE, --kmer_range KMER_RANGE**
-> range of kmers extraction (default range is 2,10,2, which means it creates words with lengths 2, 4, 6, and 8).
+**-f FOLDER, --folder FOLDER**
+> the folder that contains loci data in separate text files called "locus0.txt", "locus1.txt", ...
+
+<br/>
+
+**-nf NEXUS_File, --nf NEXUS_File**
+> the nexus file that contains the multiloci data.
 
 <br/>
 
@@ -46,20 +56,11 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 
 <br/>
 
-**-nt NUM_TOPICS, --num_topics NUM_TOPICS**
-> number of topics. Defult value is 5 topics.
-
-<br/>
-
-**-f FOLDER, --folder FOLDER**
-> the folder that contains the data (loci in separate text files called "loci0.txt", "loci1.txt", ...). The defult is "loci"
-
-<br/>
-
 **-sd SIM_DIVERGE, --siminfile_diverge_time SIM_DIVERGE**
 > To do siminfile analysis for the folder with the given float number of sim_diverge
 
 <br/>
+
 
 **-nb BOOTSTRAP, --bootstrap BOOTSTRAP**
 > number of bootstrap replicates
@@ -68,6 +69,11 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 
 **-bt BOOTSTRAP_TYPE, --bootstrap_type BOOTSTRAP_TYPE**
 > default "kmer": do the bootstrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootstrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the case the sequences have the same lengths)
+
+<br/>
+
+**-nt NUM_TOPICS, --num_topics NUM_TOPICS**
+> number of topics. Defult value is 5 topics.
 
 <br/>
 
