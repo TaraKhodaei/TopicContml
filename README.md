@@ -142,7 +142,7 @@ $\huge{\color{purple}{\textsf{Requirements}}}$
 
 $\huge{\color{purple}{\textsf{Application to Datasets}}}$
 
-$\large{\color{purple}{\textsf{1. Real Dataset}}}$
+$\color{purple}{\textsf{Real Dataset}}$
 > The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
 >
 > * **loci Folder**<br/>
@@ -160,7 +160,7 @@ $\large{\color{purple}{\textsf{1. Real Dataset}}}$
 > python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14
 > ```
 
-$\large{\color{purple}{\textsf{2. Simulated Dataset}}}$
+$\color{purple}{\textsf{Simulated Dataset}}$
 > ```
 > python topiccontml.py -f sim_100_0.0_100 -sd 0.0 -m 3 -gt rm_row -nl 100
 > python topiccontml.py -f sim_100_0.01_100 -sd 0.01 -m 3 -gt rm_row -nl 100
