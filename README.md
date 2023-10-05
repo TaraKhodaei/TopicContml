@@ -174,10 +174,10 @@ $\large{\color{purple}{\textsf{Simulated Dataset}}}$
 
 
 $\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$<br/>
-we apply TopicContml to the aligned dataset using 1000 bootstrap replicates and reporte majority-rule consensus trees (output `bootstrap_majority.tre`). We also map the bootstrap replicates onto the best topology tree found by TopicContml as the reference tree  (output `bootstrap_target_best.tre`).<br/>
-We also do bootstrap analysis to the unaligned dataset. 
 
 $\large{\color{purple}{\textsf{TopicContml Bootstrap}}}$
+we apply TopicContml to the aligned dataset using 1000 bootstrap replicates and reporte majority-rule consensus trees (output `bootstrap_majority.tre`). We also map the bootstrap replicates onto the best topology tree found by TopicContml as the reference tree  (output `bootstrap_target_best.tre`).<br/>
+We also do bootstrap analysis to the unaligned dataset. 
 > * **Aligned Dataset:**
 >> Loci Folder
 >> ```
