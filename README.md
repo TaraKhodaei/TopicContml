@@ -50,7 +50,7 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 <br/>
 
 **-nf NEXUS_File, --nexus_file NEXUS_File**
-> the nexus file that contains the multiloci data.
+> the NEXUS file that contains the multiloci data.
 
 <br/>
 
@@ -154,8 +154,8 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 > ```
 > <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
 >
-> * **nexus file**<br/> 
-> If dataset of sequences are in a nexus file (e.g. "myfile.nex"). 
+> * **NEXUS file**<br/> 
+> If dataset of sequences are in a NEXUS file (e.g. "myfile.nex"). 
 > ```
 > python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14
 > ```
@@ -168,7 +168,17 @@ $\large{\color{purple}{\textsf{Simulated Dataset}}}$
 > python topiccontml.py -f sim_100_0.1_100 -sd 0.1 -m 3 -gt rm_row -nl 100
 > python topiccontml.py -f sim_100_0.2_100 -sd 0.2 -m 3 -gt rm_row -nl 100
 > ```
-
+> 
+> ---
+> **$\color{orange}{\textsf{NOTE}}$** <br/>
+>  NEXUS data files and blocks should have the following basic structure:
+> ```
+> #NEXUS
+...
+begin characters;
+...
+end;
+> ```
 
 <br/>
 
@@ -200,7 +210,7 @@ We do the same bootstrap analysis to the unaligned dataset.
 
 $\large{\color{purple}{\textsf{SVDquartets Bootstrap}}}$<br/>
 we apply SVDquartets to the aligned dataset using 1000 bootstrap replicates and report the majority-rule consensus tree (output `svdq_tree`).
-> 1. generate concatenated nexus file of sequences in all loci called "`myfile.nex`". For the missing sequences in loci we are adding `?` for that sequence in the nexus file:
+> 1. generate concatenated NEXUS file of sequences in all loci called "`myfile.nex`". For the missing sequences in loci we are adding `?` for that sequence in the NEXUS file:
 >   ```
 >   python nexus.py -e -nl 14 -t total -m 3 -s birdspecies -w myfile -f loci_birds
 >   ```
