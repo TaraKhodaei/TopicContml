@@ -7,7 +7,8 @@ $\huge{\color{purple}{\textsf{Usage}}}$
 
     topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-kr KMER_RANGE] [-kt KMER_TYPE] 
                     [-f FOLDER] [-nf NEXUS_File] [-nl NUM_LOCI] [-sd SIM_DIVERGE] 
-                    [-nb BOOTSTRAP] [-bt BOOTSTRAP_TYPE] [-nt NUM_TOPICS] 
+                    [-nb BOOTSTRAP] [-bt BOOTSTRAP_TYPE] [-nt NUM_TOPICS] [-i ITERATIONS] 
+                    [-p PASSES] [-cs CHUNKSIZE] [-ee EVAL_EVERY] [-ue UPDATE_EVERY] [-al ALPHA] [-et ETA]  
                         
 
 $\huge{\color{purple}{\textsf{Arguments}}}$
@@ -75,6 +76,41 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 
 **-nt NUM_TOPICS, --num_topics NUM_TOPICS**
 > number of topics. Defult value is 5 topics.
+
+<br/>
+
+**-i ITERATIONS, --iterations ITERATIONS**
+> Maximum number of iterations through the corpus when inferring the topic distribution of a corpus. Defult value is 1000 iterations.
+
+<br/>
+
+**-p PASSES, --passes PASSES**
+> Number of passes through the corpus during training. Defult value is 50.
+
+<br/>
+
+**-cs CHUNKSIZE, --chunksize CHUNKSIZE**
+> Number of documents to be used in each training chunk. Defult value is 20.
+
+<br/>
+
+**-ee EVAL_EVERY, --eval_every EVAL_EVERY**
+> Log perplexity is estimated every that many updates. Defult value is 1.
+
+<br/>
+
+**-ue UPDATE_EVERY, --update_every UPDATE_EVERY**
+> Number of documents to be iterated through for each update. Defult value is 5.
+
+<br/>
+
+**-al ALPHA, --alpha ALPHA**
+> priori belief on document-topic distribution. It can be: (1) scalar for a symmetric prior over document-topic distribution, (2) 1D array of length equal to num_topics to denote an asymmetric user defined prior for each topic. (3) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"asymmetric": a fixed normalized asymmetric prior of 1.0 / (topic_index + sqrt(num_topics)),"auto":Learns an asymmetric prior from the corpus
+
+<br/>
+
+**-et ETA, --eta ETA**
+> priori belief on topic-word distribution. It can be: (1) scalar for a symmetric prior over  topic-word distribution, (2) 1D array of length equal to num_words to denote an asymmetric user defined prior for each word, (3) matrix of shape (num_topics, num_words) to assign a probability for each word-topic combination. (4) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"auto": Learns an asymmetric prior from the corpus.
 
 <br/>
 
