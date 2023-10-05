@@ -134,7 +134,7 @@ $\huge{\color{purple}{\textsf{Requirements}}}$
     ```
 3. `FigTree`, download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a>
 * After cloning the repository, in `topiccontml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
-* The  **dataset** of sequences should be in the directory in a folder, all loci are in separate text files called **"loci0.txt", "loci1.txt", ...** that follow the Phylip syntax.
+* The  **dataset** of sequences should be in the directory in a folder. Loci are in separate text files called **"loci0.txt", "loci1.txt", ...** that follow the Phylip syntax.
 
 
 <br/>
@@ -146,10 +146,16 @@ $\large{\color{purple}{\textsf{1. Birds Dataset}}}$
 
 > **Experiment 1.1**.<br/>
 > > **loci_birds:** The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals.  In each locus, we merge the words from the same location (using 3 first letters) and then apply LDA.
+    The dataset of sequences are in a folder. Loci are in separate text files called "loci0.txt", "loci1.txt", ...
 > ```
 > python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14
 > ```
 > <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
+> > **nexus file:** The dataset of sequences are in a nexus file that contains the multiloci data.
+    
+> ```
+> python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14
+> ```
 
 $\large{\color{purple}{\textsf{2. Simulated Dataset}}}$
 > **Experiment 2.1**.<br/>
