@@ -168,19 +168,19 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 > #nexus
 > 
 > begin data;
-> dimensions ntax=... nchar=...;
-> format datatype=dna missing=? gap=-;
-> matrix
+>       dimensions ntax=... nchar=...;
+>       format datatype=dna missing=? gap=-;
+>       matrix
 > .
 > .
 > .
 > ;
 > end;
 > begin sets;
-> charpartition ...
+>       charpartition ...
 > end;
 > begin sets;
-> taxpartition ...
+>       taxpartition ...
 > end;
 > ```
 
