@@ -147,12 +147,15 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 >
 > * **loci Folder**<br/>
 > If dataset of sequences are in a folder (e.g. "loci_birds"). <br/>
-    Loci should be in separate text files called "loci0.txt", "loci1.txt", ....<br/>
     In each locus, we merge the words from the same location (e.g. using 3 first letters) and then apply LDA.
 > ```
 > python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14
 > ```
 > <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
+> 
+> ---
+> **$\color{orange}{\textsf{NOTE}}$** <br/>
+> Inside the folder, loci should be in separate text files called "loci0.txt", "loci1.txt", ....
 >
 > * **NEXUS file**<br/> 
 > If dataset of sequences are in a NEXUS file (e.g. "myfile.nex"). 
