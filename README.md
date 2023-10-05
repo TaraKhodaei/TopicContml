@@ -198,9 +198,9 @@ $\large{\color{purple}{\textsf{TopicContml Bootstrap}}}$
 
 $\large{\color{purple}{\textsf{SVDquartets Bootstrap}}}$
 > 1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`", and a copy of dataset folder "loci_birds", called  "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
-    ```
-    python nexus.py -e -nl 14 -s birdspecies -w myfile -f loci_birds
-    ```
+>   ```
+>   python nexus.py -e -nl 14 -s birdspecies -w myfile -f loci_birds
+>   ```
 > 2. Use "myfile.nex" as an input in `PAUP` to get the the SVDquartets bootstrap tree called "`svdq_tree`":
 > TopicContml> paup  <br/>
 > paup> ```exe myfile.nex```  <br/>
