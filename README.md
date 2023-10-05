@@ -153,7 +153,7 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 >> <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
 >> 
 >> **$\color{orange}{\textsf{NOTE}}$** <br/>
->> The  dataset of sequences should be in the directory in a folder. Inside the folder, loci should be in separate text files called "loci0.txt", "loci1.txt", .... that follow the Phylip syntax.
+>> The  dataset of sequences should be in the directory in a folder. Inside the folder, loci should be in separate text files called "`loci0.txt`", "`loci1.txt`", .... that follow the Phylip syntax.
 >>  Each locus text file should have the following basic structure:
 >> ```
 >> ntax nchar 
