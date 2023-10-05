@@ -160,7 +160,7 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 > python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14
 > ```
 
-$\normalsize{\color{purple}{\textsf{Simulated Dataset}}}$
+$\large{\color{purple}{\textsf{Simulated Dataset}}}$
 > ```
 > python topiccontml.py -f sim_100_0.0_100 -sd 0.0 -m 3 -gt rm_row -nl 100
 > python topiccontml.py -f sim_100_0.01_100 -sd 0.01 -m 3 -gt rm_row -nl 100
@@ -175,7 +175,7 @@ $\normalsize{\color{purple}{\textsf{Simulated Dataset}}}$
 
 $\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
 
-$\normalsize{\color{purple}{\textsf{TopicContml Bootstrap}}}$
+$\large{\color{purple}{\textsf{TopicContml Bootstrap}}}$
 > * **Aligned dataset:**
 > ```
 > python topiccontml.py -f loci_birds_copy  -m -gt rm_row -nl 14 -nb 100
@@ -185,7 +185,7 @@ $\normalsize{\color{purple}{\textsf{TopicContml Bootstrap}}}$
 > python topiccontml.py -f loci_birds_copy  -m  -nl 14 -nb 100
 > ```
 
-$\normalsize{\color{purple}{\textsf{SVDquartets Bootstrap}}}$
+$\large{\color{purple}{\textsf{SVDquartets Bootstrap}}}$
 > 1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`", and a copy of dataset folder "loci_birds", called  "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
     ```
     python nexus.py -e -nl 14 -s birdspecies -w myfile -f loci_birds
