@@ -176,7 +176,7 @@ $\large{\color{purple}{\textsf{Simulated Dataset}}}$
 $\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
 
 $\large{\color{purple}{\textsf{TopicContml Bootstrap}}}$
-> * **Aligned dataset:**
+> * **Aligned Dataset:**
 >> Loci Folder
 >> ```
 >> python topiccontml.py -f loci_birds -m -gt rm_row -nl 14 -nb 1000
@@ -185,10 +185,16 @@ $\large{\color{purple}{\textsf{TopicContml Bootstrap}}}$
 >> ```
 >> python topiccontml.py -nf myfile.nex -m -gt rm_row -nl 14 -nb 1000
 >> ```
-> * **Unaligned dataset:**
-> ```
-> python topiccontml.py -f loci_birds  -m  -nl 14 -nb 1000
-> ```
+> * **Unaligned Dataset:**
+>> Loci Folder
+>> ```
+>> python topiccontml.py -f loci_birds -m -nl 14 -nb 1000
+>> ```
+>> Nexus File
+>> ```
+>> python topiccontml.py -nf myfile.nex -m -nl 14 -nb 1000
+>> ```
+
 
 $\large{\color{purple}{\textsf{SVDquartets Bootstrap}}}$
 > 1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`", and a copy of dataset folder "loci_birds", called  "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
