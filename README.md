@@ -173,7 +173,7 @@ $\large{\color{purple}{\textsf{Simulated Dataset}}}$
 <br/>
 
 
-$\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
+$\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$<br/>
 we apply both TopicContml and SVDquartets to the aligned dataset using 1000 bootstrap trees and reporte majority-rule consensus trees. We als map the bootstrap replicates onto the best topology tree found by TopicContml as the reference tree.
 We also do bootstrap analysis to the unaligned dataset. 
 
