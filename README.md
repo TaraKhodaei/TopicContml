@@ -161,7 +161,6 @@ $\large{\color{purple}{\textsf{1. Real Dataset}}}$
 > ```
 
 $\large{\color{purple}{\textsf{2. Simulated Dataset}}}$
-> **Experiment 2.1 Simulated Dataset **.<br/>
 > ```
 > python topiccontml.py -f sim_100_0.0_100 -sd 0.0 -m 3 -gt rm_row -nl 100
 > python topiccontml.py -f sim_100_0.01_100 -sd 0.01 -m 3 -gt rm_row -nl 100
