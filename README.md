@@ -49,7 +49,7 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 
 <br/>
 
-**-nf NEXUS_File, --nf NEXUS_File**
+**-nf NEXUS_File, --nexus_file NEXUS_File**
 > the nexus file that contains the multiloci data.
 
 <br/>
