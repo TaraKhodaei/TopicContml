@@ -7,7 +7,7 @@ $\huge{\color{purple}{\textsf{Usage}}}$
 
     topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-kr KMER_RANGE] [-kt KMER_TYPE] 
                     [-f FOLDER] [-nf NEXUS_File] [-nl NUM_LOCI] [-sd SIM_DIVERGE] 
-                    [-nb BOOTSTRAP] [-bt BOOTSTRAP_TYPE] 
+                    [-nb NUM_BOOTSTRAP] [-bt BOOTSTRAP_TYPE] 
                     [-nt NUM_TOPICS] [-i ITERATIONS] [-p PASSES] [-cs CHUNKSIZE] 
                     [-ee EVAL_EVERY] [-ue UPDATE_EVERY] [-al ALPHA] [-et ETA]  
                         
