@@ -151,6 +151,7 @@ $\large{\color{purple}{\textsf{1. Birds Dataset}}}$
 > python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14
 > ```
 > <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
+
 > > **nexus file:** The dataset of sequences are in a nexus file that contains the multiloci data.
     
 > ```
