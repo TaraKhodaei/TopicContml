@@ -175,11 +175,11 @@ $\large{\color{purple}{\textsf{2. Simulated Dataset}}}$
 
 $\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
 > * **TopicContml**<br/>
-> **No gaps** 
+> Aligned dataset:<br/>
 > ```
 > python topiccontml.py -f loci_birds_copy  -m -gt rm_row -nl 14 -nb 100
 > ```
-> **With gaps** 
+> Unaligned dataset<br/>
 > ```
 > python topiccontml.py -f loci_birds_copy  -m  -nl 14 -nb 100
 > ```
