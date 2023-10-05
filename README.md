@@ -142,7 +142,7 @@ $\huge{\color{purple}{\textsf{Requirements}}}$
 
 $\huge{\color{purple}{\textsf{Application to Datasets}}}$
 
-$\normalsize{\color{purple}{\textsf{Real Dataset}}}$
+$\large{\color{purple}{\textsf{Real Dataset}}}$
 > The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
 >
 > * **loci Folder**<br/>
