@@ -165,7 +165,7 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 >  NEXUS data files and blocks should have the following basic structure:
 > ```
 > #nexus
-> ...
+> 
 > begin data;
 > dimensions ntax=... nchar=...;
 > format datatype=dna missing=? gap=-;
@@ -173,6 +173,14 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 > .
 > .
 > .
+> ;
+> end;
+> begin sets;
+> charpartition ...
+> end;
+> begin sets;
+> taxpartition ...
+> end;
 > ```
 
 
