@@ -5,8 +5,9 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 $\huge{\color{purple}{\textsf{Usage}}}$
 
-    topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-kr KMER_RANGE] [-kt KMER_TYPE] [-f FOLDER] [-nf NEXUS_File] 
-                    [-nl NUM_LOCI] [-sd SIM_DIVERGE] [-nb BOOTSTRAP] [-bt BOOTSTRAP_TYPE] [-nt NUM_TOPICS] 
+    topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-kr KMER_RANGE] [-kt KMER_TYPE] 
+                    [-f FOLDER] [-nf NEXUS_File] [-nl NUM_LOCI] [-sd SIM_DIVERGE] 
+                    [-nb BOOTSTRAP] [-bt BOOTSTRAP_TYPE] [-nt NUM_TOPICS] 
                         
 
 $\huge{\color{purple}{\textsf{Arguments}}}$
