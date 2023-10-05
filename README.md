@@ -145,15 +145,13 @@ $\huge{\color{purple}{\textsf{Application to Real Data}}}$
 $\large{\color{purple}{\textsf{1. Birds Dataset}}}$
 
 > **Experiment 1.1**.<br/>
-> > **loci_birds:** The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals.  In each locus, we merge the words from the same location (using 3 first letters) and then apply LDA.
+> **loci_birds:** The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals.  In each locus, we merge the words from the same location (using 3 first letters) and then apply LDA.
     The dataset of sequences are in a folder. Loci are in separate text files called "loci0.txt", "loci1.txt", ...
 > ```
 > python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14
 > ```
 > <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
-
-> > **nexus file:** The dataset of sequences are in a nexus file that contains the multiloci data.
-    
+> **nexus file:** The dataset of sequences are in a nexus file that contains the multiloci data.
 > ```
 > python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14
 > ```
