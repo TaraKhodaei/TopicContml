@@ -134,7 +134,6 @@ $\huge{\color{purple}{\textsf{Requirements}}}$
     ```
 3. `FigTree`, download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a>
 * After cloning the repository, in `topiccontml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
-* The  **dataset** of sequences should be in the directory in a folder. Loci are in separate text files called **"loci0.txt", "loci1.txt", ...** that follow the Phylip syntax.
 
 
 <br/>
@@ -154,7 +153,8 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 > <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
 > 
 > **$\color{orange}{\textsf{NOTE}}$** <br/>
-> Inside the folder, loci should be in separate text files called "loci0.txt", "loci1.txt", ....
+> The  dataset of sequences should be in the directory in a folder. Inside the folder, loci should be in separate text files called "loci0.txt", "loci1.txt", .... that follow the Phylip syntax.
+> 
 >
 > * **NEXUS file**<br/> 
 > If dataset of sequences are in a NEXUS file (e.g. "myfile.nex"). 
