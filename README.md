@@ -140,7 +140,7 @@ $\huge{\color{purple}{\textsf{Requirements}}}$
 <br/>
 
 
-$\huge{\color{purple}{\textsf{Application to Real Data}}}$
+$\huge{\color{purple}{\textsf{Application to Datasets}}}$
 
 $\large{\color{purple}{\textsf{1. Real Dataset}}}$
 > The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
@@ -174,18 +174,18 @@ $\large{\color{purple}{\textsf{2. Simulated Dataset}}}$
 
 
 $\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
-> * **TopicContml**
->
-> **Aligned dataset:**
+
+$\large{\color{purple}{\textsf{TopicContml Bootstrap}}}$
+> * **Aligned dataset:**
 > ```
 > python topiccontml.py -f loci_birds_copy  -m -gt rm_row -nl 14 -nb 100
 > ```
-> **Unaligned dataset:**
+> * **Unaligned dataset:**
 > ```
 > python topiccontml.py -f loci_birds_copy  -m  -nl 14 -nb 100
 > ```
 
-> * **SVDquartets**<br/>
+$\large{\color{purple}{\textsf{SVDquartets Bootstrap}}}$
 > 1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`", and a copy of dataset folder "loci_birds", called  "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
     ```
     python nexus.py -e -nl 14 -s birdspecies -w myfile -f loci_birds
