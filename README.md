@@ -153,7 +153,6 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 > ```
 > <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
 > 
-> ---
 > **$\color{orange}{\textsf{NOTE}}$** <br/>
 > Inside the folder, loci should be in separate text files called "loci0.txt", "loci1.txt", ....
 >
@@ -163,7 +162,6 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 > python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14
 > ```
 > 
-> ---
 > **$\color{orange}{\textsf{NOTE}}$** <br/>
 >  NEXUS file and blocks should have the following basic structure:
 > ```
