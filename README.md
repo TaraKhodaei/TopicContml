@@ -174,7 +174,8 @@ $\large{\color{purple}{\textsf{2. Simulated Dataset}}}$
 
 
 $\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
-> * **TopicContml**<br/>
+> * **TopicContml**
+>
 > Aligned dataset:<br/>
 > ```
 > python topiccontml.py -f loci_birds_copy  -m -gt rm_row -nl 14 -nb 100
