@@ -204,7 +204,7 @@ $\large{\color{purple}{\textsf{SVDquartets Bootstrap}}}$
 > 2. Use "myfile.nex" as an input in `PAUP` to get the the SVDquartets bootstrap tree called "`svdq_tree`":
 > TopicContml> paup  <br/>
 > paup> ```exe myfile.nex```  <br/>
-> paup> ```svdq partition=birdspecies showScores=no seed=1234568 bootstrap nreps=100```  <br/>
+> paup> ```svdq partition=birdspecies showScores=no seed=1234568 bootstrap nreps=1000```  <br/>
 > paup> ```savetrees file=svdq_tree format=altnex```  <br/>
 
 
