@@ -159,15 +159,6 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 > ```
 > python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14
 > ```
-
-$\large{\color{purple}{\textsf{Simulated Dataset}}}$
-> ```
-> python topiccontml.py -f sim_100_0.0_100 -sd 0.0 -m 3 -gt rm_row -nl 100
-> python topiccontml.py -f sim_100_0.01_100 -sd 0.01 -m 3 -gt rm_row -nl 100
-> python topiccontml.py -f sim_100_0.05_100 -sd 0.05 -m 3 -gt rm_row -nl 100
-> python topiccontml.py -f sim_100_0.1_100 -sd 0.1 -m 3 -gt rm_row -nl 100
-> python topiccontml.py -f sim_100_0.2_100 -sd 0.2 -m 3 -gt rm_row -nl 100
-> ```
 > 
 > ---
 > **$\color{orange}{\textsf{NOTE}}$** <br/>
@@ -178,6 +169,16 @@ $\large{\color{purple}{\textsf{Simulated Dataset}}}$
 begin characters;
 ...
 end;
+> ```
+
+
+$\large{\color{purple}{\textsf{Simulated Dataset}}}$
+> ```
+> python topiccontml.py -f sim_100_0.0_100 -sd 0.0 -m 3 -gt rm_row -nl 100
+> python topiccontml.py -f sim_100_0.01_100 -sd 0.01 -m 3 -gt rm_row -nl 100
+> python topiccontml.py -f sim_100_0.05_100 -sd 0.05 -m 3 -gt rm_row -nl 100
+> python topiccontml.py -f sim_100_0.1_100 -sd 0.1 -m 3 -gt rm_row -nl 100
+> python topiccontml.py -f sim_100_0.2_100 -sd 0.2 -m 3 -gt rm_row -nl 100
 > ```
 
 <br/>
