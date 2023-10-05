@@ -224,7 +224,7 @@ We do the same bootstrap analysis to the unaligned dataset.
 
 $\large{\color{purple}{\textsf{SVDquartets Bootstrap}}}$<br/>
 we apply SVDquartets to the aligned dataset using 1000 bootstrap replicates and report the majority-rule consensus tree (output `svdq_tree`).
-> 1. generate concatenated NEXUS file of sequences in all loci called "`myfile.nex`". For the missing sequences in loci we are adding `?` for that sequence in the NEXUS file:
+> 1. From the loci folder we generate concatenated NEXUS file of sequences called "`myfile.nex`". For the missing sequences in loci we are adding `?` for that sequence in the NEXUS file:
 >   ```
 >   python nexus.py -e -nl 14 -t total -m 3 -s birdspecies -w myfile -f loci_birds
 >   ```
