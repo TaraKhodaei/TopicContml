@@ -174,18 +174,7 @@ $\large{\color{purple}{\textsf{2. Simulated Dataset}}}$
 
 
 $\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
-> * **SVDquartets**<br/>
-> 1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`", and a copy of dataset folder "loci_birds", called  "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
-    ```
-    python nexus.py -e -nl 14 -s birdspecies -w myfile -f loci_birds
-    ```
- > 2. Use "myfile.nex" as an input in `PAUP` to get the the SVDquartets bootstrap tree called "`svdq_tree`":
- > > TopicContml> paup  <br/>
- > > paup> ```exe myfile.nex```  <br/>
- > > paup> ```svdq partition=birdspecies showScores=no seed=1234568 bootstrap nreps=100```  <br/>
- > > paup> ```savetrees file=svdq_tree format=altnex```  <br/>
-
-3. Use "loci_birds_copy" folder to get the TopicContml bootstrap tree: <br/>
+> * **TopicContml**<br/>
 > **No gaps** 
 > ```
 > python topiccontml.py -f loci_birds_copy  -m -gt rm_row -nl 14 -nb 100
@@ -194,4 +183,18 @@ $\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
 > ```
 > python topiccontml.py -f loci_birds_copy  -m  -nl 14 -nb 100
 > ```
+
+> * **SVDquartets**<br/>
+> 1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`", and a copy of dataset folder "loci_birds", called  "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
+    ```
+    python nexus.py -e -nl 14 -s birdspecies -w myfile -f loci_birds
+    ```
+> 2. Use "myfile.nex" as an input in `PAUP` to get the the SVDquartets bootstrap tree called "`svdq_tree`":
+> TopicContml> paup  <br/>
+> paup> ```exe myfile.nex```  <br/>
+> paup> ```svdq partition=birdspecies showScores=no seed=1234568 bootstrap nreps=100```  <br/>
+> paup> ```savetrees file=svdq_tree format=altnex```  <br/>
+
+
+
 
