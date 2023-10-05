@@ -177,9 +177,14 @@ $\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
 
 $\large{\color{purple}{\textsf{TopicContml Bootstrap}}}$
 > * **Aligned dataset:**
-> ```
-> python topiccontml.py -f loci_birds  -m -gt rm_row -nl 14 -nb 1000
-> ```
+>> Loci Folder
+>> ```
+>> python topiccontml.py -f loci_birds -m -gt rm_row -nl 14 -nb 1000
+>> ```
+>> Nexus File
+>> ```
+>> python topiccontml.py -nf myfile.nex -m -gt rm_row -nl 14 -nb 1000
+>> ```
 > * **Unaligned dataset:**
 > ```
 > python topiccontml.py -f loci_birds  -m  -nl 14 -nb 1000
