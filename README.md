@@ -146,8 +146,8 @@ $\large{\color{purple}{\textsf{1. Real Dataset}}}$
 > The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
 >
 > * **loci Folder**<br/>
-> If dataset of sequences are in a folder (e.g. "loci_birds"). 
-    Loci are in separate text files called "loci0.txt", "loci1.txt", ....
+> If dataset of sequences are in a folder (e.g. "loci_birds"). <br/>
+    Loci are in separate text files called "loci0.txt", "loci1.txt", ....<br/>
     In each locus, we merge the words from the same location (using 3 first letters) and then apply LDA.
 > ```
 > python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14
