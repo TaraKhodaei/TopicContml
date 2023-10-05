@@ -157,9 +157,7 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 >>  Each locus text file should have the following basic structure:
 >> ```
 >> ntax nchar 
->> .
->> .
->> .
+>> labels + sequences
 >> ```
 >
 > * **NEXUS file**<br/> 
@@ -177,9 +175,7 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 >>       dimensions ntax=... nchar=...;
 >>       format datatype=dna missing=? gap=-;
 >>       matrix
->> .
->> .
->> .
+>> labels + sequences
 >> ;
 >> end;
 >> begin sets;
