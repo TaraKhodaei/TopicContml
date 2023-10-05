@@ -164,11 +164,15 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 > **$\color{orange}{\textsf{NOTE}}$** <br/>
 >  NEXUS data files and blocks should have the following basic structure:
 > ```
-> #NEXUS
-...
-begin characters;
-...
-end;
+> #nexus
+> ...
+> begin data;
+> dimensions ntax=... nchar=...;
+> format datatype=dna missing=? gap=-;
+> matrix
+> .
+> .
+> .
 > ```
 
 
