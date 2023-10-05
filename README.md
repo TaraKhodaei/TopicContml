@@ -147,8 +147,8 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 >
 > * **loci Folder**<br/>
 > If dataset of sequences are in a folder (e.g. "loci_birds"). <br/>
-    Loci are in separate text files called "loci0.txt", "loci1.txt", ....<br/>
-    In each locus, we merge the words from the same location (using 3 first letters) and then apply LDA.
+    Loci should be in separate text files called "loci0.txt", "loci1.txt", ....<br/>
+    In each locus, we merge the words from the same location (e.g. using 3 first letters) and then apply LDA.
 > ```
 > python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14
 > ```
@@ -178,11 +178,11 @@ $\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
 $\large{\color{purple}{\textsf{TopicContml Bootstrap}}}$
 > * **Aligned dataset:**
 > ```
-> python topiccontml.py -f loci_birds_copy  -m -gt rm_row -nl 14 -nb 100
+> python topiccontml.py -f loci_birds  -m -gt rm_row -nl 14 -nb 1000
 > ```
 > * **Unaligned dataset:**
 > ```
-> python topiccontml.py -f loci_birds_copy  -m  -nl 14 -nb 100
+> python topiccontml.py -f loci_birds  -m  -nl 14 -nb 1000
 > ```
 
 $\large{\color{purple}{\textsf{SVDquartets Bootstrap}}}$
