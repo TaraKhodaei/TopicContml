@@ -176,8 +176,8 @@ $\large{\color{purple}{\textsf{Simulated Dataset}}}$
 $\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
 
 $\large{\color{purple}{\textsf{TopicContml Bootstrap}}}$<br/>
-we apply TopicContml to the aligned dataset using 1000 bootstrap replicates and reporte majority-rule consensus trees (output `bootstrap_majority.tre`). We also map the bootstrap replicates onto the best topology tree found by TopicContml as the reference tree  (output `bootstrap_target_best.tre`).<br/>
-We also do bootstrap analysis to the unaligned dataset. 
+we apply TopicContml to the aligned dataset using 1000 bootstrap replicates and report the majority-rule consensus trees (output `bootstrap_majority.tre`). We also map the bootstrap replicates onto the best topology tree found by TopicContml as the reference tree  (output `bootstrap_target_best.tre`).<br/>
+We do the same bootstrap analysis to the unaligned dataset. 
 > * **Aligned Dataset:**
 >> Loci Folder
 >> ```
@@ -199,6 +199,7 @@ We also do bootstrap analysis to the unaligned dataset.
 
 
 $\large{\color{purple}{\textsf{SVDquartets Bootstrap}}}$
+we apply SVDquartets to the aligned dataset using 1000 bootstrap replicates and report the majority-rule consensus trees (output `svdq_tree`).
 > 1. generate concatenated nexus file of common sequences in all loci called "`myfile.nex`", and a copy of dataset folder "loci_birds", called  "`loci_birds_copy`", such that loci are modified and contain just the common sequences in all loci:
 >   ```
 >   python nexus.py -e -nl 14 -s birdspecies -w myfile -f loci_birds
