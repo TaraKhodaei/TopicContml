@@ -65,7 +65,7 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 <br/>
 
 
-**-nb BOOTSTRAP, --bootstrap BOOTSTRAP**
+**-nb NUM_BOOTSTRAP, --num_bootstrap NUM_BOOTSTRAP**
 > number of bootstrap replicates
 
 <br/>
