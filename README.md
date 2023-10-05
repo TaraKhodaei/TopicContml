@@ -145,44 +145,44 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 > The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
 >
 > * **loci Folder**<br/>
-> If dataset of sequences are in a folder (e.g. "loci_birds"). <br/>
+>> If dataset of sequences are in a folder (e.g. "loci_birds"). <br/>
     In each locus, we merge the words from the same location (e.g. using 3 first letters) and then apply LDA.
-> ```
-> python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14
-> ```
-> <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
-> 
-> **$\color{orange}{\textsf{NOTE}}$** <br/>
-> The  dataset of sequences should be in the directory in a folder. Inside the folder, loci should be in separate text files called "loci0.txt", "loci1.txt", .... that follow the Phylip syntax.
+>> ```
+>> python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14
+>> ```
+>> <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
+>> 
+>> **$\color{orange}{\textsf{NOTE}}$** <br/>
+>> The  dataset of sequences should be in the directory in a folder. Inside the folder, loci should be in separate text files called "loci0.txt", "loci1.txt", .... that follow the Phylip syntax.
 > 
 >
 > * **NEXUS file**<br/> 
-> If dataset of sequences are in a NEXUS file (e.g. "myfile.nex"). 
-> ```
-> python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14
-> ```
-> 
-> **$\color{orange}{\textsf{NOTE}}$** <br/>
->  NEXUS file and blocks should have the following basic structure:
-> ```
-> #nexus
-> 
-> begin data;
->       dimensions ntax=... nchar=...;
->       format datatype=dna missing=? gap=-;
->       matrix
-> .
-> .
-> .
-> ;
-> end;
-> begin sets;
->       charpartition ...
-> end;
-> begin sets;
->       taxpartition ...
-> end;
-> ```
+>> If dataset of sequences are in a NEXUS file (e.g. "myfile.nex"). 
+>> ```
+>> python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14
+>> ```
+>> 
+>> **$\color{orange}{\textsf{NOTE}}$** <br/>
+>>  NEXUS file and blocks should have the following basic structure:
+>> ```
+>> #nexus
+>> 
+>> begin data;
+>>       dimensions ntax=... nchar=...;
+>>       format datatype=dna missing=? gap=-;
+>>       matrix
+>> .
+>> .
+>> .
+>> ;
+>> end;
+>> begin sets;
+>>       charpartition ...
+>> end;
+>> begin sets;
+>>       taxpartition ...
+>> end;
+>> ```
 
 
 $\large{\color{purple}{\textsf{Simulated Dataset}}}$
