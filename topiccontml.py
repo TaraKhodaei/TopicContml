@@ -273,6 +273,7 @@ def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , 
         
     topics_loci = []
     taxa_names_loci = []
+    miss = 0
     for i in range(num_loci):
         print(f'\n~~~~~~~~~~~~~~~~~~~~~ locus {i} ~~~~~~~~~~~~~~~~~~~~~~~\n')
         label = labels[i]        
@@ -357,7 +358,13 @@ def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , 
         
         #=============== Filtering: remove rare and common tokens ================
         dictionary.filter_extremes(no_below=2, no_above=0.5)
+#        dictionary.filter_extremes(no_below=1, no_above=0.6)
         print(f"\nDictionary after filtering:\n{dictionary}")
+        
+        if len(dictionary)<1:
+            print("ZERO SIZED DICTIONARY")
+            miss += 1
+            continue
         
         #================ Vectorize data: Bag-of-words ===========================
         corpus = [dictionary.doc2bow(doc) for doc in docs]
@@ -413,7 +420,7 @@ def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , 
         print(f"common_topics_loci = {common_topics_loci}")
         
 
-    return common_taxa_names, common_topics_loci
+    return common_taxa_names, common_topics_loci,miss
 
     
 #====================================================================================
@@ -473,7 +480,7 @@ def simulation(current, folder):
             folder = os.path.join(simfiles_folder,siminfile_sl)
             #sys.exit()
             loci = read_data(current, folder, num_loci, 'locus', '.txt')
-            taxa_names, topics_loci = topicmodeling('NoBootstrap',loci, num_loci, num_topics, chunksize , passes , iterations , eval_every, update_every, alpha, eta )
+            taxa_names, topics_loci, miss = topicmodeling('NoBootstrap',loci, num_loci, num_topics, chunksize , passes , iterations , eval_every, update_every, alpha, eta )
             
             #for each locus remove last column from topic matrix
             topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
@@ -511,7 +518,7 @@ def single_run(show=True):
     elif datainput=="nexus_file":
         loci = read_nexus(nexus_file, ttype)
         
-    taxa_names, topics_loci = topicmodeling('NoBootstrap',loci, num_loci, num_topics, chunksize , passes , iterations , eval_every, update_every, alpha, eta )
+    taxa_names, topics_loci, miss = topicmodeling('NoBootstrap',loci, num_loci, num_topics, chunksize , passes , iterations , eval_every, update_every, alpha, eta )
     
     #for each locus remove last column from topic matrix
     topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
@@ -524,7 +531,7 @@ def single_run(show=True):
             print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
         
     #generate infile
-    infile(topics_loci_concatenated, taxa_names, num_loci)
+    infile(topics_loci_concatenated, taxa_names, num_loci-miss)
     
     #run CONTML
     ourtree = run_contml(infile)
@@ -578,7 +585,7 @@ def bootstrap_run(bootstrap):
 
         count_boot += 1
         #sys.exit()
-        taxa_names, topics_loci = topicmodeling(bootstrap,bloci, num_loci, num_topics, chunksize , passes , iterations , eval_every, update_every, alpha, eta )
+        taxa_names, topics_loci, miss = topicmodeling(bootstrap,bloci, num_loci, num_topics, chunksize , passes , iterations , eval_every, update_every, alpha, eta )
         #for each locus remove last column from topic matrix
         topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
         #concatenation of the topics for all loci
@@ -586,7 +593,7 @@ def bootstrap_run(bootstrap):
         for i in range(1,len(topics_loci_missingLast)):
             topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
         #generate infile
-        infile(topics_loci_concatenated, taxa_names, num_loci)
+        infile(topics_loci_concatenated, taxa_names, num_loci-miss)
         #run CONTML
         ourtree = run_contml(infile)
         outtrees.append(ourtree)
