@@ -18,7 +18,7 @@ $\huge{\color{purple}{\textsf{Usage}}}$
 $\huge{\color{purple}{\textsf{Arguments}}}$
 
 **-h, --help**
-> show this help message and exi  
+> Show this help message and exi  
 
 <br/>
 
@@ -38,27 +38,27 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 <br/>
 
 **-kr KMER_RANGE, --kmer_range KMER_RANGE**
-> range of kmers extraction, lowerbound,max+1,step [for example: 2,10,2 leads to non overlapping k-mers: 2,4,6,8']
+> Range of kmers extraction, lowerbound,max+1,step [for example: 2,10,2 leads to non overlapping k-mers: 2,4,6,8']
 
 <br/>
 
 **-kt KMER_TYPE, --kmer_type KMER_TYPE**
-> default "not_overlap": extract kmers without overlapping. String "overlap": extract kmers with overlapping.
+> Default "not_overlap": extract kmers without overlapping. String "overlap": extract kmers with overlapping.
 
 <br/>
 
 **-f FOLDER, --folder FOLDER**
-> the folder that contains loci data in separate text files called "locus0.txt", "locus1.txt", ...
+> The folder that contains loci data in separate text files called "locus0.txt", "locus1.txt", ...
 
 <br/>
 
 **-nf NEXUS_File, --nexus_file NEXUS_File**
-> the NEXUS file that contains the multiloci data.
+> The NEXUS file that contains the multiloci data.
 
 <br/>
 
 **-nl NUM_LOCI, --num_loci NUM_LOCI**
-> number of loci
+> Number of loci
 
 <br/>
 
@@ -69,37 +69,37 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 
 
 **-nb NUM_BOOTSTRAP, --num_bootstrap NUM_BOOTSTRAP**
-> number of bootstrap replicates
+> Number of bootstrap replicates
 
 <br/>
 
 **-bt BOOTSTRAP_TYPE, --bootstrap_type BOOTSTRAP_TYPE**
-> default "kmer": do the bootstrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootstrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the case the sequences have the same lengths)
+> Default "kmer": do the bootstrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootstrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the case the sequences have the same lengths)
 
 <br/>
 
 **-incl INCLUDE_FILE, --include INCLUDE_FILE**
-> the include file contains a list of names that must be analyzed
+> The include file contains a list of names that must be analyzed
 
 <br/>
 
 **-excl EXCLUDE_FILE, --exclude EXCLUDE_FILE**
-> the exclude file contains a list of names that should not be analyzed
+> The exclude file contains a list of names that should not be analyzed
 
 <br/>
 
 **-force , --force**
-> this forces to use all species using an uninformative topicfrequency for missings
+> This forces to use all species using an uninformative topicfrequency for missings
 
 <br/>
 
 **-show , --showtree**
-> uses figtree to show the tree
+> Uses figtree to show the tree
 
 <br/>
 
 **-nt NUM_TOPICS, --num_topics NUM_TOPICS**
-> number of topics. Defult value is 5 topics.
+> Number of topics. Defult value is 5 topics.
 
 <br/>
 
@@ -129,12 +129,12 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 <br/>
 
 **-al ALPHA, --alpha ALPHA**
-> priori belief on document-topic distribution. It can be: (1) scalar for a symmetric prior over document-topic distribution, (2) 1D array of length equal to num_topics to denote an asymmetric user defined prior for each topic. (3) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"asymmetric": a fixed normalized asymmetric prior of 1.0 / (topic_index + sqrt(num_topics)),"auto":Learns an asymmetric prior from the corpus
+> A priori belief on document-topic distribution. It can be: (1) scalar for a symmetric prior over document-topic distribution, (2) 1D array of length equal to num_topics to denote an asymmetric user defined prior for each topic. (3) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"asymmetric": a fixed normalized asymmetric prior of 1.0 / (topic_index + sqrt(num_topics)),"auto":Learns an asymmetric prior from the corpus
 
 <br/>
 
 **-et ETA, --eta ETA**
-> priori belief on topic-word distribution. It can be: (1) scalar for a symmetric prior over  topic-word distribution, (2) 1D array of length equal to num_words to denote an asymmetric user defined prior for each word, (3) matrix of shape (num_topics, num_words) to assign a probability for each word-topic combination. (4) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"auto": Learns an asymmetric prior from the corpus.
+> A priori belief on topic-word distribution. It can be: (1) scalar for a symmetric prior over  topic-word distribution, (2) 1D array of length equal to num_words to denote an asymmetric user defined prior for each word, (3) matrix of shape (num_topics, num_words) to assign a probability for each word-topic combination. (4) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"auto": Learns an asymmetric prior from the corpus.
 
 <br/>
 
