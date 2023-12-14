@@ -171,7 +171,7 @@ $\large{\color{purple}{\textsf{Real Dataset}}}$
 >> The dataset of sequences are in a folder (e.g. "loci_birds"). <br/>
     In each locus, we merge the words from the same location (e.g. using 3 first letters) and then apply LDA.
 >> ```
->> python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14
+>> python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14 -show
 >> ```
 >> <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
 >> 
