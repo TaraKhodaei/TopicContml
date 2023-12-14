@@ -230,20 +230,20 @@ We do the same bootstrap analysis to the unaligned dataset.
 > * **Aligned Dataset:**
 >> Loci Folder
 >> ```
->> python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14 -nb 1000 -show
->> ```
->> Nexus File
->> ```
->> python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14 -nb 1000 -show
->> ```
-> * **Unaligned Dataset:**
->> Loci Folder
->> ```
 >> python topiccontml.py -f loci_birds -m 3 -nl 14 -nb 1000 -show
 >> ```
 >> Nexus File
 >> ```
 >> python topiccontml.py -nf myfile.nex -m 3 -nl 14 -nb 1000 -show
+>> ```
+> * **Unaligned Dataset:**
+>> Loci Folder
+>> ```
+>> python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14 -nb 1000 -show
+>> ```
+>> Nexus File
+>> ```
+>> python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14 -nb 1000 -show
 >> ```
 
 
