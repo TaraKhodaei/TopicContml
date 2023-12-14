@@ -77,6 +77,16 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 
 <br/>
 
+**-incl INCLUDE_FILE, --include INCLUDE_FILE**
+> the include file contains a list of names that must be analyzed
+
+<br/>
+
+**-excl EXCLUDE_FILE, --exclude EXCLUDE_FILE**
+> the exclude file contains a list of names that should not be analyzed
+
+<br/>
+
 **-nt NUM_TOPICS, --num_topics NUM_TOPICS**
 > number of topics. Defult value is 5 topics.
 
