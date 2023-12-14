@@ -87,6 +87,16 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 
 <br/>
 
+**-force FORCE, --force FORCE**
+> this forces to use all species using an uninformative topicfrequency for missings
+
+<br/>
+
+**-show SHOWTREE, --showtree SHOWTREE**
+> uses figtree to show the tree
+
+<br/>
+
 **-nt NUM_TOPICS, --num_topics NUM_TOPICS**
 > number of topics. Defult value is 5 topics.
 
