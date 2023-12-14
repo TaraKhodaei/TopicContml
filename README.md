@@ -9,7 +9,8 @@ $\huge{\color{purple}{\textsf{Usage}}}$
 
     topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-kr KMER_RANGE] [-kt KMER_TYPE] 
                     [-f FOLDER] [-nf NEXUS_File] [-nl NUM_LOCI] [-sd SIM_DIVERGE] 
-                    [-nb NUM_BOOTSTRAP] [-bt BOOTSTRAP_TYPE] 
+                    [-nb NUM_BOOTSTRAP] [-bt BOOTSTRAP_TYPE] [incl INCLUDE_FILE] 
+                    [excl EXCLUDE_FILE] [-force] [-show]
                     [-nt NUM_TOPICS] [-i ITERATIONS] [-p PASSES] [-cs CHUNKSIZE] 
                     [-ee EVAL_EVERY] [-ue UPDATE_EVERY] [-al ALPHA] [-et ETA]  
                         
@@ -87,12 +88,12 @@ $\huge{\color{purple}{\textsf{Arguments}}}$
 
 <br/>
 
-**-force FORCE, --force FORCE**
+**-force , --force**
 > this forces to use all species using an uninformative topicfrequency for missings
 
 <br/>
 
-**-show SHOWTREE, --showtree SHOWTREE**
+**-show , --showtree**
 > uses figtree to show the tree
 
 <br/>
