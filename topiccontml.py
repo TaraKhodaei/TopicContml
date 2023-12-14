@@ -1,39 +1,31 @@
 #!/usr/bin/env python
 #Import Libraries
-
-# import numpy for matrix operation
 import numpy as np
-
-# Importing Gensim
+import multiprocessing
+from  tqdm import tqdm
+from multiprocessing import Pool
 import gensim
 from gensim import corpora
-
-# to generate dictionary of unique tokens
 from gensim.corpora import Dictionary
-
-#LDA model
 from gensim.models import LdaModel, LdaMulticore
-
-# to suppress warnings
 from warnings import filterwarnings
 filterwarnings('ignore')
 
-#plotting tools
 import matplotlib.pyplot as plt
 
-#To extract my sequences from myfile.phy
 import phylip
-
-#To calculate distance of trees
 import dendropy
 from dendropy.calculate import treecompare
 
 import os
 import sys
 import itertools
+import time
+
+from itertools import chain
+from collections import Counter
 
 current = os.getcwd()
-
 
 DEBUG = False
 if DEBUG:
@@ -80,6 +72,21 @@ def myparser():
     parser.add_argument('-bt','--bootstrap_type', dest='bootstrap_type',
                         default='kmer', action='store',type=str,
                         help='default "kmer": do the bootsrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootsrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the ccase the sequences have the same lengths)')
+    parser.add_argument('-incl','--include', dest='include_file',
+                        default=None, action='store',  type=str,
+                        help='the include file contains a list of names that must be analyzed')
+    parser.add_argument('-excl','--exclude', dest='exclude_file',
+                        default=None, action='store',  type=str,
+                        help='the exclude file contains a list of names that should not be analyzed')
+    parser.add_argument('-force','--force', dest='force',
+                        default=False, action='store_true',
+                        help='this forces to use all species using an uninformative topicfrequency for missings')
+
+    parser.add_argument('-show','--showtree', dest='showtree',
+                        default=False, action='store_true',
+                        help='uses figtree to show the tree')
+    
+
     #gensim LDA arguments:
     parser.add_argument('-nt','--num_topics', dest='num_topics',
                         default=5, action='store', type=int,
@@ -101,10 +108,10 @@ def myparser():
                         help='Number of documents to be iterated through for each update. Defult value is 5.')
     parser.add_argument('-al','--alpha', dest='alpha',
                         default='1',
-                        help='priori belief on document-topic distribution. It can be: (1) scalar for a symmetric prior over document-topic distribution, (2) 1D array of length equal to num_topics to denote an asymmetric user defined prior for each topic. (3) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"asymmetric": a fixed normalized asymmetric prior of 1.0 / (topic_index + sqrt(num_topics)),"auto":Learns an asymmetric prior from the corpus')
+                        help='a priori belief on document-topic distribution. It can be: (1) scalar for a symmetric prior over document-topic distribution, (2) 1D array of length equal to num_topics to denote an asymmetric user defined prior for each topic. (3) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"asymmetric": a fixed normalized asymmetric prior of 1.0 / (topic_index + sqrt(num_topics)),"auto":Learns an asymmetric prior from the corpus')
     parser.add_argument('-et','--eta', dest='eta',
                         default='auto',
-                        help='priori belief on topic-word distribution. It can be: (1) scalar for a symmetric prior over  topic-word distribution, (2) 1D array of length equal to num_words to denote an asymmetric user defined prior for each word, (3) matrix of shape (num_topics, num_words) to assign a probability for each word-topic combination. (4) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"auto": Learns an asymmetric prior from the corpus.')
+                        help='a priori belief on topic-word distribution. It can be: (1) scalar for a symmetric prior over  topic-word distribution, (2) 1D array of length equal to num_words to denote an asymmetric user defined prior for each word, (3) matrix of shape (num_topics, num_words) to assign a probability for each word-topic combination. (4) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"auto": Learns an asymmetric prior from the corpus.')
                             
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
     return args
@@ -113,21 +120,6 @@ def myparser():
 #====================================================================================
 #Tokenize Documents
 def tokenize(seq_list, k, gaps_type, kmers_type):  #gaps:rm_row/rm_com     #kmers_type:overlap/not_overlap
-    if gaps_type == 'rm_row':
-        seq_list = [seq.replace('-', '') for seq in seq_list]
-        
-    elif gaps_type == 'rm_col':
-        # String List to Column Character Matrix Using zip() + map()
-        seq_matrix = np.transpose(list(map(list, zip(*seq_list))))
-        #remove columns if the column has an element '-'
-        seq_matrix_cleaned = np.array([col for col in seq_matrix.T if '-' not in col]).T
-        #Convert List of lists to list of Strings again
-        seq_list = [''.join(ele) for ele in seq_matrix_cleaned]
-        
-    if DEBUG:
-        np.savetxt ('seq_list', seq_list,  fmt='%s')
-        
-    #docs: list of lists of each document kemers
     docs = []
     if kmers_type == 'overlap':
         for seq in seq_list:
@@ -144,25 +136,38 @@ def tokenize(seq_list, k, gaps_type, kmers_type):  #gaps:rm_row/rm_com     #kmer
 
 
 #====================================================================================
-def read_data(current, folder, num_loci,prefix='locus',suffix='.txt'):
+def read_data(current, folder, num_loci,prefix='locus',suffix='.txt', include_names=set([]), exclude_names=set([])):
     labels=[]
     sequences=[]
     varsitess=[]
+    seti = set(include_names)
+    sete = set(exclude_names)
+    real_loci = 0
     for i in range(num_loci):
         #Extract labels and sequences:
         locus_i = prefix+str(i)+suffix
         locus = os.path.join(current,folder,locus_i)        
         label,sequence,varsites = phylip.readData(locus, ttype)
-        if DEBUG:
-            print(f"len(label) = {len(label)}")
-            print(f"len(sequence) = {len(sequence)}")
-        labels.append(label)
-        sequences.append(sequence)
-        varsitess.append(varsites)
-        labels = [[x.lower() for x in label] for label in labels]
-    return [labels,sequences,varsitess]
+        setl = set(label)
+        iok = (setl.intersection(seti) == seti)
+        if iok:
+            real_loci += 1
+            setle = setl.intersection(sete)
+            setl  = setl.difference(setle)
+            labelidx = [label.index(i) for i in setl]
+            label = [label[i] for i in labelidx]
+            sequence = [sequence[i] for i in labelidx]
 
-
+            if DEBUG:
+                print(f"len(label) = {len(label)}")
+                print(f"len(sequence) = {len(sequence)}")
+            labels.append(label)
+            sequences.append(sequence)
+            varsitess.append(varsites)
+            labels = [[x.lower() for x in label] for label in labels]
+    return [labels,sequences,varsitess,real_loci]
+    
+    
 #====================================================================================
 def read_nexus(nexus_file, ttype):
     print('\n++++++++++++ nexus file information ++++++++++++')
@@ -265,74 +270,324 @@ def read_nexus(nexus_file, ttype):
 
 
 #====================================================================================
-def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , iterations , eval_every, update_every, alpha, eta ):
-    if datainput=="folder":
-        labels, sequences, varsitess = myloci
-    elif datainput=="nexus_file":
-        labels,sequences,varsitess,taxpartition,taxpartition_names = myloci
-        
-    topics_loci = []
-    taxa_names_loci = []
+# Use this to read labels from files for exlcude or include operations
+def read_inexfiles(file_name):
+    if file_name == None:
+        return []
+    # contains a name one by line
+    with open(file_name, 'r') as f:
+        return [line.rstrip() for line in f]
+
+#====================================================================================
+# create kmers
+def kmer_docs(label, sequence, varsites, kmerrange, options):
+    gaps_type = options['gaps_type']
+    kmers_type = options['kmers_type']
+
+    docs=[]
     miss = 0
-    for i in range(num_loci):
-        print(f'\n~~~~~~~~~~~~~~~~~~~~~ locus {i} ~~~~~~~~~~~~~~~~~~~~~~~\n')
-        label = labels[i]        
-        sequence = sequences[i]
-        varsites = varsitess[i]
-        #Extract k-mers:
-        docs=[]
-        for k in range(kmer_range_list[0],kmer_range_list[1],kmer_range_list[2]):
-            tokenize_k = tokenize(sequence, k, gaps_type, kmers_type)
-            if len(docs)>0:
-                docs =[docs[i]+tokenize_k[i] for i in range(len(tokenize_k))]
-            else:
-                docs = tokenize_k
-        if bootstrap == 'kmer' and nbootstrap>0:
-            #sys.exit()
-            print(f"bootstrapping k-mers")
-            for i in range(len(docs)):
-                docs[i] = np.random.choice(docs[i],size=len(docs[i]),replace=True)
+    
+    for k in kmerrange:
+        tokenize_k = tokenize(sequence, k, gaps_type, kmers_type)
+        if len(docs)>0:
+            docs =[docs[i]+tokenize_k[i] for i in range(len(tokenize_k))]
+        else:
+            docs = tokenize_k
             
-        #count number of all words in docs
+    if DEBUG:
+        taxa_names = label
         count = 0
         for doc in docs:
             count += len(doc)
         print(f"Number of all words in docs = {count}")
+        print(f"len(taxa_names) = {len(taxa_names)} ")
+        print(f"taxa_names = {taxa_names} ")
+    return docs
+
+
+
+#====================================================================================
+def merge_documents(options, label, docs,taxpartition,taxpartition_names):
+    datainput = options['datainput']
+    merging = options['merging']
+    if datainput=="folder":
+        if merging:
+            taxa_names = list(dict.fromkeys([x[:merging] for x in label ]))  #remove duplicates from a list,
+            #while preserving order using"dict.fromkeys" insted of "list(set)"
+            if DEBUG:
+                print(f"distinct taxa_names = {taxa_names} ")
                 
-        taxa_names = label
+            taxa_names_indices=[]
+            for item in taxa_names:
+                indices= [label.index(i) for i in label if item in i]
+                taxa_names_indices.append(indices)
+                taxa_names_indices_len=[len(i) for i in taxa_names_indices]
+                if DEBUG:
+                    print(f"taxa_names_indices = {taxa_names_indices}")
+                    print(f"taxa_names_indices_len = {taxa_names_indices_len}")
+                docs_merged=[]
+                for indices in taxa_names_indices:
+                    doc_merged = list(itertools.chain.from_iterable([docs[i] for i in indices] ))
+                    docs_merged.append(doc_merged)
+
+                #DEBUG: count number of all words in docs
+                if DEBUG:
+                    print(f"len(docs_merged) = {len(docs_merged)} ")
+                    count = 0
+                    for doc in docs_merged:
+                        count += len(doc)
+                    print(f"Number of all words in docs_merged = {count}")
+            return taxa_names, docs_merged
+        else:
+            taxa_names = label
+            return taxa_names, docs
+            
+    elif datainput=="nexus_file":
+        taxa_names = taxpartition_names
         if DEBUG:
-            print(f"len(taxa_names) = {len(taxa_names)} ")
             print(f"taxa_names = {taxa_names} ")
         
-        #====================== k-mers after merging ===========================
-        if datainput=="folder":
-            if merging:
-                taxa_names = list(dict.fromkeys([x[:merging] for x in label ]))  #remove duplicates from a list, while preserving order using"dict.fromkeys" insted of "list(set)"
-                print(f"taxa_names = {taxa_names} ")
-            
-                merging_num=[]
-                for item in taxa_names:
-                    merg_indxs= [label.index(i) for i in label if item in i]
-                    merging_num.append(merg_indxs)
-                    
-                merging_nums=[len(i) for i in merging_num]
-                print(f"merging_nums = {merging_nums}")
+        docs_merged=[]
+        for i,item in enumerate(taxpartition):
+            doc_merged = list(itertools.chain.from_iterable(docs[item[0]:item[1]]))
+            docs_merged.append(doc_merged)
+        if DEBUG:
+            print(f"len(docs_merged) = {len(docs_merged)} ")
+            #count number of all words in docs
+            count = 0
+            for doc in docs_merged:
+                count += len(doc)
+            if DEBUG:
+                print(f"Number of all words in docs_merged = {count}")
+        docs = docs_merged
+        return taxa_names, docs
+        
+        
+#====================================================================================
+def training(taxa_names, docs, options):
+    miss = 0
+    dictionary = Dictionary(docs)
+    chunksize = options['chunksize']
+    iterations = options['iterations']
+    num_topics = options['num_topics']
+    passes = options['passes']
+    eval_every = options['eval_every']
+    update_every = options['update_every']
+    alpha = options['alpha']
+    eta = options['eta']
+    
+    #--------------- Filtering: remove rare and common tokens ---------------
+    dictionary.filter_extremes(no_below=2, no_above=0.5)
+    if DEBUG:
+        print(f"\nDictionary after filtering:\n{dictionary}")
+        
+    if len(dictionary)<1:
+        if DEBUG:
+            print("ZERO SIZED DICTIONARY")
+        miss += 1
+        return [None,None,miss]
+
+    #---------------------- Vectorize data: Bag-of-words --------------------
+    corpus = [dictionary.doc2bow(doc) for doc in docs]
+    if DEBUG:
+        print(f'\nNumber of documents: {len(corpus)}')
+        print(f'Number of unique tokens: {len(dictionary)}')
+        
+    #------------------------- LDA Model: Training --------------------------
+    # Make a index to word dictionary.
+    temp = dictionary[0]
+    id2word = dictionary.id2token
+    
+    model = LdaModel(corpus=corpus, id2word=id2word, chunksize=chunksize, \
+                     alpha=alpha, eta=eta, \
+                     iterations=iterations, num_topics=num_topics, \
+                     passes=passes, eval_every=eval_every, minimum_probability=0, update_every=update_every )
+    #--------------------- Print topics/words frequencies -------------------
+    if DEBUG:
+        for idx, topic in model.print_topics(-1):
+            print("Topic: {} \nWords: {}\n".format(idx, topic))
                 
-                docs_merged=[]
-                j=0
-                for num in merging_nums:
-                    doc_merged = list(itertools.chain.from_iterable(docs[j:j+num]))
-                    docs_merged.append(doc_merged)
-                    j +=num
-                print(f"len(docs_merged) = {len(docs_merged)} ")
+    #---------------- Assigning the topics to the documents -----------------
+    docs_tuples = model[corpus]
+                
+    #--------------------- topics list for current locus --------------------
+    topics = []
+    for num, doc in enumerate(docs_tuples):
+        first=[]
+        second=[]
+        for tuple_i in doc:
+            first.append(tuple_i[0])
+            second.append(tuple_i[1])
+        topics_freq=[]
+        for i in range(num_topics):
+            topics_freq.append(second[first.index(i)])
+        topics.append(topics_freq)
+    return [topics,taxa_names,miss]
+
+
+#====================================================================================
+def read_one_data(current, folder, locus,options):
+    if DEBUG:
+        print(f"current = {current}")
+    prefix = options['prefix']
+    suffix = options['suffix']
+    ttype = options['ttype']
+    filetype = options['filetype']
+    include_names = options['include_names']
+    exclude_names = options['exclude_names']
+
+    labels=[]
+    sequences=[]
+    varsitess=[]
+    seti = include_names
+    sete = exclude_names
+    real_loci = 0
+    i = locus
+    #Extract labels and sequences:
+    locus_i = prefix+str(i)+suffix
+    locus = os.path.join(current,folder,locus_i)        
+    label,sequence,varsites = phylip.readData(locus, ttype)
+    setl = set(label)
+    iok = (setl.intersection(seti) == seti)
+    if iok:
+        real_loci += 1
+        setle = setl.intersection(sete)
+        setl  = setl.difference(setle)
+        labelidx = [label.index(i) for i in setl]
+        label = [label[i] for i in labelidx]
+        sequence = [sequence[i] for i in labelidx]
+        if DEBUG:
+            print(f"len(label) = {len(label)}")
+            print(f"len(sequence) = {len(sequence)}")
+        label = [x.lower() for x in label]
+    return [label,sequence,varsites,real_loci] # a single locus
+    
+    
+#====================================================================================
+def use_options(current, folder, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names):
+    options={}
+    options['current'] = current
+    options['folder'] = folder
+    options['gaps_type']=gaps_type
+    options['kmers_type'] = kmers_type
+    options['bootstrap'] = bootstrap
+    options['nbootstrap'] = nbootstrap
+    options['datainput'] = datainput
+    options['merging'] = merging
+    options['chunksize'] = chunksize
+    options['iterations']=iterations
+    options['num_topics'] = num_topics
+    options['passes'] = passes
+    options['eval_every'] = eval_every
+    options['update_every'] = update_every
+    options['alpha'] = alpha
+    options['eta'] = eta
+    options['prefix'] = prefix
+    options['suffix'] = suffix
+    options['ttype'] = ttype
+    options['filetype'] = filetype
+    options['include_names'] = include_names
+    options['exclude_names'] = exclude_names
+    return options
+
+
+#====================================================================================
+def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, kmerrange, options):
+        
+    datainput = options['datainput']
+    nbootstrap = options['nbootstrap']
+    bootstrap = options['bootstrap']
+    gaps_type = options['gaps_type']
+
+    #print(i,end=' ', file=sys.stderr, flush=True)
+    if datainput=="folder":
+        if label == []: #assume we need to read the data for each locus now and have not done that beforehand
+            label, sequence, varsites, real_locus  = read_one_data(options['current'], options['folder'], i, options)
+            
+            
+    if bootstrap == 'seq' and nbootstrap>0:
+        sequence = bootstrap_sequences_one_locus(sequence)
+        
+ 
+    if gaps_type == 'rm_row':
+        sequence = [seq.replace('-', '') for seq in sequence]
+    elif gaps_type == 'rm_col':
+        # String List to Column Character Matrix Using zip() + map()
+        seq_matrix = np.transpose(list(map(list, zip(*sequence))))
+        #remove columns if the column has an element '-'
+        seq_matrix_cleaned = np.array([col for col in seq_matrix.T if '-' not in col]).T
+        #Convert List of lists to list of Strings again
+        sequence = [''.join(ele) for ele in seq_matrix_cleaned]
+        
+        
+    docs = kmer_docs(label, sequence, varsites, kmerrange, options)
+    
+    if bootstrap == 'kmer' and nbootstrap>0:
+        docs = [np.random.choice(docs[i],size=len(docs[i]),replace=True) for i in range(len(docs)) ]
+    
+
+    taxa_names, docs = merge_documents(options, label, docs, taxpartition,taxpartition_names)
+    return training(taxa_names, docs, options)
+    
+
+#====================================================================================
+def process_locus_forloop(i, label, sequence, varsites, kmerrange, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,passes, eval_every, update_every, alpha, eta):
+    print(f'\n~~~~~~~~~~~~~~~~~~~~~ locus {i} ~~~~~~~~~~~~~~~~~~~~~~~\n')
+    docs=[]
+    miss = 0
+    for k in kmerrange:
+        tokenize_k = tokenize(sequence, k, gaps_type, kmers_type)
+        if len(docs)>0:
+            docs =[docs[i]+tokenize_k[i] for i in range(len(tokenize_k))]
+        else:
+            docs = tokenize_k
+    if bootstrap == 'kmer' and nbootstrap>0:
+        #sys.exit()
+        print(f"bootstrapping k-mers")
+        for i in range(len(docs)):
+            docs[i] = np.random.choice(docs[i],size=len(docs[i]),replace=True)
+            
+    #count number of all words in docs
+    count = 0
+    for doc in docs:
+        count += len(doc)
+    print(f"Number of all words in docs = {count}")
+                
+    taxa_names = label
+    if DEBUG:
+        print(f"len(taxa_names) = {len(taxa_names)} ")
+        print(f"taxa_names = {taxa_names} ")
+        
+    #----------------------- k-mers after merging --------------------------
+    if datainput=="folder":
+        if merging:
+            taxa_names = list(dict.fromkeys([x[:merging] for x in label ]))  #remove duplicates from a list, while preserving order using"dict.fromkeys" insted of "list(set)"
+            print(f"distinct taxa_names = {taxa_names} ")
+            
+            taxa_names_indices=[]
+            for item in taxa_names:
+                indices= [label.index(i) for i in label if item in i]
+                taxa_names_indices.append(indices)
+                
+            print(f"taxa_names_indices = {taxa_names_indices}")
+            
+            taxa_names_indices_len=[len(i) for i in taxa_names_indices]
+            print(f"taxa_names_indices_len = {taxa_names_indices_len}")
+    
+            docs_merged=[]
+            for indices in taxa_names_indices:
+                doc_merged = list(itertools.chain.from_iterable([docs[i] for i in indices] ))
+                docs_merged.append(doc_merged)
+            print(f"len(docs_merged) = {len(docs_merged)} ")
+
                                 
-                #count number of all words in docs
-                count = 0
-                for doc in docs_merged:
-                    count += len(doc)
-                if DEBUG:
-                    print(f"Number of all words in docs_merged = {count}")
-                docs = docs_merged
+            #count number of all words in docs
+            count = 0
+            for doc in docs_merged:
+                count += len(doc)
+            if DEBUG:
+                print(f"Number of all words in docs_merged = {count}")
+            docs = docs_merged
                 
         elif datainput=="nexus_file":
             taxa_names = taxpartition_names
@@ -352,77 +607,135 @@ def topicmodeling(bootstrap, myloci, num_loci, num_topics, chunksize , passes , 
                 print(f"Number of all words in docs_merged = {count}")
             docs = docs_merged
 
-        #================= Dictionary of Unique Tokens ===========================
-        dictionary = Dictionary(docs)
-        print(f"\nDictionary:\n{dictionary}")
+
+    #---------------------- Dictionary of Unique Tokens --------------------
+    dictionary = Dictionary(docs)
+    print(f"\nDictionary:\n{dictionary}")
         
-        #=============== Filtering: remove rare and common tokens ================
-        dictionary.filter_extremes(no_below=2, no_above=0.5)
-#        dictionary.filter_extremes(no_below=1, no_above=0.6)
+    #------------ Filtering: remove rare and common tokens -----------------
+    dictionary.filter_extremes(no_below=2, no_above=0.5)
+    #dictionary.filter_extremes(no_below=1, no_above=0.6)
+    if DEBUG:
         print(f"\nDictionary after filtering:\n{dictionary}")
         
-        if len(dictionary)<1:
-            print("ZERO SIZED DICTIONARY")
-            miss += 1
-            continue
+    if len(dictionary)<1:
+        print("ZERO SIZED DICTIONARY")
+        miss += 1
+        return [None,None,miss]
+        #topics = [0,0,0,0,0]*taxa_names
+        #return [topics,taxa_names,miss]
+    #---------------------- Vectorize data: Bag-of-words -------------------
+    corpus = [dictionary.doc2bow(doc) for doc in docs]
+    print(f'\nNumber of documents: {len(corpus)}')
+    print(f'Number of unique tokens: {len(dictionary)}')
         
-        #================ Vectorize data: Bag-of-words ===========================
-        corpus = [dictionary.doc2bow(doc) for doc in docs]
-        print(f'\nNumber of documents: {len(corpus)}')
-        print(f'Number of unique tokens: {len(dictionary)}')
-        
-        #===================== LDA Model: Training ===============================
-        # Make a index to word dictionary.
-        temp = dictionary[0]
-        id2word = dictionary.id2token
-
-        model = LdaModel(corpus=corpus, id2word=id2word, chunksize=chunksize, \
-                           alpha=alpha, eta=eta, \
-                           iterations=iterations, num_topics=num_topics, \
-                           passes=passes, eval_every=eval_every, minimum_probability=0, update_every=update_every )
-
-        #================== Print topics/words frequencies ======================
-        if DEBUG:
-            for idx, topic in model.print_topics(-1):
-                print("Topic: {} \nWords: {}\n".format(idx, topic))
+    #------------------------- LDA Model: Training -------------------------
+    # Make a index to word dictionary.
+    temp = dictionary[0]
+    id2word = dictionary.id2token
+    
+    model = LdaModel(corpus=corpus, id2word=id2word, chunksize=chunksize, \
+                     alpha=alpha, eta=eta, \
+                     iterations=iterations, num_topics=num_topics, \
+                     passes=passes, eval_every=eval_every, minimum_probability=0, update_every=update_every )
+    #-------------------- Print topics/words frequencies -------------------
+    if DEBUG:
+        for idx, topic in model.print_topics(-1):
+            print("Topic: {} \nWords: {}\n".format(idx, topic))
                 
-        #============== Assigning the topics to the documents ===================
-        docs_tuples = model[corpus]
+    #---------------- Assigning the topics to the documents ----------------
+    docs_tuples = model[corpus]
                 
-        #=================== topics list for current locus ======================
-        topics = []
-        for num, doc in enumerate(docs_tuples):
-            first=[]
-            second=[]
-            for tuple_i in doc:
-                first.append(tuple_i[0])
-                second.append(tuple_i[1])
-            topics_freq=[]
-            for i in range(num_topics):
-                topics_freq.append(second[first.index(i)])
-            topics.append(topics_freq)
-        topics_loci.append(topics)
-        taxa_names_loci.append(taxa_names)
+    #------------------- topics list for current locus ---------------------
+    topics = []
+    for num, doc in enumerate(docs_tuples):
+        first=[]
+        second=[]
+        for tuple_i in doc:
+            first.append(tuple_i[0])
+            second.append(tuple_i[1])
+        topics_freq=[]
+        for i in range(num_topics):
+            topics_freq.append(second[first.index(i)])
+        topics.append(topics_freq)
+    return [topics,taxa_names,miss]
+
+
+#====================================================================================
+def topicmodeling(num_loci, options):
+    datainput = options['datainput']
+    
+    if datainput=="folder":
+        kmerrange = range(kmer_range_list[0],kmer_range_list[1],kmer_range_list[2])
+        args = [(i, [],[], [], [], [], kmerrange, options) for i in range(num_loci)]
+    
+    elif datainput=="nexus_file":
+        loci = read_nexus(nexus_file, ttype)
+        labels,sequences,varsitess,taxpartition,taxpartition_names = loci
+        kmerrange = range(kmer_range_list[0],kmer_range_list[1],kmer_range_list[2])
+        args = [(i, labels[i], sequences[i], varsitess[i],taxpartition,taxpartition_names, kmerrange, options) for i in range(num_loci)]
+
+
+    mypool = multiprocessing.cpu_count() -1
+    print("Number of cores to use:",mypool)
+    with Pool(mypool) as p, tqdm(total=num_loci) as pbar:
+        res = [p.apply_async(
+            process_locus, args=args[i], callback=lambda _: pbar.update(1)) for i in range(num_loci)]
+        results = [r.get() for r in res]
+
+    
+    topics_loci = []
+    taxa_names_loci = []
         
+    topics_loci,taxa_names_loci,miss = zip(*results)
+    topics_loci = [t for t in topics_loci if t!=None]
+    taxa_names_loci  = [t for t in taxa_names_loci if t!=None]
+
+    miss = np.sum(miss)
+    
     if DEBUG:
         print(f"taxa_names_loci = {taxa_names_loci}")
-    
-    common_taxa_names = list(set.intersection(*map(set, taxa_names_loci)))
+    taxa_names_loci_sets = [set(l) for l in  taxa_names_loci]
+    common_taxa_names = list(set.intersection(*taxa_names_loci_sets))
+    uncommon_taxa_names  =  list(set.union(*taxa_names_loci_sets) - set.intersection(*taxa_names_loci_sets))
+    alltaxa = list(set.union(*taxa_names_loci_sets))
     if DEBUG:
-        print(f"common_taxa_names = {common_taxa_names}")
-        
+        print("ALL:", list(alltaxa))
+        print("COMMON:",common_taxa_names)
+        print("NOT COMMON:", uncommon_taxa_names)
+            
     common_taxa_names_loci_indx = [[l.index(c) for c in common_taxa_names] for l in taxa_names_loci]
+    uncommon_taxa_names_loci_indx = [[uncommoncheck(l,c) for c in uncommon_taxa_names] for l in taxa_names_loci]
     if DEBUG:
         print(f"common_taxa_names_loci_indx = {common_taxa_names_loci_indx}")
         
     common_topics_loci = [[l[i] for i in common_taxa_names_loci_indx[num]] for num,l in enumerate(topics_loci)]
-    if DEBUG:
-        print(f"common_topics_loci = {common_topics_loci}")
+    uncommon_topics_loci = [[uncommonresolve(l,i, num_topics) for i in uncommon_taxa_names_loci_indx[num]] for num,l in enumerate(topics_loci)]
         
+    commonplus_taxa_names = common_taxa_names + uncommon_taxa_names
+    commonplus_topics_loci = [l+u for l,u in zip(common_topics_loci, uncommon_topics_loci) ]
+    if DEBUG:
+        print(f"commonplus_taxa_names = {commonplus_taxa_names}")
+        print(f"commonplus_topics_loci = {commonplus_topics_loci}")
 
-    return common_taxa_names, common_topics_loci,miss
+    if force:
+        return commonplus_taxa_names, commonplus_topics_loci,miss
+    else:
+        return common_taxa_names, common_topics_loci,miss
 
-    
+
+#====================================================================================
+def uncommoncheck(l,c):
+    if c in l:
+        return l.index(c)
+    else:
+        return -1
+
+def uncommonresolve(l, i, numtopics):
+    if i == -1:
+        return [1.0/numtopics for i in range(numtopics)]
+    else:
+        return l[i]
 #====================================================================================
 def infile(topics_loci, taxa_names, num_loci):
     if DEBUG:
@@ -447,7 +760,8 @@ def run_contml(infile):
         contmlinput = f'g\nj\n{contmljumble}\n{contmltimes}\ny'
         #contmlinput = f'g\n'
         f.write(contmlinput)
-    os.system(f'cat contmlinput | {PROGRAMPATH}contml2')
+    print("Contml is running...")
+    os.system(f'cat contmlinput | {PROGRAMPATH}contml2 -> contml2.log')
 #    os.system(f'cat contmlinput | {PROGRAMPATH}contml')
     
     #read the outtree file
@@ -456,7 +770,7 @@ def run_contml(infile):
     return tree
 
 #====================================================================================
-def simulation(current, folder):
+def simulation(current, folder, options):
     diverge_time = float(sim_diverge)       #diverge_time=0.0/0.01/0.05/0.1/0.2
     tree_newick = '((Arb:1,Fra:1):1,Kre:1,Rom:1);'    #We need just topology to compare
     tns = dendropy.TaxonNamespace()
@@ -464,7 +778,8 @@ def simulation(current, folder):
     true_tree.encode_bipartitions()
         
     simfiles_folder = os.path.join(current,folder)
-    print(simfiles_folder)
+    if DEBUG:
+        print(f"simfiles_folder = {simfiles_folder}")
     current = simfiles_folder
     siminfiles_trees=[]
     
@@ -475,13 +790,21 @@ def simulation(current, folder):
     for num in num_iter:
         num_loci = num
         distances =[]
+        include_names = []
+        exclude_names = []
         for sim_num in sims_num:
             siminfile_sl ='siminfile_'+str(sim_num)+'_100_'+str(diverge_time)+'_100'
             folder = os.path.join(simfiles_folder,siminfile_sl)
+            if DEBUG:
+                print(f"siminfile_sl = {siminfile_sl}")
+                print(f"folder = {folder}")
             #sys.exit()
-            loci = read_data(current, folder, num_loci, 'locus', '.txt')
-            taxa_names, topics_loci, miss = topicmodeling('NoBootstrap',loci, num_loci, num_topics, chunksize , passes , iterations , eval_every, update_every, alpha, eta )
-            
+            options['current'] = current
+            options['folder'] = folder
+            if DEBUG:
+                print(f"options['current'] = {options['current']}")
+                print(f"\noptions = {options}")
+            taxa_names, topics_loci, miss = topicmodeling(num_loci, options)
             #for each locus remove last column from topic matrix
             topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
             
@@ -512,14 +835,10 @@ def simulation(current, folder):
 
 #====================================================================================
 # a single analysis that shows the tree using figtree with show=True
-def single_run(show=True):
-    if datainput=="folder":
-        loci = read_data(current, folder, num_loci, 'locus', '.txt')
-    elif datainput=="nexus_file":
-        loci = read_nexus(nexus_file, ttype)
-        
-    taxa_names, topics_loci, miss = topicmodeling('NoBootstrap',loci, num_loci, num_topics, chunksize , passes , iterations , eval_every, update_every, alpha, eta )
-    
+def single_run(show=False,options={}):
+    global num_loci
+
+    taxa_names, topics_loci, miss = topicmodeling(num_loci, options)
     #for each locus remove last column from topic matrix
     topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
         
@@ -535,15 +854,16 @@ def single_run(show=True):
     
     #run CONTML
     ourtree = run_contml(infile)
-    print(ourtree)
+#    print(f"ourtree = {ourtree}")
     if show:
         #Figtree
         os.system(f"{PROGRAMPATH}figtree outtree")
+    print('Effective loci use:', num_loci)
     return ourtree
 
         
 #====================================================================================
-def bootstrap_sequences(sequences):
+def bootstrap_sequences(sequences):     #All loci
     newsequences = []
     for locus in sequences:
         nind = len(locus)
@@ -556,52 +876,57 @@ def bootstrap_sequences(sequences):
         newsequences.append(locusnewseq)
     return newsequences
     
+    
 #====================================================================================
-def bootstrap_run(bootstrap):
+def bootstrap_sequence_one_locus(sequence):     #one locus
+    num = len(sequence)
+    nsites = len(sequence[0])
+    pick = np.random.randint(0,nsites,nsites)
+    newsequence=[]
+    for n in range(num):
+        newseq = "".join([locus[n][i] for i in  pick])
+        newsequence.append(newseq)
+    return newsequence
+            
+
+
+#====================================================================================
+def bootstrap_run(bootstrap, options):
+    global num_loci
     count_boot = 1
     outtrees=[]
-    
-    if datainput=="folder":
-        loci = read_data(current, folder, num_loci, 'locus', '.txt')
-    elif datainput=="nexus_file":
-        loci = read_nexus(nexus_file, ttype)
-        
-    for bi in range(nbootstrap):
-        if DEBUG:
-            print(f"bootstrap ={bootstrap}")
-        if datainput=="folder":
-            labels,sequences,varsitess = loci
-        elif datainput=="nexus_file":
-            labels,sequences,varsitess,taxpartition,taxpartition_names = loci
-        
-        if not bootstrap=='kmer':      #in case of "seq"
-            bsequences = bootstrap_sequences(sequences)
-            if datainput=="folder":
-                bloci = [labels,bsequences,varsitess]
-            elif datainput=="nexus_file":
-                bloci = [labels,bsequences,varsitess,taxpartition,taxpartition_names]
-        else:
-            bloci = loci
 
+    nbootstrap = options['nbootstrap']
+    bootstrap = options['bootstrap']
+#    print(f"bootstrapping based on '{bootstrap}'")
+    
+    for bi in range(nbootstrap):
+        print(f"\nBootstrapping number '{bi}'")
         count_boot += 1
-        #sys.exit()
-        taxa_names, topics_loci, miss = topicmodeling(bootstrap,bloci, num_loci, num_topics, chunksize , passes , iterations , eval_every, update_every, alpha, eta )
+        taxa_names, topics_loci, miss = topicmodeling(num_loci, options)
+        
         #for each locus remove last column from topic matrix
         topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
+        
         #concatenation of the topics for all loci
         topics_loci_concatenated = topics_loci_missingLast[0]
         for i in range(1,len(topics_loci_missingLast)):
             topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
+            
         #generate infile
         infile(topics_loci_concatenated, taxa_names, num_loci-miss)
+        
         #run CONTML
         ourtree = run_contml(infile)
+        print(f"Bootstrap tree #{bi} = {ourtree}")
         outtrees.append(ourtree)
+        
     return outtrees
-
 
 #====================================================================================
 if __name__ == "__main__":
+    prefix = 'locus'
+    suffix = '.txt'
     args = myparser() # parses the commandline arguments
     gaps_type = args.gaps_type
     merging = args.merging
@@ -611,6 +936,10 @@ if __name__ == "__main__":
     folder = args.folder
     nexus_file = args.nexus_file
     bootstrap_type = args.bootstrap_type
+    include_file = args.include_file
+    exclude_file = args.exclude_file
+    force = args.force
+    showtree = args.showtree
     #gensim LDA arguments:
     num_topics = args.num_topics
     iterations = args.iterations
@@ -630,7 +959,8 @@ if __name__ == "__main__":
     elif nexus_file:
         datainput = "nexus_file"
     print(f"\ndatainput : {datainput}")
-        
+
+    
     print('\n+++++++++++++++ LDA arguments +++++++++++++++++')
     print(f"num_topics = {num_topics}")
     print(f"iterations = {iterations}")
@@ -664,30 +994,45 @@ if __name__ == "__main__":
         filetype = 'PHYLIP'
 
     kmer_range_list = list(map(int, args.kmer_range.split(',')))
+
+    include_names = read_inexfiles(include_file)
+    exclude_names = read_inexfiles(exclude_file)
+    
+    options = use_options(current, folder, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names)
     
     #After cloning the repository, in topiccontml.py modify the PROGRAMPATH to the path that FigTree and CONTML are installed
-    PROGRAMPATH = '/Users/tara/bin/'
+    PROGRAMPATH = '~/bin/'
     
     # generates a random number seed for jumble in contml
     RANDOMSEED  = np.random.randint(10000,2**16,size=1)[0]
     if RANDOMSEED % 2 == 0:
         RANDOMSEED += 1
      
-    #=================== if siminfile analysis ======================
+    start = time.time()
+    #=================== if simulation analysis ======================
     if sim_diverge is not None:
-        simulation(current, folder)
-    #===================  if NOT siminfile analysis  ======================
+        simulation(current, folder, options)
+    #===========  General: if NOT simulation analysis  ===============
     elif bootstrap!= 'none':
-        ourtree = single_run(False)
+        print(f"\nBootstrapping based on '{bootstrap}':\n")
+        ourtree = single_run(False,options)
+        print(f"TopicContml tree = {ourtree}\n")
         with open('best.tre','w') as btrees:
             btrees.write(ourtree+'\n')
             
-        outtrees = bootstrap_run(bootstrap)
+        outtrees = bootstrap_run(bootstrap, options)
         with open('bootstrap_replicates.tre','w') as btrees:
             for tr in outtrees:
                 btrees.write(tr+'\n')
 
         os.system(f"sumtrees.py --set-edges=support --decimals=0 --percentages --output-tree-filepath=bootstrap_target_best.tre --target=best.tre bootstrap_replicates.tre")
         os.system(f"sumtrees.py --set-edges=support --decimals=0 --percentages --output-tree-filepath=bootstrap_majority.tre bootstrap_replicates.tre")
+        
+        print(f"\n> Bootstrap trees are written into files 'bootstrap_target_best.tre' and 'bootstrap_majority.tre'")
+        print(f"> Bootstrap replicates are written into file 'bootstrap_replicates.tre'")
+        print(f"> TopicContml tree is written into file 'best.tre'")
     else:
-        single_run()
+        single_run(showtree,options)
+    end = time.time()
+    print(f"\n> Elapsed time = {end - start}")
+    print(f"\n> tokenize_time = {tokenize_time}")
