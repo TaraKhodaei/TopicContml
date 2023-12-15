@@ -180,7 +180,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 ### Bird Dataset
 > The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
 >
-> * **loci Folder**<br/>
+>> * **loci Folder**<br/>
 >> In this case, the dataset of sequences are in a folder (e.g. "loci_birds"). <br/>
     In each locus, we merge the words from the same location (e.g. using 3 first letters) and then apply LDA.
 >> ```
@@ -196,7 +196,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 >> labels + sequences
 >> ```
 >
-> * **NEXUS file**<br/> 
+>> * **NEXUS file**<br/> 
 >> In this case, the dataset of sequences are in a NEXUS file (e.g. "myfile.nex"). 
 >> ```
 >> python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14 -show
