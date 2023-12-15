@@ -2,12 +2,6 @@
 
 <br/> 
 
-<h1 style="text-align: center;">$\large{\color{purple}{\textbf{TopicContml}}}$</h1>
-
-<p align="center">
-$\HUGE{\color{purple}{\textbf{TopicContml}}}$
-</p>
-
 <h1 align="center">
 $\large{\color{purple}{\textbf{TopicContml}}}$
 </h1>
