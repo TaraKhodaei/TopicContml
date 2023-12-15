@@ -155,6 +155,8 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 ## Installation and Requirements
 
+* TopicCContml was tested on a Mac, Linux will be very similar. It will not work for Windows, but let us know.  <br/>
+
 * The following **packages** are required: <br/>
 1. `gensim`:
     ```
