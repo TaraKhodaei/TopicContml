@@ -162,7 +162,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     ```
     #this should trigger also installation of numpy and scipy <br/>
 
-   <!--- this should trigger also installation of numpy and scipy --->
+   $\tiny{\color{grey}{\textsf{this should trigger also installation of numpy and scipy}}}$
    
 3. `dendropy`:
     ```
