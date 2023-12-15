@@ -8,7 +8,7 @@ $\large{\color{purple}{\textbf{TopicContml}}}$
 
 Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, an unsupervised machine learning approach based on natural language processing, to construct evolutionary relationships among multilocus species from unaligned DNA sequences.
 
-# Table of Contents
+## Table of Contents
 - **[Usage](#Usage)**
 - **[Arguments](#Arguments)**
 - **[Installation and Requirements](#Installation-and-Requirements)**
@@ -18,7 +18,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 
 
-# Usage
+## Usage
 
     topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-kr KMER_RANGE] [-kt KMER_TYPE] 
                     [-f FOLDER] [-nf NEXUS_File] [-nl NUM_LOCI] [-sd SIM_DIVERGE] 
@@ -32,15 +32,15 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 ## Arguments
 
-**-h, --help**
-> Show this help message and exi  
+**-h, --help**<br/>
+Show this help message and exi  
 
 <br/>
 
 **-e, --extended**
 > If the phylip dataset is in the extended format, use this. 
  
-> <br/>
+<br/>
 
 **-gt GAPS_TYPE, --gaps_type GAPS_TYPE**
 > String "rm_row": removes gaps(-) in each sequence by the row. String "rm_col": romoves the column if there is at least one gap(-) in that column. Otherwise, it does not make changes in sequences.
