@@ -176,8 +176,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 * TopicContml was tested on a Mac, Linux will be very similar. It will not work for Windows, but let us know.
   
 * If you use python through anaconda, miniconda, or conda, we suggest that you create a virtual environment to run it:
-    ```
-    conda env create -n topicconml python=3.8    
+    ```conda env create -n topicconml python=3.8    
     conda activate topiccontml  # if this fails follow the instructions on the screen
     ```
 
