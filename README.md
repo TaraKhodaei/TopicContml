@@ -5,8 +5,12 @@
 <h1 style="text-align: center;">$\large{\color{purple}{\textbf{TopicContml}}}$</h1>
 
 <p align="center">
-$\large{\color{purple}{\textbf{TopicContml}}}$
+$\HUGE{\color{purple}{\textbf{TopicContml}}}$
 </p>
+
+<h1 align="center">
+$\large{\color{purple}{\textbf{TopicContml}}}$
+</h1>
 
 Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, an unsupervised machine learning approach based on natural language processing, to construct evolutionary relationships among multilocus species from unaligned DNA sequences.
 
