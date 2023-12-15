@@ -13,7 +13,8 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 - **[Arguments](#Arguments)**
 - **[Installation and Requirements](#Installation-and-Requirements)**
 - **[Application to Datasets](#Application-to-Datasets)**
-- **[Real Dataset](##Real-Dataset)**
+- **[Bootstrap Analysis](#Bootstrap-Analysis)**
+
 
 
 
@@ -176,7 +177,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 ## Application to Datasets
 
-### Real Dataset
+### Bird Dataset
 The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
 
 > * **loci Folder**<br/>
@@ -222,7 +223,7 @@ The bird sequences are collected from 14 loci and 9 different locations. For eac
 > ```
 
 
-$\large{\color{orange}{\textsf{Simulated Dataset}}}$
+### Simulated Dataset
 > ```
 > python topiccontml.py -f sim_100_0.0_100 -sd 0.0 -m 3 -gt rm_row -nl 100
 > python topiccontml.py -f sim_100_0.01_100 -sd 0.01 -m 3 -gt rm_row -nl 100
@@ -234,7 +235,7 @@ $\large{\color{orange}{\textsf{Simulated Dataset}}}$
 <br/>
 
 
-$\huge{\color{purple}{\textsf{Bootstrap Analysis}}}$
+## Bootstrap Analysis
 
 $\large{\color{purple}{\textsf{TopicContml Bootstrap}}}$<br/>
 we apply TopicContml to the aligned dataset using 1000 bootstrap replicates and report the majority-rule consensus trees (output `bootstrap_majority.tre`). We also map the bootstrap replicates onto the best topology tree found by TopicContml as the reference tree  (output `bootstrap_target_best.tre`).<br/>
