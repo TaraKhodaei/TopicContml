@@ -4,6 +4,9 @@
 
 Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, an unsupervised machine learning approach based on natural language processing, to construct evolutionary relationships among multilocus species from unaligned DNA sequences.
 
+$\huge{\color{purple}{\textsf{Table of Contents}}}$
+- [Usage](Usage)
+
 
 $\huge{\color{purple}{\textsf{Usage}}}$
 
