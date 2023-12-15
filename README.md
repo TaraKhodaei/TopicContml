@@ -32,8 +32,8 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 ## Arguments
 
-**-h, --help**<br/>
-Show this help message and exi  
+**-h, --help**
+> Show this help message and exi  
 
 <br/>
 
@@ -180,7 +180,7 @@ Show this help message and exi
 ### Bird Dataset
 > The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
 >
-> * **loci Folder**<br/>
+> * \Large{**loci Folder**}<br/>
 > In this case, the dataset of sequences are in a folder (e.g. "loci_birds"). <br/>
     In each locus, we merge the words from the same location (e.g. using 3 first letters) and then apply LDA.
 > ```
