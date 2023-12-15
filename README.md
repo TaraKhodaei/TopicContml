@@ -11,7 +11,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 ## Table of Contents
 - **[Usage](#usage)**
 - **[Arguments](#Arguments)**
-- **[Installation and Requirements](Installation and Requirements)**
+- **[Installation and Requirements](#Installation and Requirements)**
 
 
 
