@@ -158,13 +158,15 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 * you most likely will need to install several **packages** for example: <br/>
 1. `gensim`:
     ```
-    conda install gensim       #this should trigger also installation of numpy and scipy
+    conda install gensim       
     ```
-2. `dendropy`:
+    #this should trigger also installation of numpy and scipy
+   
+3. `dendropy`:
     ```
     conda install -c bioconda dendropy
     ```
-3. `matplotlib`:
+4. `matplotlib`:
     ```
     conda install matplotlib
     ```
