@@ -4,7 +4,7 @@
 
 <h1 style="text-align: center;">$\huge{\color{purple}{\textbf{TopicContml}}}$</h1>
 
-<p style="text-align: center;">$\huge{\color{purple}{\textbf{TopicContml}}}$</p>
+<h1 style="text-align: center;">\huge{\color{purple}{\textbf{TopicContml}}}</h1>
 
 
 
