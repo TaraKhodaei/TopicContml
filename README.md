@@ -207,7 +207,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 >> ```
 >> #nexus
 >> 
-> begin data;
+>> begin data;
 >>       dimensions ntax=... nchar=...;
 >>       format datatype=dna missing=? gap=-;
 >>       matrix
