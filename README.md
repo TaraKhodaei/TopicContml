@@ -240,7 +240,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 ### TopicContml Bootstrap
 we apply TopicContml to the aligned dataset using 1000 bootstrap replicates and report the majority-rule consensus trees (output `bootstrap_majority.tre`). We also map the bootstrap replicates onto the best topology tree found by TopicContml as the reference tree  (output `bootstrap_target_best.tre`).<br/>
 We do the same bootstrap analysis to the unaligned dataset. 
->> * **Aligned Dataset:**
+>> * **Aligned Dataset:** <br/>
 >> Loci Folder
 >> ```
 >> python topiccontml.py -f loci_birds -m 3 -nl 14 -nb 1000 -show
@@ -250,7 +250,7 @@ We do the same bootstrap analysis to the unaligned dataset.
 >> python topiccontml.py -nf myfile.nex -m 3 -nl 14 -nb 1000 -show
 >> ```
 >
->> * **Unaligned Dataset:**
+>> * **Unaligned Dataset:** <br/>
 >> Loci Folder
 >> ```
 >> python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14 -nb 1000 -show
