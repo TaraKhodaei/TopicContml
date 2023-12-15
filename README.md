@@ -2,7 +2,7 @@
 
 <br/> 
 
-$$<h1 style="text-align: center;">$\huge{\color{purple}{\textbf{TopicContml}}}$</h1>$$
+<h1 style="text-align: center;">$\huge{\color{purple}{\textbf{TopicContml}}}$</h1>
 
 
 $$\huge{\color{purple}{\textbf{TopicContml}}}$$
