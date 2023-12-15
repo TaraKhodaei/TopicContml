@@ -190,7 +190,10 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     mkdir -p ~/bin
     cp contml ~/bin/contml2
     ```
-    $\normalsize{\color{grey}{\textsf{If ~/bin does not exist then do mkdir -p ~/bin}}}$
+    If ~/bin does not exist then do:
+    ```
+    mkdir -p ~/bin
+    ```
   
 * **`FigTree`**: Download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a>
 
