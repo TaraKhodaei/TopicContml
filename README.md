@@ -6,7 +6,7 @@
 $\large{\color{purple}{\textbf{TopicContml}}}$
 </h1>
 
-Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, an unsupervised machine learning approach based on natural language processing, to construct evolutionary relationships among multilocus species from unaligned DNA sequences.
+Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, an unsupervised machine learning approach based on natural language processing, to construct evolutionary relationships among multilocus species from aligned/unaligned DNA sequences.
 
 ## Table of Contents
 - **[Usage](#Usage)**
