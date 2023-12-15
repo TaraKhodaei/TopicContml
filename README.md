@@ -155,8 +155,6 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 ## Installation and Requirements
 
-* TopicCContml was tested on a Mac, Linux will be very similar. It will not work for Windows, but let us know.  <br/>
-
 * The following **packages** are required: <br/>
 1. `gensim`:
     ```
@@ -172,7 +170,18 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     cp contml ~/bin/contml2
     ```
 3. `FigTree`, download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a>
+
 * After cloning the repository, in `topiccontml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
+
+* TopicContml was tested on a Mac, Linux will be very similar. It will not work for Windows, but let us know.
+  
+* If you use python through anaconda, miniconda, or conda, we suggest that you create a virtual environment to run it:
+    ```
+    conda env create -n topicconml python=3.8    
+    conda activate topiccontml  # if this fails follow the instructions on the screen
+    ```
+
+
 
 
 <br/>
