@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# MIT License
+# (c) Tara Khodaei and Peter Beerli 2023
+# github: khodaei
 #Import Libraries
 import numpy as np
 import multiprocessing
@@ -10,32 +13,35 @@ from gensim.corpora import Dictionary
 from gensim.models import LdaModel, LdaMulticore
 from warnings import filterwarnings
 filterwarnings('ignore')
-
 import matplotlib.pyplot as plt
-
 import phylip
 import dendropy
 from dendropy.calculate import treecompare
-
 import os
 import sys
 import itertools
 import time
-
 from itertools import chain
 from collections import Counter
 
-current = os.getcwd()
-
+#---------------------------------------------------
+# most important global variables are defined in __main__
 DEBUG = False
-if DEBUG:
-    #To print progress of the training procedure on screen
-    import logging
-    for handler in logging.root.handlers[:]:
-        logging.root.removeHandler(handler)
-    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.NOTSET)
-    
-    
+#---------------------------------------------------
+
+def citations(options):
+    print("# If you use this software for publications please cite these:")
+    print("# Khodaei, M., Edwards, S. Beerli, P. (2023). Multilocus Phylogeny ")
+    print("#     Estimation Using Probabilistic Topic Modeling, Biorxiv doi: xxxx")
+    print("# Blei, D. M., Ng A. Y, and Jordan, M. I. (2003). Latent Dirichlet allocation.")
+    print("#     J Mach Learn Res, 3: 993–1022")
+    print("# Felsenstein, J. (2005). PHYLIP (Phylogeny Inference Package) version 3.6.")
+    print("#     Distributed by the author. Department of Genome Sciences, University")
+    print("#     of Washington, Seattle. (https://phylipweb.github.io/phylip/)")
+    if options['bootstrap']=='bootstrap':
+        print("# Sukumaran, J. and Holder, M. T. (2010). DendroPy: a Python library for")
+        print("#     phylogenetic computing. Bioinformatics 26: 1569-1571.")
+
 def myparser():
     import argparse
     parser = argparse.ArgumentParser(description='generates topic frequencies for the dataset to be applied as an input to CONTML to generate the phylogeny')
@@ -530,136 +536,6 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
     return training(taxa_names, docs, options)
     
 
-#====================================================================================
-def process_locus_forloop(i, label, sequence, varsites, kmerrange, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,passes, eval_every, update_every, alpha, eta):
-    print(f'\n~~~~~~~~~~~~~~~~~~~~~ locus {i} ~~~~~~~~~~~~~~~~~~~~~~~\n')
-    docs=[]
-    miss = 0
-    for k in kmerrange:
-        tokenize_k = tokenize(sequence, k, gaps_type, kmers_type)
-        if len(docs)>0:
-            docs =[docs[i]+tokenize_k[i] for i in range(len(tokenize_k))]
-        else:
-            docs = tokenize_k
-    if bootstrap == 'kmer' and nbootstrap>0:
-        #sys.exit()
-        print(f"bootstrapping k-mers")
-        for i in range(len(docs)):
-            docs[i] = np.random.choice(docs[i],size=len(docs[i]),replace=True)
-            
-    #count number of all words in docs
-    count = 0
-    for doc in docs:
-        count += len(doc)
-    print(f"Number of all words in docs = {count}")
-                
-    taxa_names = label
-    if DEBUG:
-        print(f"len(taxa_names) = {len(taxa_names)} ")
-        print(f"taxa_names = {taxa_names} ")
-        
-    #----------------------- k-mers after merging --------------------------
-    if datainput=="folder":
-        if merging:
-            taxa_names = list(dict.fromkeys([x[:merging] for x in label ]))  #remove duplicates from a list, while preserving order using"dict.fromkeys" insted of "list(set)"
-            print(f"distinct taxa_names = {taxa_names} ")
-            
-            taxa_names_indices=[]
-            for item in taxa_names:
-                indices= [label.index(i) for i in label if item in i]
-                taxa_names_indices.append(indices)
-                
-            print(f"taxa_names_indices = {taxa_names_indices}")
-            
-            taxa_names_indices_len=[len(i) for i in taxa_names_indices]
-            print(f"taxa_names_indices_len = {taxa_names_indices_len}")
-    
-            docs_merged=[]
-            for indices in taxa_names_indices:
-                doc_merged = list(itertools.chain.from_iterable([docs[i] for i in indices] ))
-                docs_merged.append(doc_merged)
-            print(f"len(docs_merged) = {len(docs_merged)} ")
-
-                                
-            #count number of all words in docs
-            count = 0
-            for doc in docs_merged:
-                count += len(doc)
-            if DEBUG:
-                print(f"Number of all words in docs_merged = {count}")
-            docs = docs_merged
-                
-        elif datainput=="nexus_file":
-            taxa_names = taxpartition_names
-            print(f"taxa_names = {taxa_names} ")
-            
-            docs_merged=[]
-            for i,item in enumerate(taxpartition):
-                doc_merged = list(itertools.chain.from_iterable(docs[item[0]:item[1]]))
-                docs_merged.append(doc_merged)
-            print(f"len(docs_merged) = {len(docs_merged)} ")
-            
-            #count number of all words in docs
-            count = 0
-            for doc in docs_merged:
-                count += len(doc)
-            if DEBUG:
-                print(f"Number of all words in docs_merged = {count}")
-            docs = docs_merged
-
-
-    #---------------------- Dictionary of Unique Tokens --------------------
-    dictionary = Dictionary(docs)
-    print(f"\nDictionary:\n{dictionary}")
-        
-    #------------ Filtering: remove rare and common tokens -----------------
-    dictionary.filter_extremes(no_below=2, no_above=0.5)
-    #dictionary.filter_extremes(no_below=1, no_above=0.6)
-    if DEBUG:
-        print(f"\nDictionary after filtering:\n{dictionary}")
-        
-    if len(dictionary)<1:
-        print("ZERO SIZED DICTIONARY")
-        miss += 1
-        return [None,None,miss]
-        #topics = [0,0,0,0,0]*taxa_names
-        #return [topics,taxa_names,miss]
-    #---------------------- Vectorize data: Bag-of-words -------------------
-    corpus = [dictionary.doc2bow(doc) for doc in docs]
-    print(f'\nNumber of documents: {len(corpus)}')
-    print(f'Number of unique tokens: {len(dictionary)}')
-        
-    #------------------------- LDA Model: Training -------------------------
-    # Make a index to word dictionary.
-    temp = dictionary[0]
-    id2word = dictionary.id2token
-    
-    model = LdaModel(corpus=corpus, id2word=id2word, chunksize=chunksize, \
-                     alpha=alpha, eta=eta, \
-                     iterations=iterations, num_topics=num_topics, \
-                     passes=passes, eval_every=eval_every, minimum_probability=0, update_every=update_every )
-    #-------------------- Print topics/words frequencies -------------------
-    if DEBUG:
-        for idx, topic in model.print_topics(-1):
-            print("Topic: {} \nWords: {}\n".format(idx, topic))
-                
-    #---------------- Assigning the topics to the documents ----------------
-    docs_tuples = model[corpus]
-                
-    #------------------- topics list for current locus ---------------------
-    topics = []
-    for num, doc in enumerate(docs_tuples):
-        first=[]
-        second=[]
-        for tuple_i in doc:
-            first.append(tuple_i[0])
-            second.append(tuple_i[1])
-        topics_freq=[]
-        for i in range(num_topics):
-            topics_freq.append(second[first.index(i)])
-        topics.append(topics_freq)
-    return [topics,taxa_names,miss]
-
 
 #====================================================================================
 def topicmodeling(num_loci, options):
@@ -925,6 +801,15 @@ def bootstrap_run(bootstrap, options):
 
 #====================================================================================
 if __name__ == "__main__":
+    current = os.getcwd()
+
+    if DEBUG:
+        #To print progress of the training procedure on screen
+        import logging
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+        logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.NOTSET)
+    
     prefix = 'locus'
     suffix = '.txt'
     args = myparser() # parses the commandline arguments
@@ -1035,4 +920,5 @@ if __name__ == "__main__":
         single_run(showtree,options)
     end = time.time()
     print(f"\n> Elapsed time = {end - start}")
-    print(f"\n> tokenize_time = {tokenize_time}")
+    #variable not defined    print(f"\n> Tokenize_time = {tokenize_time}")
+    citations(options)
