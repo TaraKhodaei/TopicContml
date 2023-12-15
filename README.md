@@ -2,10 +2,7 @@
 
 <br/> 
 
-<h1 style="text-align: center;">$\huge{\color{purple}{\textbf{TopicContml}}}$</h1>
-
-<h3 style="text-align: center;">H3 that is center aligned</h3>
-
+***<h1 style="text-align: center;">$\huge{\color{purple}{\textbf{TopicContml}}}$</h1>***
 
 
 Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, an unsupervised machine learning approach based on natural language processing, to construct evolutionary relationships among multilocus species from unaligned DNA sequences.
