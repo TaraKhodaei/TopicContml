@@ -213,6 +213,10 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     conda activate topiccontml  
     ```
     $\normalsize{\color{grey}{\textsf{if this fails follow the instructions on the screen}}}$
+* Now you should be ready to try a test case:
+    ```
+    python <yourpath>/TopicContml/topiccontml.py -f testdata -nl 3
+    ```
 
 
 <br/>
