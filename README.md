@@ -151,8 +151,6 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 <br/>
 
-
-%$\huge{\color{purple}{\textsf{Requirements}}}$
 ## Installation and Requirements
 
 * The following **packages** are required: <br/>
@@ -174,7 +172,6 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 
 <br/>
-
 
 ## Application to Datasets
 
