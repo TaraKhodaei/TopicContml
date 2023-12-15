@@ -187,7 +187,6 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     
     You may need to use this once: 
     ```
-    mkdir -p ~/bin
     cp contml ~/bin/contml2
     ```
     If ~/bin does not exist then do:
