@@ -175,7 +175,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 ## Application to Datasets
 
-$\large{\color{purple}{\textsf{Real Dataset}}}$<br/>
+$\large{\color{orange}{\textsf{Real Dataset}}}$<br/>
 The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
 
 > * **loci Folder**<br/>
@@ -221,7 +221,7 @@ The bird sequences are collected from 14 loci and 9 different locations. For eac
 > ```
 
 
-$\large{\color{purple}{\textsf{Simulated Dataset}}}$
+$\large{\color{orange}{\textsf{Simulated Dataset}}}$
 > ```
 > python topiccontml.py -f sim_100_0.0_100 -sd 0.0 -m 3 -gt rm_row -nl 100
 > python topiccontml.py -f sim_100_0.01_100 -sd 0.01 -m 3 -gt rm_row -nl 100
