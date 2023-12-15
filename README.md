@@ -28,7 +28,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 ## Arguments
 
-## <h1 style="text-align: center;">$\large{\color{purple}{\textbf{Test}}}$</h1>
+<h1 style="text-align: center;">$\large{\color{purple}{\textbf{Test}}}$</h1>
 
 **-h, --help**
 > Show this help message and exi  
