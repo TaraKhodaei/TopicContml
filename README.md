@@ -194,7 +194,11 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     mkdir -p ~/bin
     ```
   
-* **`FigTree`**: Download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a>
+* **`FigTree`**: If you do not have figtree on your computer we suggest to install figtree so that you can call it from the commandline.
+> Download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a>
+> Install figtree (on macs move figtree.app to the /Application folder
+> create a script 'figtree' with this content:
+> !/bin/sh
 
 * After cloning the repository, in `topiccontml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
 
