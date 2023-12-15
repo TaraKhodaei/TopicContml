@@ -9,9 +9,10 @@ $\large{\color{purple}{\textbf{TopicContml}}}$
 Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, an unsupervised machine learning approach based on natural language processing, to construct evolutionary relationships among multilocus species from unaligned DNA sequences.
 
 ## Table of Contents
-- **[Usage](#usage)**
+- **[Usage](#Usage)**
 - **[Arguments](#Arguments)**
 - **[Installation and Requirements](#Installation-and-Requirements)**
+- **[Application to Datasets](#Application-to-Datasets)**
 
 
 
@@ -175,7 +176,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 
-$\huge{\color{purple}{\textsf{Application to Datasets}}}$
+## Application to Datasets
 
 $\large{\color{purple}{\textsf{Real Dataset}}}$
 > The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
