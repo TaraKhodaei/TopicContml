@@ -179,16 +179,19 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     cd phylip-part-3.69/src
     make contml
     ```
-    $\normalsize{\color{grey}{\textsf{If this fails you will need to see whether you can use one of the makefiles supplied using}}}$
+    $\normalsize{\color{grey}{\textsf{If this fails you will need to see whether you can use one of the makefiles supplied using:}}}$
     ```
-    make -f makefile... contml`
+    make -f makefile... contml
     ```
+    $\normalsize{\color{grey}{\textsf{If that fails talk to someone to help compile a C program for your computer.}}}$
     
     You may need to use this once: 
     ```
     mkdir -p ~/bin
     cp contml ~/bin/contml2
     ```
+    $\normalsize{\color{grey}{\textsf{If ~/bin does not exist then do mkdir -p ~/bin}}}$
+  
 * **`FigTree`**: Download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a>
 
 * After cloning the repository, in `topiccontml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
