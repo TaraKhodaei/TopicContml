@@ -4,7 +4,7 @@
 
 <h1 style="text-align: center;">$\huge{\color{purple}{\textbf{TopicContml}}}$</h1>
 
-<h1 style="text-align: center;">TopicContml</h1>
+<h3 style="text-align: center;">H3 that is center aligned</h3>
 
 
 
