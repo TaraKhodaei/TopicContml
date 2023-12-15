@@ -20,7 +20,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
                     [-ee EVAL_EVERY] [-ue UPDATE_EVERY] [-al ALPHA] [-et ETA]  
                         
 
-$\huge{\color{purple}{\textsf{Arguments}}}$
+## $\color{purple}{\textsf{Arguments}}$
 
 **-h, --help**
 > Show this help message and exi  
