@@ -10,7 +10,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 
 
-## $\color{purple}{\textsf{Usage}}$
+## Usage
 
     topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-kr KMER_RANGE] [-kt KMER_TYPE] 
                     [-f FOLDER] [-nf NEXUS_File] [-nl NUM_LOCI] [-sd SIM_DIVERGE] 
@@ -22,7 +22,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 
 
-## <span color="red">Arguments</span>
+## Arguments
 
 **-h, --help**
 > Show this help message and exi  
