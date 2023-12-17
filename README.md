@@ -166,7 +166,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     ```
     conda install -c bioconda dendropy
     ```
-    $\normalsize{\color{grey}{\textsf{For more information, see link }}}$ <a html="https://dendropy.org/programs/sumtrees.html">https://dendropy.org/programs/sumtrees.html</a>
+    $\normalsize{\color{grey}{\textsf{For more information, see link }}}$ <a html="https://dendropy.org/">https://dendropy.org/</a>
 4. `matplotlib`:
     ```
     conda install matplotlib
