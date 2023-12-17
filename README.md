@@ -160,7 +160,8 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     ```
     conda install gensim       
     ```
-   $\normalsize{\color{grey}{\textsf{this should trigger also installation of numpy and scipy.}}}$
+   $\normalsize{\color{grey}{\textsf{This should trigger also installation of numpy and scipy.}}}$<br/>
+   
    $\normalsize{\color{grey}{\textsf{For more information, see link }}}$ <a html="https://radimrehurek.com/gensim/index.html">https://radimrehurek.com/gensim/index.html</a>
    
 3. `dendropy`:
