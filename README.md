@@ -324,8 +324,28 @@ we apply SVDquartets to the aligned dataset using 1000 bootstrap replicates and 
 > paup> ```savetrees file=svdq_tree format=altnex```  <br/>
 
 
-## License
-[MIT License](https://github.com/TaraKhodaei/TopicContml/blob/main/LICENSE)
+## License :balance_scale:
+TopicContml is licensed under [MIT License](https://github.com/TaraKhodaei/TopicContml/blob/main/LICENSE).
 
 ## Citing TopicContml
+
+print(" --------------------------------------------------------------------------------- ")
+    print("| If you use this software for publications please cite these:                    |")
+    print("|                                                                                 |")
+    print("| Khodaei, M., Edwards, S. Beerli, P. (2023). Multilocus Phylogeny Estimation     |")
+    print("|     Using Probabilistic Topic Modeling, Biorxiv doi: xxxx                       |")
+    print("| Blei, D. M., Ng A. Y, and Jordan, M. I. (2003). Latent Dirichlet allocation.    |")
+    print("|     Journal of machine Learning research, 3:993–1022                            |")
+    print("| Felsenstein, J. (2005). PHYLIP (Phylogeny Inference Package) version 3.6.       |")
+    print("|     Distributed by the author. Department of Genome Sciences, University        |")
+    print("|     of Washington, Seattle. (https://phylipweb.github.io/phylip/)               |")
+    print("| Řehůřek, R., and Sojka, P. (2010). Software framework for topic modelling with  |")
+    print("|     large corpora. In proceedings of LREC 2010 Workshop on New Challenges       |")
+    print("|     for NLP Frameworks, Valletta, Malta, pp.45–50.                              |")
+    print("|     (http://is.muni.cz/publication/884893/en)                                   |")
+    if bootstrap!= 'none':
+        print("| Sukumaran, J. and Holder, M. T. (2010). DendroPy: a Python library for          |")
+        print("|     phylogenetic computing, Bioinformatics, 26:1569-1571.                       |")
+        print("|     (https://dendropy.org/)                                                     |")
+    print(" --------------------------------------------------------------------------------- ")
 
