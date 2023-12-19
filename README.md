@@ -15,7 +15,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 - **[Application to Datasets](#Application-to-Datasets)**
 - **[Bootstrap Analysis](#Bootstrap-Analysis)**
 - **[License](#License)**
-- **[Citing TopicContml](#Citing TopicContml)**
+- **[Citing TopicContml](#Citing-TopicContml)**
 
 
 
