@@ -29,18 +29,28 @@ from collections import Counter
 DEBUG = False
 #---------------------------------------------------
 
+
+
 def citations(options):
-    print("# If you use this software for publications please cite these:")
-    print("# Khodaei, M., Edwards, S. Beerli, P. (2023). Multilocus Phylogeny ")
-    print("#     Estimation Using Probabilistic Topic Modeling, Biorxiv doi: xxxx")
-    print("# Blei, D. M., Ng A. Y, and Jordan, M. I. (2003). Latent Dirichlet allocation.")
-    print("#     J Mach Learn Res, 3: 993–1022")
-    print("# Felsenstein, J. (2005). PHYLIP (Phylogeny Inference Package) version 3.6.")
-    print("#     Distributed by the author. Department of Genome Sciences, University")
-    print("#     of Washington, Seattle. (https://phylipweb.github.io/phylip/)")
-    if options['bootstrap']=='bootstrap':
-        print("# Sukumaran, J. and Holder, M. T. (2010). DendroPy: a Python library for")
-        print("#     phylogenetic computing. Bioinformatics 26: 1569-1571.")
+    print(" --------------------------------------------------------------------------------- ")
+    print("| If you use this software for publications please cite these:                    |")
+    print("|                                                                                 |")
+    print("| Khodaei, M., Edwards, S. Beerli, P. (2023). Multilocus Phylogeny Estimation     |")
+    print("|     Using Probabilistic Topic Modeling, Biorxiv doi: xxxx                       |")
+    print("| Blei, D. M., Ng A. Y, and Jordan, M. I. (2003). Latent Dirichlet allocation.    |")
+    print("|     Journal of machine Learning research, 3:993–1022                            |")
+    print("| Felsenstein, J. (2005). PHYLIP (Phylogeny Inference Package) version 3.6.       |")
+    print("|     Distributed by the author. Department of Genome Sciences, University        |")
+    print("|     of Washington, Seattle. (https://phylipweb.github.io/phylip/)               |")
+    print("| Řehůřek, R., and Sojka, P. (2010). Software framework for topic modelling with  |")
+    print("|     large corpora. In proceedings of LREC 2010 Workshop on New Challenges       |")
+    print("|     for NLP Frameworks, Valletta, Malta, pp.45–50.                              |")
+    print("|     (http://is.muni.cz/publication/884893/en)                                   |")
+    if bootstrap!= 'none':
+        print("| Sukumaran, J. and Holder, M. T. (2010). DendroPy: a Python library for          |")
+        print("|     phylogenetic computing, Bioinformatics, 26:1569-1571.                       |")
+        print("|     (https://dendropy.org/)                                                     |")
+    print(" --------------------------------------------------------------------------------- ")
 
 def myparser():
     import argparse
@@ -909,9 +919,10 @@ if __name__ == "__main__":
         with open('bootstrap_replicates.tre','w') as btrees:
             for tr in outtrees:
                 btrees.write(tr+'\n')
-
-        os.system(f"sumtrees.py --set-edges=support --decimals=0 --percentages --output-tree-filepath=bootstrap_target_best.tre --target=best.tre bootstrap_replicates.tre")
-        os.system(f"sumtrees.py --set-edges=support --decimals=0 --percentages --output-tree-filepath=bootstrap_majority.tre bootstrap_replicates.tre")
+                
+        print(f"\nBootstrap trees using SumTrees")
+        os.system(f"sumtrees.py --set-edges=support --decimals=0 --percentages --output-tree-filepath=bootstrap_target_best.tre --target=best.tre bootstrap_replicates.tre -q")
+        os.system(f"sumtrees.py --set-edges=support --decimals=0 --percentages --output-tree-filepath=bootstrap_majority.tre bootstrap_replicates.tre -q")
         
         print(f"\n> Bootstrap trees are written into files 'bootstrap_target_best.tre' and 'bootstrap_majority.tre'")
         print(f"> Bootstrap replicates are written into file 'bootstrap_replicates.tre'")
@@ -919,6 +930,6 @@ if __name__ == "__main__":
     else:
         single_run(showtree,options)
     end = time.time()
-    print(f"\n> Elapsed time = {end - start}")
+    print(f"\n> Elapsed time = {end - start}\n")
     #variable not defined    print(f"\n> Tokenize_time = {tokenize_time}")
     citations(options)
