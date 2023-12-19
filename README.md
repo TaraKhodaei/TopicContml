@@ -325,5 +325,7 @@ we apply SVDquartets to the aligned dataset using 1000 bootstrap replicates and 
 
 
 ### License
+[MIT License](https://github.com/TaraKhodaei/TopicContml/blob/main/LICENSE)
+
 ### Citing TopicContml
 
