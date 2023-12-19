@@ -14,6 +14,8 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 - **[Installation and Requirements](#Installation-and-Requirements)**
 - **[Application to Datasets](#Application-to-Datasets)**
 - **[Bootstrap Analysis](#Bootstrap-Analysis)**
+- **[License](#License)**
+- **[Citing TopicContml](#Citing TopicContml)**
 
 
 
@@ -322,5 +324,6 @@ we apply SVDquartets to the aligned dataset using 1000 bootstrap replicates and 
 > paup> ```savetrees file=svdq_tree format=altnex```  <br/>
 
 
-
+### License
+### Citing TopicContml
 
