@@ -325,7 +325,7 @@ we apply SVDquartets to the aligned dataset using 1000 bootstrap replicates and 
 
 
 ## License 
-TopicContml is licensed under a [MIT License](https://github.com/TaraKhodaei/TopicContml/blob/main/LICENSE) :balance_scale:.
+TopicContml is licensed under a [MIT License](https://github.com/TaraKhodaei/TopicContml/blob/main/LICENSE) :balance_scale:
 
 ## Citing TopicContml
 
