@@ -17,7 +17,6 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 
 
-
 ## Usage
 
     topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-kr KMER_RANGE] [-kt KMER_TYPE] 
