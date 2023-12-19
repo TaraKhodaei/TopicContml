@@ -324,8 +324,8 @@ we apply SVDquartets to the aligned dataset using 1000 bootstrap replicates and 
 > paup> ```savetrees file=svdq_tree format=altnex```  <br/>
 
 
-### License
+## License
 [MIT License](https://github.com/TaraKhodaei/TopicContml/blob/main/LICENSE)
 
-### Citing TopicContml
+## Citing TopicContml
 
