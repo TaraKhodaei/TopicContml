@@ -324,8 +324,8 @@ we apply SVDquartets to the aligned dataset using 1000 bootstrap replicates and 
 > paup> ```savetrees file=svdq_tree format=altnex```  <br/>
 
 
-## License :balance_scale:
-TopicContml is licensed under [MIT License](https://github.com/TaraKhodaei/TopicContml/blob/main/LICENSE).
+## License 
+TopicContml is licensed under [MIT License](https://github.com/TaraKhodaei/TopicContml/blob/main/LICENSE) :balance_scale:.
 
 ## Citing TopicContml
 
