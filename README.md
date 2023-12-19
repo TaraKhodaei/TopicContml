@@ -331,6 +331,7 @@ TopicContml is licensed under a [MIT License](https://github.com/TaraKhodaei/Top
 
 If you use TopicContml software for publications, please cite this:
 
-    Khodaei, M., Edwards, S. Beerli, P. (2023). Multilocus phylogeny estimation using probabilistic topic modeling, Biorxiv doi: xxxx  
+    Khodaei, M., Edwards, S. Beerli, P. (2023). Multilocus phylogeny estimation using
+        probabilistic topic modeling, Biorxiv doi: xxxx  
                             
 
