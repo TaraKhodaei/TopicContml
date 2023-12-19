@@ -329,13 +329,8 @@ TopicContml is licensed under a [MIT License](https://github.com/TaraKhodaei/Top
 
 ## Citing TopicContml
 
-If you use this software for publications please cite these:                    
+If you use TopicContml software for publications, please cite these:
 
-    Khodaei, M., Edwards, S. Beerli, P. (2023). Multilocus phylogeny estimation  using probabilistic topic modeling, Biorxiv doi: xxxx   
-                               
-    Felsenstein, J. (2005). PHYLIP (Phylogeny Inference Package) version 3.6. Distributed by the author. Department of Genome Sciences, University of Washington, Seattle     (https://phylipweb.github.io/phylip/)   
-    
-    Řehůřek, R., and Sojka, P. (2010). Software framework for topic modelling with large corpora. In proceedings of LREC 2010 Workshop on New Challenges for NLP Frameworks, Valletta, Malta, pp.45–50. (http://is.muni.cz/publication/884893/en) 
-    
-    Sukumaran, J. and Holder, M. T. (2010). DendroPy: a Python library for phylogenetic computing, Bioinformatics, 26:1569-1571. (https://dendropy.org/)                      
+    Khodaei, M., Edwards, S. Beerli, P. (2023). Multilocus phylogeny estimation using probabilistic topic modeling, Biorxiv doi: xxxx  
+                            
 
