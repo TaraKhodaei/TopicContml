@@ -38,17 +38,17 @@ def citations(options):
     print("| Khodaei, M., Edwards, S. Beerli, P. (2023). Multilocus Phylogeny Estimation     |")
     print("|     Using Probabilistic Topic Modeling, Biorxiv doi: xxxx                       |")
     print("| Blei, D. M., Ng A. Y, and Jordan, M. I. (2003). Latent Dirichlet allocation.    |")
-    print("|     Journal of machine Learning research, 3:993–1022                            |")
+    print("|     Journal of machine Learning research, 3:993--1022                            |")
     print("| Felsenstein, J. (2005). PHYLIP (Phylogeny Inference Package) version 3.6.       |")
     print("|     Distributed by the author. Department of Genome Sciences, University        |")
     print("|     of Washington, Seattle. (https://phylipweb.github.io/phylip/)               |")
     print("| Řehůřek, R., and Sojka, P. (2010). Software framework for topic modelling with  |")
     print("|     large corpora. In proceedings of LREC 2010 Workshop on New Challenges       |")
-    print("|     for NLP Frameworks, Valletta, Malta, pp.45–50.                              |")
+    print("|     for NLP Frameworks, Valletta, Malta, pp.45--50.                              |")
     print("|     (http://is.muni.cz/publication/884893/en)                                   |")
     if bootstrap!= 'none':
         print("| Sukumaran, J. and Holder, M. T. (2010). DendroPy: a Python library for          |")
-        print("|     phylogenetic computing, Bioinformatics, 26:1569-1571.                       |")
+        print("|     phylogenetic computing, Bioinformatics, 26:1569--1571.                       |")
         print("|     (https://dendropy.org/)                                                     |")
     print(" --------------------------------------------------------------------------------- ")
 
@@ -286,13 +286,13 @@ def read_nexus(nexus_file, ttype):
 
 
 #====================================================================================
-# Use this to read labels from files for exlcude or include operations
+# Use this to read labels from files for exclude or include operations and return as sets
 def read_inexfiles(file_name):
     if file_name == None:
         return []
     # contains a name one by line
     with open(file_name, 'r') as f:
-        return [line.rstrip() for line in f]
+        return set([line.rstrip() for line in f])
 
 #====================================================================================
 # create kmers
@@ -455,8 +455,8 @@ def read_one_data(current, folder, locus,options):
     labels=[]
     sequences=[]
     varsitess=[]
-    seti = include_names
-    sete = exclude_names
+    seti = set(include_names)
+    sete = set(exclude_names)
     real_loci = 0
     i = locus
     #Extract labels and sequences:
@@ -464,6 +464,8 @@ def read_one_data(current, folder, locus,options):
     locus = os.path.join(current,folder,locus_i)        
     label,sequence,varsites = phylip.readData(locus, ttype)
     setl = set(label)
+    if seti==set():
+        seti = setl
     iok = (setl.intersection(seti) == seti)
     if iok:
         real_loci += 1
@@ -476,8 +478,9 @@ def read_one_data(current, folder, locus,options):
             print(f"len(label) = {len(label)}")
             print(f"len(sequence) = {len(sequence)}")
         label = [x.lower() for x in label]
-    return [label,sequence,varsites,real_loci] # a single locus
-    
+        return [label,sequence,varsites,real_loci] # a single locus
+    else:
+        return [None,None,None,0]
     
 #====================================================================================
 def use_options(current, folder, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names):
@@ -535,20 +538,23 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         #Convert List of lists to list of Strings again
         sequence = [''.join(ele) for ele in seq_matrix_cleaned]
         
-        
-    docs = kmer_docs(label, sequence, varsites, kmerrange, options)
+    if label != None:    
+        docs = kmer_docs(label, sequence, varsites, kmerrange, options)
     
-    if bootstrap == 'kmer' and nbootstrap>0:
-        docs = [np.random.choice(docs[i],size=len(docs[i]),replace=True) for i in range(len(docs)) ]
+        if bootstrap == 'kmer' and nbootstrap>0:
+            docs = [np.random.choice(docs[i],size=len(docs[i]),replace=True) for i in range(len(docs)) ]
     
 
-    taxa_names, docs = merge_documents(options, label, docs, taxpartition,taxpartition_names)
-    return training(taxa_names, docs, options)
-    
+        taxa_names, docs = merge_documents(options, label, docs, taxpartition,taxpartition_names)
+        [topics,taxa_names,miss] = training(taxa_names, docs, options)
+        return [topics,taxa_names,miss,real_locus]
+    else:
+        return [None, None, 0, 0]
 
 
 #====================================================================================
-def topicmodeling(num_loci, options):
+def topicmodeling(options):
+    global num_loci
     datainput = options['datainput']
     
     if datainput=="folder":
@@ -573,12 +579,12 @@ def topicmodeling(num_loci, options):
     topics_loci = []
     taxa_names_loci = []
         
-    topics_loci,taxa_names_loci,miss = zip(*results)
+    topics_loci,taxa_names_loci,miss, real_loci = zip(*results)
     topics_loci = [t for t in topics_loci if t!=None]
     taxa_names_loci  = [t for t in taxa_names_loci if t!=None]
-
+    num_loci = np.sum(real_loci)
     miss = np.sum(miss)
-    
+    print("Missed loci out of:",miss,num_loci)
     if DEBUG:
         print(f"taxa_names_loci = {taxa_names_loci}")
     taxa_names_loci_sets = [set(l) for l in  taxa_names_loci]
@@ -690,7 +696,7 @@ def simulation(current, folder, options):
             if DEBUG:
                 print(f"options['current'] = {options['current']}")
                 print(f"\noptions = {options}")
-            taxa_names, topics_loci, miss = topicmodeling(num_loci, options)
+            taxa_names, topics_loci, miss = topicmodeling(options)
             #for each locus remove last column from topic matrix
             topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
             
@@ -724,7 +730,7 @@ def simulation(current, folder, options):
 def single_run(show=False,options={}):
     global num_loci
 
-    taxa_names, topics_loci, miss = topicmodeling(num_loci, options)
+    taxa_names, topics_loci, miss = topicmodeling(options)
     #for each locus remove last column from topic matrix
     topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
         
@@ -789,7 +795,7 @@ def bootstrap_run(bootstrap, options):
     for bi in range(nbootstrap):
         print(f"\nBootstrapping number '{bi}'")
         count_boot += 1
-        taxa_names, topics_loci, miss = topicmodeling(num_loci, options)
+        taxa_names, topics_loci, miss = topicmodeling(options)
         
         #for each locus remove last column from topic matrix
         topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
