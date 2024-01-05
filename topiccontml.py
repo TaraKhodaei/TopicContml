@@ -42,7 +42,7 @@ def citations(options):
     print("| Felsenstein, J. (2005). PHYLIP (Phylogeny Inference Package) version 3.6.       |")
     print("|     Distributed by the author. Department of Genome Sciences, University        |")
     print("|     of Washington, Seattle. (https://phylipweb.github.io/phylip/)               |")
-    print("| Řehůřek, R., and Sojka, P. (2010). Software framework for topic modelling with  |")
+    print("| Rehurek, R., and Sojka, P. (2010). Software framework for topic modelling with  |")
     print("|     large corpora. In proceedings of LREC 2010 Workshop on New Challenges       |")
     print("|     for NLP Frameworks, Valletta, Malta, pp.45--50.                              |")
     print("|     (http://is.muni.cz/publication/884893/en)                                   |")
@@ -381,6 +381,13 @@ def merge_documents(options, label, docs,taxpartition,taxpartition_names):
         
 #====================================================================================
 def training(taxa_names, docs, options):
+    # Define ambiguous letters to be removed
+    ambiguous_letters_to_remove = ['n']
+    # Remove words with specific ambiguous letters
+    docs = [
+        [word for word in doc if all(letter not in word for letter in ambiguous_letters_to_remove)]
+        for doc in docs]
+    
     miss = 0
     dictionary = Dictionary(docs)
     chunksize = options['chunksize']
@@ -518,18 +525,23 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
     bootstrap = options['bootstrap']
     gaps_type = options['gaps_type']
 
-    #print(i,end=' ', file=sys.stderr, flush=True)
     if datainput=="folder":
         if label == []: #assume we need to read the data for each locus now and have not done that beforehand
             label, sequence, varsites, real_locus  = read_one_data(options['current'], options['folder'], i, options)
             
-            
+    
+    if sequence == [] or sequence == None:
+        return [None, None, 0, 0]
+        
+        
     if bootstrap == 'seq' and nbootstrap>0:
         sequence = bootstrap_sequences_one_locus(sequence)
-        
+
  
     if gaps_type == 'rm_row':
         sequence = [seq.replace('-', '') for seq in sequence]
+
+        
     elif gaps_type == 'rm_col':
         # String List to Column Character Matrix Using zip() + map()
         seq_matrix = np.transpose(list(map(list, zip(*sequence))))
@@ -547,6 +559,10 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
 
         taxa_names, docs = merge_documents(options, label, docs, taxpartition,taxpartition_names)
         [topics,taxa_names,miss] = training(taxa_names, docs, options)
+        if topics == [] or topics == None:
+            topics = None
+        if taxa_names == [] or taxa_names == None:
+            taxa_names = None
         return [topics,taxa_names,miss,real_locus]
     else:
         return [None, None, 0, 0]
@@ -577,8 +593,7 @@ def topicmodeling(options):
 
     
     topics_loci = []
-    taxa_names_loci = []
-        
+    taxa_names_loci = []   
     topics_loci,taxa_names_loci,miss, real_loci = zip(*results)
     topics_loci = [t for t in topics_loci if t!=None]
     taxa_names_loci  = [t for t in taxa_names_loci if t!=None]
@@ -937,5 +952,4 @@ if __name__ == "__main__":
         single_run(showtree,options)
     end = time.time()
     print(f"\n> Elapsed time = {end - start}\n")
-    #variable not defined    print(f"\n> Tokenize_time = {tokenize_time}")
     citations(options)
