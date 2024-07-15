@@ -766,7 +766,6 @@ def topicmodeling(options):
         
     else:
         topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci = zip(*results)
-    
     topics_loci = [t for t in topics_loci if t!=None]
     taxa_names_loci  = [t for t in taxa_names_loci if t!=None]
     num_loci = np.sum(real_loci)
@@ -912,7 +911,6 @@ def simulation(current, folder, options):
             topics_loci_concatenated = topics_loci_missingLast[0]
             for i in range(1,len(topics_loci_missingLast)):
                 topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
-
             #generate infile
             infile(topics_loci_concatenated, taxa_names, num_loci)
             

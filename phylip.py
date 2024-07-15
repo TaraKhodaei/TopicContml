@@ -12,10 +12,9 @@ def readData(myfile, type='STANDARD'):     #testdata.phy : sequences
     data = f.readlines()
     f.close()
     i = len(data) -1
-    while len(data[i])==0:
+    while len(data[i].rstrip())==0:
         data.pop(i)
         i -= 1
-    
     numind,numsites, *rest = (data.pop(0)).split()
     for i in data:
     
