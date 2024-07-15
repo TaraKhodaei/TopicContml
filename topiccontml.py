@@ -24,6 +24,11 @@ import time
 from itertools import chain
 from collections import Counter
 
+
+import pyLDAvis
+import pyLDAvis.gensim_models as gensimvis
+from gensim.models import CoherenceModel
+import shutil
 #---------------------------------------------------
 # most important global variables are defined in __main__
 DEBUG = False
@@ -42,7 +47,7 @@ def citations(options):
     print("| Felsenstein, J. (2005). PHYLIP (Phylogeny Inference Package) version 3.6.       |")
     print("|     Distributed by the author. Department of Genome Sciences, University        |")
     print("|     of Washington, Seattle. (https://phylipweb.github.io/phylip/)               |")
-    print("| Řehůřek, R., and Sojka, P. (2010). Software framework for topic modelling with  |")
+    print("| Rehurek, R., and Sojka, P. (2010). Software framework for topic modelling with  |")
     print("|     large corpora. In proceedings of LREC 2010 Workshop on New Challenges       |")
     print("|     for NLP Frameworks, Valletta, Malta, pp.45--50.                              |")
     print("|     (http://is.muni.cz/publication/884893/en)                                   |")
@@ -63,13 +68,13 @@ def myparser():
                         help='String "rm_row": removes gaps(-) in each sequence (by row). String "rm_col": removes site columns thathave at least one gap(-). Without this option the gaps(-) are included.')
     parser.add_argument('-m','--merging', dest='merging',
                         default=None, action='store',type=int,
-                        help='Merge sequences that start with the same 3 letters [e.g. population or species labels].')
+                        help='Merge sequences that start with the same m letters [e.g. population or species labels].')
     parser.add_argument('-kr','--kmer_range', dest='kmer_range',
                         default='2,10,2', action='store',
                         help='range of kmers extraction, lowerbound,max+1,step [for example: 2,10,2 leads to non overlapping k-mers: 2,4,6,8')
     parser.add_argument('-kt','--kmer_type', dest='kmers_type',
                         default='not_overlap', action='store',type=str,
-                        help='default "not_overlap": extract kmers without overlapping. String "not_overlap": extract kmers with overlapping.')
+                        help='default "not_overlap": extract kmers without overlapping. String "overlap": extract kmers with overlapping.')
     parser.add_argument('-f','--folder', dest='folder',
                         default=None, action='store',  type=str,
                         help='the folder that contains loci data in separate text files called "locus0.txt", "locus1.txt", ...')
@@ -97,19 +102,27 @@ def myparser():
     parser.add_argument('-force','--force', dest='force',
                         default=False, action='store_true',
                         help='this forces to use all species using an uninformative topicfrequency for missings')
-
     parser.add_argument('-show','--showtree', dest='showtree',
                         default=False, action='store_true',
                         help='uses figtree to show the tree')
-    
+    parser.add_argument('-tmap', dest='tmap',
+                        default=False, action='store_true',
+                        help='uses pyLDAvis to map the topics')
+    parser.add_argument('-threads','--threads', dest='max_threads',
+                        default=1000, action='store', type=int,
+                        help='Number of cpu cores to use for locus-parallel runs, default is system max.')
+
 
     #gensim LDA arguments:
     parser.add_argument('-nt','--num_topics', dest='num_topics',
-                        default=5, action='store', type=int,
+                        default=None, action='store', type=int,
                         help='Number of requested latent topics to be extracted from the training corpus. Defult value is 5 topics.')
+    parser.add_argument('-cr','--coherence_range', dest='coherence_range',
+                        nargs='?', const='2,20,4', default=None,
+                        help='Compute coherence for various number of topics in range of [start, limit, step]. Defult is 2,20,4, which means to compute coherence for topics number of 2,6,10,14,18')
     parser.add_argument('-i','--iterations', dest='iterations',
-                        default=1000, action='store', type=int,
-                        help='Maximum number of iterations through the corpus when inferring the topic distribution of a corpus. Defult value is 1000 iterations.')
+                        default=100, action='store', type=int,
+                        help='Maximum number of iterations through the corpus when inferring the topic distribution of a corpus. Defult value is 100 iterations.')
     parser.add_argument('-p','--passes', dest='passes',
                         default=50, action='store', type=int,
                         help='Number of passes through the corpus during training. Defult value is 50.')
@@ -130,7 +143,106 @@ def myparser():
                         help='a priori belief on topic-word distribution. It can be: (1) scalar for a symmetric prior over  topic-word distribution, (2) 1D array of length equal to num_words to denote an asymmetric user defined prior for each word, (3) matrix of shape (num_topics, num_words) to assign a probability for each word-topic combination. (4) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"auto": Learns an asymmetric prior from the corpus.')
                             
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
+        
     return args
+    
+
+#====================================================================================
+def use_options(current, folder, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations, num_topics, coherence_range,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap):
+    options={}
+    options['current'] = current
+    options['folder'] = folder
+    options['gaps_type']=gaps_type
+    options['kmers_type'] = kmers_type
+
+    options['bootstrap'] = bootstrap
+    options['nbootstrap'] = nbootstrap
+    options['datainput'] = datainput
+    options['merging'] = merging
+    options['chunksize'] = chunksize
+    options['iterations']=iterations
+    options['num_topics'] = num_topics
+    options['coherence_range'] = coherence_range
+    options['passes'] = passes
+    options['eval_every'] = eval_every
+    options['update_every'] = update_every
+    options['alpha'] = alpha
+    options['eta'] = eta
+    options['prefix'] = prefix
+    options['suffix'] = suffix
+    options['ttype'] = ttype
+    options['filetype'] = filetype
+    options['include_names'] = include_names
+    options['exclude_names'] = exclude_names
+    options['tmap'] = tmap
+    return options
+
+#====================================================================================
+def parse_coherence_range(coherence_range):
+    try:
+        start, limit, step = map(int, coherence_range.split(','))
+        return list(range(start, limit, step))
+    except ValueError:
+        raise ValueError("coherence_range must be in the format 'start,limit,step' with integer values.")
+
+        
+#====================================================================================
+def plot_coherence_values(coherencevalues_loci, coherencerange_loci, subplots_per_row=1):
+    """
+    Plot coherence values for various numbers of topics with highlighted max values in each locus.
+
+    Parameters:
+    ----------
+    coherencevalues_loci : List of lists of coherence values in each locus
+    coherencerange_loci : List of lists of number of topics in each locus
+    subplots_per_row : Number of subplots in each row
+    """
+    # Number of plots
+    num_plots = len(coherencerange_loci)
+
+    # Create subplots
+    num_rows = (num_plots // subplots_per_row) + (num_plots % subplots_per_row > 0)
+    fig, axs = plt.subplots(nrows=num_rows, ncols=subplots_per_row, figsize=(6 * subplots_per_row, 4 * num_rows))
+
+    # Flatten the axes array for easy iteration
+    axs = axs.flatten()
+
+    # Plot each coherence value set with the corresponding range
+    for i in range(num_plots):
+        ax = axs[i]
+        coherence_values = coherencevalues_loci[i]
+        coherence_range = coherencerange_loci[i]
+
+        ax.plot(coherence_range, coherence_values, marker='o', linestyle='-', color='orange')
+        ax.set_title(f'Locus {i}', fontsize=13, fontweight='bold')
+        ax.set_xlabel('Number of Topics')
+        ax.set_ylabel('Coherence Value')
+
+        # Highlight the maximum coherence value with a vertical purple line
+        max_value = max(coherence_values)
+        max_index = coherence_values.index(max_value)
+        max_topic = coherence_range[max_index]
+        ax.axvline(x=max_topic, color='green', linestyle='--')
+        
+        # Mark the max value point on the plot
+        ax.scatter([max_topic], [max_value], color='green', s=90)
+        
+        # Annotate the maximum value and the corresponding topic number in purple with larger font size
+        ax.annotate(f'Max: ({max_topic}, {max_value:.2f})', xy=(max_topic, max_value),
+                    xytext=(max_topic, max_value - 0.15 * (max(coherence_values) - min(coherence_values))),
+                    textcoords='data', color='green', ha='center', fontsize=12, fontweight='bold',
+                    bbox=dict(facecolor='white', edgecolor='none', pad=1))
+
+    # Remove empty subplots if any
+    for j in range(num_plots, len(axs)):
+        fig.delaxes(axs[j])
+
+    # Adjust layout to prevent overlap
+    plt.tight_layout()
+
+    # Save and show the plot
+    plt.savefig('coherencetopics_loci.pdf')
+#    plt.show()
     
     
 #====================================================================================
@@ -182,9 +294,52 @@ def read_data(current, folder, num_loci,prefix='locus',suffix='.txt', include_na
             varsitess.append(varsites)
             labels = [[x.lower() for x in label] for label in labels]
     return [labels,sequences,varsitess,real_loci]
-    
-    
+
+
 #====================================================================================
+def read_one_data(current, folder, locus,options):
+    if DEBUG:
+        print(f"current = {current}")
+    prefix = options['prefix']
+    suffix = options['suffix']
+    ttype = options['ttype']
+    filetype = options['filetype']
+    include_names = options['include_names']
+    exclude_names = options['exclude_names']
+
+    labels=[]
+    sequences=[]
+    varsitess=[]
+    seti = set(include_names)
+    sete = set(exclude_names)
+    real_loci = 0
+    i = locus
+    #Extract labels and sequences:
+    locus_i = prefix+str(i)+suffix
+    locus = os.path.join(current,folder,locus_i)
+    label,sequence,varsites = phylip.readData(locus, ttype)
+    setl = set(label)
+    if seti==set():
+        seti = setl
+    iok = (setl.intersection(seti) == seti)
+    if iok:
+        real_loci += 1
+        setle = setl.intersection(sete)
+        setl  = setl.difference(setle)
+        labelidx = [label.index(i) for i in setl]
+        label = [label[i] for i in labelidx]
+        sequence = [sequence[i] for i in labelidx]
+        if DEBUG:
+            print(f"len(label) = {len(label)}")
+            print(f"len(sequence) = {len(sequence)}")
+        label = [x.lower() for x in label]
+        return [label,sequence,varsites,real_loci] # a single locus
+    else:
+        return [None,None,None,0]
+        
+        
+#====================================================================================
+#Read a nexus file
 def read_nexus(nexus_file, ttype):
     print('\n++++++++++++ nexus file information ++++++++++++')
     with open(nexus_file,'r') as f:
@@ -294,22 +449,20 @@ def read_inexfiles(file_name):
     with open(file_name, 'r') as f:
         return set([line.rstrip() for line in f])
 
+
 #====================================================================================
 # create kmers
 def kmer_docs(label, sequence, varsites, kmerrange, options):
     gaps_type = options['gaps_type']
     kmers_type = options['kmers_type']
-
     docs=[]
     miss = 0
-    
     for k in kmerrange:
         tokenize_k = tokenize(sequence, k, gaps_type, kmers_type)
         if len(docs)>0:
             docs =[docs[i]+tokenize_k[i] for i in range(len(tokenize_k))]
         else:
             docs = tokenize_k
-            
     if DEBUG:
         taxa_names = label
         count = 0
@@ -321,8 +474,8 @@ def kmer_docs(label, sequence, varsites, kmerrange, options):
     return docs
 
 
-
 #====================================================================================
+#Merge the sequences labels with given number
 def merge_documents(options, label, docs,taxpartition,taxpartition_names):
     datainput = options['datainput']
     merging = options['merging']
@@ -378,19 +531,69 @@ def merge_documents(options, label, docs,taxpartition,taxpartition_names):
         docs = docs_merged
         return taxa_names, docs
         
-        
+
+#=================================================================================
+#In each locus, for given corpus of documents (seqs) and given list of different number of topics (coherencerange) compute the coherence values
+def compute_coherence_values(dictionary, corpus, docs, id2word, coherencerange, options):
+    chunksize = options['chunksize']
+    alpha = options['alpha']
+    eta = options['eta']
+    iterations = options['iterations']
+    passes = options['passes']
+    eval_every = options['eval_every']
+    update_every = options['update_every']
+
+    """
+    Compute c_v coherence for various number of topics
+
+    Parameters:
+    ----------
+    dictionary : Gensim dictionary
+    corpus : Gensim corpus
+    docs : List of input documents
+    limit : Max num of topics
+    start : starting num of topics
+    step : stepping through the range of topics by #step
+
+    Returns:
+    -------
+    model_list : List of LDA topic models
+    coherence_values : Coherence values corresponding to the LDA model with respective number of topics
+    """
+    coherence_values = []
+    model_list = []
+    for numtopics in coherencerange:
+        model = LdaModel(corpus=corpus, id2word=id2word, chunksize=chunksize, \
+                     alpha=alpha, eta=eta, \
+                     iterations=iterations, num_topics=numtopics, \
+                     passes=passes, eval_every=eval_every, minimum_probability=0, update_every=update_every )
+        model_list.append(model)
+        coherencemodel = CoherenceModel(model=model, texts=docs, dictionary=dictionary, coherence='u_mass')
+        coherence_values.append(coherencemodel.get_coherence())
+    return model_list, coherence_values, coherencerange
+
+  
 #====================================================================================
 def training(taxa_names, docs, options):
+    # Define ambiguous letters to be removed
+    ambiguous_letters_to_remove = ['n']
+    # Remove words with specific ambiguous letters
+    docs = [
+        [word for word in doc if all(letter not in word for letter in ambiguous_letters_to_remove)]
+        for doc in docs]
+    
     miss = 0
     dictionary = Dictionary(docs)
     chunksize = options['chunksize']
     iterations = options['iterations']
-    num_topics = options['num_topics']
     passes = options['passes']
     eval_every = options['eval_every']
     update_every = options['update_every']
     alpha = options['alpha']
     eta = options['eta']
+    tmap = options['tmap']
+    num_topics = options['num_topics']
+    coherence_range = options['coherence_range']
     
     #--------------- Filtering: remove rare and common tokens ---------------
     dictionary.filter_extremes(no_below=2, no_above=0.5)
@@ -414,10 +617,21 @@ def training(taxa_names, docs, options):
     temp = dictionary[0]
     id2word = dictionary.id2token
     
-    model = LdaModel(corpus=corpus, id2word=id2word, chunksize=chunksize, \
-                     alpha=alpha, eta=eta, \
-                     iterations=iterations, num_topics=num_topics, \
-                     passes=passes, eval_every=eval_every, minimum_probability=0, update_every=update_every )
+    
+    if coherence_range is not None:
+        coherencerange = parse_coherence_range(coherence_range)    #this gives a list like [2, 6, 10, 14, 18, 22, 26] for start,limit,step=2,30,4
+        
+        model_list, coherence_values, coherencerange = compute_coherence_values(dictionary, corpus, docs, id2word, coherencerange, options)
+        
+        best_coherence_index = coherence_values.index(max(coherence_values))
+        num_topics = coherencerange[best_coherence_index]
+        model = model_list[best_coherence_index]
+    
+    else:
+        model = LdaModel(corpus=corpus, id2word=id2word, chunksize=chunksize, \
+                         alpha=alpha, eta=eta, \
+                         iterations=iterations, num_topics=num_topics, \
+                         passes=passes, eval_every=eval_every, minimum_probability=0, update_every=update_every )
     #--------------------- Print topics/words frequencies -------------------
     if DEBUG:
         for idx, topic in model.print_topics(-1):
@@ -427,89 +641,15 @@ def training(taxa_names, docs, options):
     docs_tuples = model[corpus]
                 
     #--------------------- topics list for current locus --------------------
-    topics = []
-    for num, doc in enumerate(docs_tuples):
-        first=[]
-        second=[]
-        for tuple_i in doc:
-            first.append(tuple_i[0])
-            second.append(tuple_i[1])
-        topics_freq=[]
-        for i in range(num_topics):
-            topics_freq.append(second[first.index(i)])
-        topics.append(topics_freq)
-    return [topics,taxa_names,miss]
-
-
-#====================================================================================
-def read_one_data(current, folder, locus,options):
-    if DEBUG:
-        print(f"current = {current}")
-    prefix = options['prefix']
-    suffix = options['suffix']
-    ttype = options['ttype']
-    filetype = options['filetype']
-    include_names = options['include_names']
-    exclude_names = options['exclude_names']
-
-    labels=[]
-    sequences=[]
-    varsitess=[]
-    seti = set(include_names)
-    sete = set(exclude_names)
-    real_loci = 0
-    i = locus
-    #Extract labels and sequences:
-    locus_i = prefix+str(i)+suffix
-    locus = os.path.join(current,folder,locus_i)        
-    label,sequence,varsites = phylip.readData(locus, ttype)
-    setl = set(label)
-    if seti==set():
-        seti = setl
-    iok = (setl.intersection(seti) == seti)
-    if iok:
-        real_loci += 1
-        setle = setl.intersection(sete)
-        setl  = setl.difference(setle)
-        labelidx = [label.index(i) for i in setl]
-        label = [label[i] for i in labelidx]
-        sequence = [sequence[i] for i in labelidx]
-        if DEBUG:
-            print(f"len(label) = {len(label)}")
-            print(f"len(sequence) = {len(sequence)}")
-        label = [x.lower() for x in label]
-        return [label,sequence,varsites,real_loci] # a single locus
-    else:
-        return [None,None,None,0]
+    topics = [[y for (x,y) in model[corpus[i]]] for i in range(len(corpus))]
+   
     
-#====================================================================================
-def use_options(current, folder, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names):
-    options={}
-    options['current'] = current
-    options['folder'] = folder
-    options['gaps_type']=gaps_type
-    options['kmers_type'] = kmers_type
-    options['bootstrap'] = bootstrap
-    options['nbootstrap'] = nbootstrap
-    options['datainput'] = datainput
-    options['merging'] = merging
-    options['chunksize'] = chunksize
-    options['iterations']=iterations
-    options['num_topics'] = num_topics
-    options['passes'] = passes
-    options['eval_every'] = eval_every
-    options['update_every'] = update_every
-    options['alpha'] = alpha
-    options['eta'] = eta
-    options['prefix'] = prefix
-    options['suffix'] = suffix
-    options['ttype'] = ttype
-    options['filetype'] = filetype
-    options['include_names'] = include_names
-    options['exclude_names'] = exclude_names
-    return options
-
-
+    if coherence_range:
+        return [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange]
+    else:
+        return [topics, taxa_names, miss, model, corpus, dictionary]
+        
+        
 #====================================================================================
 def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, kmerrange, options):
         
@@ -517,19 +657,21 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
     nbootstrap = options['nbootstrap']
     bootstrap = options['bootstrap']
     gaps_type = options['gaps_type']
+    coherence_range = options['coherence_range']
 
-    #print(i,end=' ', file=sys.stderr, flush=True)
     if datainput=="folder":
         if label == []: #assume we need to read the data for each locus now and have not done that beforehand
             label, sequence, varsites, real_locus  = read_one_data(options['current'], options['folder'], i, options)
             
-            
+    if sequence == [] or sequence == None:
+        return [None, None, 0, 0]
+                
     if bootstrap == 'seq' and nbootstrap>0:
         sequence = bootstrap_sequences_one_locus(sequence)
-        
  
     if gaps_type == 'rm_row':
         sequence = [seq.replace('-', '') for seq in sequence]
+
     elif gaps_type == 'rm_col':
         # String List to Column Character Matrix Using zip() + map()
         seq_matrix = np.transpose(list(map(list, zip(*sequence))))
@@ -546,10 +688,29 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
     
 
         taxa_names, docs = merge_documents(options, label, docs, taxpartition,taxpartition_names)
-        [topics,taxa_names,miss] = training(taxa_names, docs, options)
-        return [topics,taxa_names,miss,real_locus]
+        
+        if coherence_range:
+#            [topics,taxa_names,miss,num_topics,coherence_values,coherencerange] = training(taxa_names, docs, options)
+            [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange] = training(taxa_names, docs, options)
+
+        else:
+#            [topics,taxa_names,miss] = training(taxa_names, docs, options)
+            [topics, taxa_names, miss, model, corpus, dictionary] = training(taxa_names, docs, options)
+
+            
+        if topics == [] or topics == None:
+            topics = None
+        if taxa_names == [] or taxa_names == None:
+            taxa_names = None
+            
+        if coherence_range:
+#            return [topics, taxa_names, miss, real_locus, num_topics, coherence_values, coherencerange]
+            return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange]
+        else:
+#            return [topics,taxa_names,miss,real_locus]
+            return [topics,taxa_names,miss,real_locus, model, corpus, dictionary]
     else:
-        return [None, None, 0, 0]
+        return [None, None, 0, 0, 0, 0, 0]   #?
 
 
 #====================================================================================
@@ -557,49 +718,76 @@ def topicmodeling(options):
     global num_loci
     datainput = options['datainput']
     
+    kmerrange = range(kmer_range_list[0],kmer_range_list[1],kmer_range_list[2])
+    print("kmerrange= ",list(kmerrange))
+    
     if datainput=="folder":
-        kmerrange = range(kmer_range_list[0],kmer_range_list[1],kmer_range_list[2])
-        args = [(i, [],[], [], [], [], kmerrange, options) for i in range(num_loci)]
+        args = [(i, [],[], [], [], [], kmerrange,  options) for i in range(num_loci)]
     
     elif datainput=="nexus_file":
         loci = read_nexus(nexus_file, ttype)
         labels,sequences,varsitess,taxpartition,taxpartition_names = loci
-        kmerrange = range(kmer_range_list[0],kmer_range_list[1],kmer_range_list[2])
         args = [(i, labels[i], sequences[i], varsitess[i],taxpartition,taxpartition_names, kmerrange, options) for i in range(num_loci)]
 
-
-    mypool = multiprocessing.cpu_count() -1
+    #mypool = multiprocessing.cpu_count() -1
     print("Number of cores to use:",mypool)
     with Pool(mypool) as p, tqdm(total=num_loci) as pbar:
         res = [p.apply_async(
             process_locus, args=args[i], callback=lambda _: pbar.update(1)) for i in range(num_loci)]
         results = [r.get() for r in res]
 
-    
-    topics_loci = []
-    taxa_names_loci = []
+
+
+    if coherence_range:
+        topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci = zip(*results)
+        num_topics_loci = [t for t in num_topics_loci if t!=None]
+        coherencevalues_loci = [t for t in coherencevalues_loci if t!=None]
+        coherencerange_loci = [t for t in coherencerange_loci if t!=None]
+        print(f"\ncoherencevalues_loci = {coherencevalues_loci}")
+        print(f"coherencerange_loci = {coherencerange_loci}")
+        print(f"num_topics_loci = {num_topics_loci}")
         
-    topics_loci,taxa_names_loci,miss, real_loci = zip(*results)
+        #plot the coherence values in each locus:
+        plot_coherence_values(coherencevalues_loci, coherencerange_loci, subplots_per_row=3)
+        
+        #-----------------------map topic using pyLDAvis ------------------------
+        if tmap:
+            folder_name = 'pyLDAvis_plots_loci'
+            if os.path.exists(folder_name):
+                # Empty the folder if it exists
+                shutil.rmtree(folder_name)
+            os.makedirs(folder_name)
+            
+            for i in range(len(model_loci)):
+                vis_data = gensimvis.prepare(model_loci[i], corpus_loci[i], dictionary_loci[i], mds='mmds')
+                visfile = os.path.join(folder_name, f'topicsmap_locus{i}.html')
+                pyLDAvis.save_html(vis_data, visfile)
+
+        
+    else:
+        topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci = zip(*results)
+    
     topics_loci = [t for t in topics_loci if t!=None]
     taxa_names_loci  = [t for t in taxa_names_loci if t!=None]
     num_loci = np.sum(real_loci)
     miss = np.sum(miss)
     print("Missed loci out of:",miss,num_loci)
     if DEBUG:
-        print(f"taxa_names_loci = {taxa_names_loci}")
+        print(f"\ntaxa_names_loci = {taxa_names_loci}")
     taxa_names_loci_sets = [set(l) for l in  taxa_names_loci]
-    common_taxa_names = list(set.intersection(*taxa_names_loci_sets))
-    uncommon_taxa_names  =  list(set.union(*taxa_names_loci_sets) - set.intersection(*taxa_names_loci_sets))
+    common_taxa_names = list(set.intersection(*taxa_names_loci_sets))    #common taxa among loci
+    uncommon_taxa_names  =  list(set.union(*taxa_names_loci_sets) - set.intersection(*taxa_names_loci_sets)) #uncommon taxa among loci
     alltaxa = list(set.union(*taxa_names_loci_sets))
     if DEBUG:
-        print("ALL:", list(alltaxa))
-        print("COMMON:",common_taxa_names)
-        print("NOT COMMON:", uncommon_taxa_names)
-            
+        print("\nALL:", list(alltaxa))
+        print("\nCOMMON:",common_taxa_names)
+        print("\nNOT COMMON:", uncommon_taxa_names)
+     
+     
     common_taxa_names_loci_indx = [[l.index(c) for c in common_taxa_names] for l in taxa_names_loci]
     uncommon_taxa_names_loci_indx = [[uncommoncheck(l,c) for c in uncommon_taxa_names] for l in taxa_names_loci]
     if DEBUG:
-        print(f"common_taxa_names_loci_indx = {common_taxa_names_loci_indx}")
+        print(f"\ncommon_taxa_names_loci_indx = {common_taxa_names_loci_indx}")
         
     common_topics_loci = [[l[i] for i in common_taxa_names_loci_indx[num]] for num,l in enumerate(topics_loci)]
     uncommon_topics_loci = [[uncommonresolve(l,i, num_topics) for i in uncommon_taxa_names_loci_indx[num]] for num,l in enumerate(topics_loci)]
@@ -607,13 +795,20 @@ def topicmodeling(options):
     commonplus_taxa_names = common_taxa_names + uncommon_taxa_names
     commonplus_topics_loci = [l+u for l,u in zip(common_topics_loci, uncommon_topics_loci) ]
     if DEBUG:
-        print(f"commonplus_taxa_names = {commonplus_taxa_names}")
-        print(f"commonplus_topics_loci = {commonplus_topics_loci}")
+        print(f"\ncommonplus_taxa_names = {commonplus_taxa_names}")
+        print(f"\ncommonplus_topics_loci = {commonplus_topics_loci}")
 
-    if force:
-        return commonplus_taxa_names, commonplus_topics_loci,miss
+    if coherence_range:
+        if force:
+            return commonplus_taxa_names, commonplus_topics_loci, miss, num_topics_loci
+        else:
+            return common_taxa_names, common_topics_loci, miss, num_topics_loci
+    
     else:
-        return common_taxa_names, common_topics_loci,miss
+        if force:
+            return commonplus_taxa_names, commonplus_topics_loci, miss, num_topics
+        else:
+            return common_taxa_names, common_topics_loci, miss, num_topics
 
 
 #====================================================================================
@@ -629,18 +824,26 @@ def uncommonresolve(l, i, numtopics):
     else:
         return l[i]
 #====================================================================================
-def infile(topics_loci, taxa_names, num_loci):
+def infile(topics_loci, taxa_names, num_loci, numsoftopics):
+#    print(f"topics_loci = {topics_loci}")
     if DEBUG:
         print(f"num_loci = {num_loci}")
     taxa_names_limited = [x[:10] for x in taxa_names]      #CONTML accepts population names lass than 10 letters
     num_pop= len(topics_loci)
     with  open("infile", "w") as f:
         f.write('     {}    {}\n'.format(num_pop, num_loci))
-        f.write('{} '.format(num_topics)*num_loci)
+        if coherence_range:
+            f.write(' '.join(map(str, numsoftopics)) + ' ')
+        else:
+            f.write('{} '.format(num_topics)*num_loci)
         f.write('\n')
         for i in range(num_pop):
             myname = taxa_names[i]
-            f.write(f'{myname:<15}{" ".join(map(str, topics_loci[i]))}\n')
+#            f.write(f'{myname:<15}{" ".join(map(str, topics_loci[i]))}\n')
+
+            # Adjust the precision (number of decimal places) as needed, here set to 8
+            formatted_values = " ".join(f"{x:.8f}" for x in topics_loci[i])
+            f.write(f'{myname:<15}{formatted_values}\n')
     f.close()
 
 #====================================================================================
@@ -654,7 +857,6 @@ def run_contml(infile):
         f.write(contmlinput)
     print("Contml is running...")
     os.system(f'cat contmlinput | {PROGRAMPATH}contml2 -> contml2.log')
-#    os.system(f'cat contmlinput | {PROGRAMPATH}contml')
     
     #read the outtree file
     with open('outtree', 'r') as f:
@@ -696,7 +898,12 @@ def simulation(current, folder, options):
             if DEBUG:
                 print(f"options['current'] = {options['current']}")
                 print(f"\noptions = {options}")
-            taxa_names, topics_loci, miss = topicmodeling(options)
+            
+            if coherence_range:
+                taxa_names, topics_loci, miss, num_topics_loci = topicmodeling(options)
+            else:
+                taxa_names, topics_loci, miss = topicmodeling(options)
+                
             #for each locus remove last column from topic matrix
             topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
             
@@ -727,10 +934,10 @@ def simulation(current, folder, options):
 
 #====================================================================================
 # a single analysis that shows the tree using figtree with show=True
-def single_run(show=False,options={}):
+def single_run(show=False, options={}):
     global num_loci
 
-    taxa_names, topics_loci, miss = topicmodeling(options)
+    taxa_names, topics_loci, miss, numsoftopics = topicmodeling(options)
     #for each locus remove last column from topic matrix
     topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
         
@@ -742,7 +949,7 @@ def single_run(show=False,options={}):
             print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
         
     #generate infile
-    infile(topics_loci_concatenated, taxa_names, num_loci-miss)
+    infile(topics_loci_concatenated, taxa_names, num_loci-miss, numsoftopics)
     
     #run CONTML
     ourtree = run_contml(infile)
@@ -751,6 +958,7 @@ def single_run(show=False,options={}):
         #Figtree
         os.system(f"{PROGRAMPATH}figtree outtree")
     print('Effective loci use:', num_loci)
+
     return ourtree
 
         
@@ -841,8 +1049,15 @@ if __name__ == "__main__":
     exclude_file = args.exclude_file
     force = args.force
     showtree = args.showtree
+    tmap = args.tmap
+    max_threads = args.max_threads
+    mypool = multiprocessing.cpu_count() -1
+    if max_threads < mypool:
+        mypool = max_threads
+    
     #gensim LDA arguments:
     num_topics = args.num_topics
+    coherence_range = args.coherence_range
     iterations = args.iterations
     passes = args.passes
     chunksize = args.chunksize
@@ -860,21 +1075,30 @@ if __name__ == "__main__":
     elif nexus_file:
         datainput = "nexus_file"
     print(f"\ndatainput : {datainput}")
+    
+        
+    if coherence_range is not None:
+        if coherence_range == '':  # Handle case where '-cr' is provided without a value
+            coherence_range = '2,20,4'
+        else:
+            coherence_range = coherence_range
+    else:
+        num_topics = num_topics or 5
 
     
-    print('\n+++++++++++++++ LDA arguments +++++++++++++++++')
+    print('\n+++++++++++++++ Arguments +++++++++++++++++')
     print(f"num_topics = {num_topics}")
+    print(f"coherence_range = {coherence_range}")
     print(f"iterations = {iterations}")
     print(f"passes = {passes}")
     print(f"chunksize = {chunksize}")
     print(f"eval_every = {eval_every}")
     print(f"update_every = {update_every}")
-    
     print(f"type(alpha) = {type(alpha)}")
     print(f"type(eta) = {type(eta)}")
-    
     print(f"alpha = {alpha}")
     print(f"eta = {eta}")
+    print(f"kmers_type = {kmers_type}")
                                 
     
     if DEBUG:
@@ -895,11 +1119,15 @@ if __name__ == "__main__":
         filetype = 'PHYLIP'
 
     kmer_range_list = list(map(int, args.kmer_range.split(',')))
-
+    print(f"kmer_range_list = {kmer_range_list }")
+        
+    
     include_names = read_inexfiles(include_file)
     exclude_names = read_inexfiles(exclude_file)
     
-    options = use_options(current, folder, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names)
+    options = use_options(current, folder, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,coherence_range, passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap)
+
+
     
     #After cloning the repository, in topiccontml.py modify the PROGRAMPATH to the path that FigTree and CONTML are installed
     PROGRAMPATH = '~/bin/'
@@ -937,5 +1165,4 @@ if __name__ == "__main__":
         single_run(showtree,options)
     end = time.time()
     print(f"\n> Elapsed time = {end - start}\n")
-    #variable not defined    print(f"\n> Tokenize_time = {tokenize_time}")
     citations(options)
