@@ -11,7 +11,10 @@ def readData(myfile, type='STANDARD'):     #testdata.phy : sequences
     sequence=[]
     data = f.readlines()
     f.close()
-    
+    i = len(data) -1
+    while len(data[i])==0:
+        data.pop(i)
+        i -= 1
     
     numind,numsites, *rest = (data.pop(0)).split()
     for i in data:
@@ -29,7 +32,8 @@ def readData(myfile, type='STANDARD'):     #testdata.phy : sequences
         label.append(l.strip().replace(' ','_'))
         if DEBUG:
             print("myread()",l.replace(' ','_').strip())
-        sequence.append(s.strip())
+        s = s.replace(' ','').strip() 
+        sequence.append(s)
         
     if DEBUG:
         print ("Phylip file:", myfile, file=sys.stderr)

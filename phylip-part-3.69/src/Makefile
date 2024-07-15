@@ -78,7 +78,7 @@ EXEDIR  = ../exe
 # The next two assignments are the invocations of the compiler
 #
 # This one specifies the "cc" C compiler
-CC        = cc
+CC        = clang -g
 #
 #  To use GCC instead:
 #CC        = gcc
@@ -97,7 +97,7 @@ CC        = cc
 #CFLAGS  = -g 
 #
 # An optimized one for gcc
-CFLAGS  = -O3 -fomit-frame-pointer
+CFLAGS  = -g
 #
 # For some serious debugging using Gnu gcc
 #
