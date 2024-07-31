@@ -15,6 +15,7 @@ from warnings import filterwarnings
 filterwarnings('ignore')
 import matplotlib.pyplot as plt
 import phylip
+import euclid
 import dendropy
 from dendropy.calculate import treecompare
 import os
@@ -832,7 +833,7 @@ def infile_func(topics_loci, taxa_names, num_loci, numsoftopics):
         print(f"num_loci = {num_loci}")
     taxa_names_limited = [x[:10] for x in taxa_names]      #CONTML accepts population names lass than 10 letters
     num_pop= len(topics_loci)
-    with  open("infile", "w") as f:
+    with  open(INFILE, "w") as f:
         f.write('     {}    {}\n'.format(num_pop, num_loci))
         if coherence_range:
             f.write(' '.join(map(str, numsoftopics)) + ' ')
@@ -869,10 +870,10 @@ def run_contml(infile):
 def run_neighbor(infile):
     os.system('rm outfile outtree')
     print("Euclidiean distance generation and Neighbor is running...")
-    outfile = 'infile'
+    outfile = INFILE
     euclid.distances(infile,outfile)
     
-    os.system(f'{PROGRAMPATH}neighbor -> neighbor.log')
+    os.system(f'echo "Y" | {PROGRAMPATH}neighbor -> neighbor.log')
     
     #read the outtree file
     with open('outtree', 'r') as f:
@@ -934,7 +935,6 @@ def simulation(current, folder, options):
                 #run CONTML
                 ourtree = run_contml(infile)
             else:
-                import shutil
                 shutil.copy(infile,infile+"savecopy")
                 ourtree = run_neighbor(infile)
             print(ourtree)
@@ -974,7 +974,6 @@ def single_run(show=False, options={}):
         #run CONTML
         ourtree = run_contml(infile)
     else:
-        import shutil
         shutil.copy(infile,infile+"savecopy")
         ourtree = run_neighbor(infile)
     print(f"outtree = {ourtree}")
@@ -1044,8 +1043,7 @@ def bootstrap_run(bootstrap, options):
             #run CONTML                                                                                                                    
             ourtree = run_contml(infile)
         else:
-            import shutil
-	    shutil.copy(infile,infile+"savecopy")
+            shutil.copy(infile,infile+"savecopy")
             ourtree = run_neighbor(infile)
         print(f"Bootstrap tree #{bi} = {ourtree}")
         outtrees.append(ourtree)
@@ -1156,8 +1154,9 @@ if __name__ == "__main__":
     
     options = use_options(current, folder, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,coherence_range, passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap)
 
-
-    
+    # sets name for data interaction with phylip programs contml2 or neighbor
+    INFILE = "infile"
+    infile = INFILE
     #After cloning the repository, in topiccontml.py modify the PROGRAMPATH to the path that FigTree and CONTML are installed
     PROGRAMPATH = '~/bin/'
     
