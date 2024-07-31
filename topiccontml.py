@@ -826,7 +826,7 @@ def uncommonresolve(l, i, numtopics):
     else:
         return l[i]
 #====================================================================================
-def infile(topics_loci, taxa_names, num_loci, numsoftopics):
+def infile_func(topics_loci, taxa_names, num_loci, numsoftopics):
 #    print(f"topics_loci = {topics_loci}")
     if DEBUG:
         print(f"num_loci = {num_loci}")
@@ -929,14 +929,14 @@ def simulation(current, folder, options):
             for i in range(1,len(topics_loci_missingLast)):
                 topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
             #generate infile
-            infile(topics_loci_concatenated, taxa_names, num_loci)
+            infile_func(topics_loci_concatenated, taxa_names, num_loci)
             if not useneighbor:
                 #run CONTML
                 ourtree = run_contml(infile)
             else:
                 import shutil
                 shutil.copy(infile,infile+"savecopy")
-                outtree = run_neighbor(infile)
+                ourtree = run_neighbor(infile)
             print(ourtree)
             
             our_tree = dendropy.Tree.get(data=ourtree,schema="newick",taxon_namespace=tns)
@@ -968,11 +968,16 @@ def single_run(show=False, options={}):
             print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
         
     #generate infile
-    infile(topics_loci_concatenated, taxa_names, num_loci-miss, numsoftopics)
-    
-    #run CONTML
-    ourtree = run_contml(infile)
-#    print(f"ourtree = {ourtree}")
+    infile_func(topics_loci_concatenated, taxa_names, num_loci-miss, numsoftopics)
+
+    if not useneighbor:
+        #run CONTML
+        ourtree = run_contml(infile)
+    else:
+        import shutil
+        shutil.copy(infile,infile+"savecopy")
+        ourtree = run_neighbor(infile)
+    print(f"outtree = {ourtree}")
     if show:
         #Figtree
         os.system(f"{PROGRAMPATH}figtree outtree")
@@ -1033,10 +1038,15 @@ def bootstrap_run(bootstrap, options):
             topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
             
         #generate infile
-        infile(topics_loci_concatenated, taxa_names, num_loci-miss)
-        
-        #run CONTML
-        ourtree = run_contml(infile)
+        infile_func(topics_loci_concatenated, taxa_names, num_loci-miss)
+
+        if not useneighbor:
+            #run CONTML                                                                                                                    
+            ourtree = run_contml(infile)
+        else:
+            import shutil
+	    shutil.copy(infile,infile+"savecopy")
+            ourtree = run_neighbor(infile)
         print(f"Bootstrap tree #{bi} = {ourtree}")
         outtrees.append(ourtree)
         
