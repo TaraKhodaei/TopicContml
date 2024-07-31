@@ -105,6 +105,9 @@ def myparser():
     parser.add_argument('-show','--showtree', dest='showtree',
                         default=False, action='store_true',
                         help='uses figtree to show the tree')
+    parser.add_argument('-neighbor','--neighbor', dest='useneighbor',
+                        default=False, action='store_true',
+                        help='uses Neighbor-Joining (neighbor) instead of contml')
     parser.add_argument('-tmap', dest='tmap',
                         default=False, action='store_true',
                         help='uses pyLDAvis to map the topics')
@@ -863,6 +866,20 @@ def run_contml(infile):
     return tree
 
 #====================================================================================
+def run_neighbor(infile):
+    os.system('rm outfile outtree')
+    print("Euclidiean distance generation and Neighbor is running...")
+    outfile = 'infile'
+    euclid.distances(infile,outfile)
+    
+    os.system(f'{PROGRAMPATH}neighbor -> neighbor.log')
+    
+    #read the outtree file
+    with open('outtree', 'r') as f:
+        tree = f.read().replace('\n', ' ')
+    return tree
+
+#====================================================================================
 def simulation(current, folder, options):
     diverge_time = float(sim_diverge)       #diverge_time=0.0/0.01/0.05/0.1/0.2
     tree_newick = '((Arb:1,Fra:1):1,Kre:1,Rom:1);'    #We need just topology to compare
@@ -913,9 +930,13 @@ def simulation(current, folder, options):
                 topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
             #generate infile
             infile(topics_loci_concatenated, taxa_names, num_loci)
-            
-            #run CONTML
-            ourtree = run_contml(infile)
+            if not useneighbor:
+                #run CONTML
+                ourtree = run_contml(infile)
+            else:
+                import shutil
+                shutil.copy(infile,infile+"savecopy")
+                outtree = run_neighbor(infile)
             print(ourtree)
             
             our_tree = dendropy.Tree.get(data=ourtree,schema="newick",taxon_namespace=tns)
@@ -1052,7 +1073,7 @@ if __name__ == "__main__":
     mypool = multiprocessing.cpu_count() -1
     if max_threads < mypool:
         mypool = max_threads
-    
+    useneighbor = args.useneighbor # if true use neighbor if false use contml [default]
     #gensim LDA arguments:
     num_topics = args.num_topics
     coherence_range = args.coherence_range
