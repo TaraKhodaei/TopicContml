@@ -68,11 +68,7 @@ def myparser():
     parser.add_argument('-m','--merging', dest='merging',
                         default=None, action='store',type=int,
                         help='Merge sequences that start with the same m letters [e.g. population or species labels].')
-#    parser.add_argument('-kr','--kmer_range', dest='kmer_range',
-#                        default='2,10,2', action='store',
-#                        help='range of kmers extraction, lowerbound,max+1,step [for example: 2,10,2 leads to non overlapping k-mers: 2,4,6,8')
-
-    parser.add_argument('-kr','--kmer_range', dest='kmer_range',
+    parser.add_argument('-k','--kmers', dest='kmers',
                         nargs='?', const='2,10,2', default=None,
                         help='range of kmers extraction: [lowerbound,max+1,step]. Default is 2,10,2 which leads to k-mers of lengths: 2,4,6,8')
     parser.add_argument('-kt','--kmer_type', dest='kmers_type',
@@ -161,12 +157,12 @@ def myparser():
     
 
 #====================================================================================
-def use_options(current, folder, gaps_type, kmer_range, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations, num_topics, coherence_range,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap, filter_below, filter_above):
+def use_options(current, folder, gaps_type, kmers, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations, num_topics, coherence_range,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap, filter_below, filter_above):
     options={}
     options['current'] = current
     options['folder'] = folder
     options['gaps_type']=gaps_type
-    options['kmer_range'] = kmer_range
+    options['kmers'] = kmers
     options['kmers_type'] = kmers_type
     options['bootstrap'] = bootstrap
     options['nbootstrap'] = nbootstrap
@@ -331,13 +327,13 @@ def tokenize(seq_list, k, kmers_type):
     return docs
     
 #====================================================================================
-def kmer_docs(sequence, kmerrange, options):
+def kmer_docs(sequence, kmerslist, options):
     """
     Generates concatenated k-mer documents from sequences across a range of k-mer lengths.
 
     Parameters:
     sequence (list of str): List of DNA sequences to be tokenized.
-    kmerrange (range or list of int): Range or list of k-mer lengths to consider.
+    kmerslist (list of int): list of k-mer lengths to consider.
     options (dict): Contains options like 'kmers_type' (either 'overlap' or 'not_overlap').
 
     Returns:
@@ -345,7 +341,7 @@ def kmer_docs(sequence, kmerrange, options):
     """
     kmers_type = options['kmers_type']  # Get the k-mers type from options
     docs = []
-    for k in kmerrange:
+    for k in kmerslist:
         tokenize_k = tokenize(sequence, k, kmers_type)  # Tokenize sequence with current k
         if len(docs) > 0:
             # Concatenate new k-mers to existing documents
@@ -733,7 +729,7 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
     bootstrap = options['bootstrap']
     gaps_type = options['gaps_type']
     coherence_range = options['coherence_range']
-    kmer_range = options['kmer_range']
+    kmers = options['kmers']
 
     if datainput=="folder":
         if label == []: #assume we need to read the data for each locus now and have not done that beforehand
@@ -756,18 +752,26 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         #Convert List of lists to list of Strings again
         sequence = [''.join(ele) for ele in seq_matrix_cleaned]
         
+        
+    
     if label != None:
-        if kmer_range:
-            kmerrange = range(kmer_range[0],kmer_range[1],kmer_range[2])
-#            print("kmerrange = ",list(kmerrange))
-            docs = kmer_docs(sequence, kmerrange, options)
+        start_docs = time.time()
+        if kmers:
+            if len(kmers)>1:    # range of kmers given by user
+                kmerslist = range(kmers[0],kmers[1],kmers[2])
+            elif len(kmers)==1: # one kmer given by user
+                kmerslist = kmers
+            docs = kmer_docs(sequence, kmerslist, options)
         else:
             docs, kprime = kmerprime_docs(sequence, options)
         
     
         if bootstrap == 'kmer' and nbootstrap>0:
             docs = [np.random.choice(docs[i],size=len(docs[i]),replace=True) for i in range(len(docs)) ]
-    
+            
+        end_docs = time.time()
+        words_time = end_docs - start_docs
+#        print(f"\n> extract words run time = {end_docs - start_docs}\n")
 
         taxa_names, docs = merge_documents(options, label, docs, taxpartition,taxpartition_names)
         
@@ -785,15 +789,15 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
             
         
         if coherence_range:
-            if kmer_range:
-                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering]
+            if kmers:
+                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, words_time]
             else:
-                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, kprime]
+                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, kprime, words_time]
         else:
-            if kmer_range:
-                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering]
+            if kmers:
+                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering, words_time]
             else:
-                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering, kprime]
+                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering, kprime, words_time]
     else:
         return [None, None, 0, 0, 0, 0, 0, 0, 0]   #???
 
@@ -813,18 +817,21 @@ def topicmodeling(options):
 
 
     #mypool = multiprocessing.cpu_count() -1
-    print("Number of cores to use:",mypool)
+    print("\nmultilocus LDA is running ...\n")
+    print("number of cores to use:",mypool)
+    start_lda = time.time()
     with Pool(mypool) as p, tqdm(total=num_loci) as pbar:
         res = [p.apply_async(
             process_locus, args=args[i], callback=lambda _: pbar.update(1)) for i in range(num_loci)]
         results = [r.get() for r in res]
-
+    end_lda = time.time()
+    print(f"\n> LDA run time = {end_lda - start_lda}\n")
 
     if coherence_range:
-        if kmer_range:
-            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci = zip(*results)
+        if kmers:
+            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, words_time_loci = zip(*results)
         else:
-            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, kprime_loci = zip(*results)
+            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, kprime_loci, words_time_loci = zip(*results)
             kprime_loci = [t for t in kprime_loci if t!=None]
             print(f"\nkprime_loci = {kprime_loci}")
 
@@ -854,15 +861,16 @@ def topicmodeling(options):
         '''
         
     else:
-        if kmer_range:
-            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci = zip(*results)
+        if kmers:
+            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, words_time_loci = zip(*results)
         else:
-            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, kprime_loci = zip(*results)
+            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, kprime_loci, words_time_loci = zip(*results)
             kprime_loci = [t for t in kprime_loci if t!=None]
             print(f"\nkprime_loci = {kprime_loci}")
            
-    print(f"length of dictionary before filtering in loci = {dictionary_before_filtering_loci}")
-    print(f"length of dictionary after filtering in loci = {dictionary_after_filtering_loci}")
+    print(f"> extracting words across loci time = {sum(words_time_loci)}")
+    print(f"\nnumber of words across loci before filtering = {dictionary_before_filtering_loci}")
+    print(f"\nnumber of words across loci after filtering = {dictionary_after_filtering_loci}")
     
     
     #-----------------------map topic using pyLDAvis ------------------------
@@ -884,7 +892,7 @@ def topicmodeling(options):
     taxa_names_loci  = [t for t in taxa_names_loci if t!=None]
     num_loci = np.sum(real_loci)
     miss = np.sum(miss)
-    print("Missed loci out of:",miss,num_loci)
+    print("\nmissed loci out of:",miss,num_loci)
     if DEBUG:
         print(f"\ntaxa_names_loci = {taxa_names_loci}")
     taxa_names_loci_sets = [set(l) for l in  taxa_names_loci]
@@ -964,8 +972,12 @@ def run_contml(infile):
     with open('contmlinput','w') as f:
         contmlinput = f'g\nj\n{contmljumble}\n{contmltimes}\ny'
         f.write(contmlinput)
-    print("\nContml is running...")
+        
+    print("\n\n\nContml is running ...\n")
+    start_contml = time.time()
     os.system(f'cat contmlinput | {PROGRAMPATH}contml2 -> contml2.log')
+    end_contml = time.time()
+    print(f"> Contml run time = {end_contml - start_contml}\n")
     
     #read the outtree file
     with open('outtree', 'r') as f:
@@ -1200,7 +1212,7 @@ if __name__ == "__main__":
     eta = args.eta
     filter_below = args.filter_below
     filter_above = args.filter_above
-    kmer_range = args.kmer_range
+    kmers = args.kmers
         
     if alpha.isdigit():
         alpha = int(alpha)
@@ -1223,7 +1235,7 @@ if __name__ == "__main__":
         num_topics = num_topics or 5
 
     
-    print('\n+++++++++++++++ Arguments +++++++++++++++++')
+    print('\n============ Arguments =============')
     print(f"num_topics = {num_topics}")
     print(f"coherence_range = {coherence_range}")
     print(f"iterations = {iterations}")
@@ -1238,9 +1250,9 @@ if __name__ == "__main__":
     print(f"kmers_type = {kmers_type}")
     
     if gaps_type is None:
-        print(f"gaps_type = {gaps_type} ===> we did NOT REMOVE gaps")
+        print(f"gaps_type = {gaps_type} (gaps are NOT REMOVED)")
     else:
-        print(f"gaps_type = {gaps_type} ===> we REMOVED gaps")
+        print(f"gaps_type = {gaps_type} (gaps are REMOVED)")
     
     if DEBUG:
         print(f"\nnum_topics={num_topics}")
@@ -1260,20 +1272,20 @@ if __name__ == "__main__":
         filetype = 'PHYLIP'
         
 
-    print(f"kmer_range = {kmer_range}")
-    if kmer_range is not None:
-        if kmer_range == '':  # Handle the case where '-kr' is provided without a value
-            kmer_range = '2,10,2'
-        else:
-            kmer_range = kmer_range
-        kmer_range = list(map(int, kmer_range.split(',')))
-        print("kmers list = ",list(range(kmer_range[0],kmer_range[1],kmer_range[2])))
-        
+
+    if kmers is not None:
+        kmers = kmers
+        kmers = list(map(int, kmers.split(',')))
+        if len(kmers)>1:    # range of kmers given by user
+            print("kmers list = ",list(range(kmers[0],kmers[1],kmers[2])))
+        elif len(kmers)==1: # one kmer given by user
+            print("kmers list = ", kmers)
+    print('====================================')
     
     include_names = read_inexfiles(include_file)
     exclude_names = read_inexfiles(exclude_file)
     
-    options = use_options(current, folder, gaps_type, kmer_range, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,coherence_range, passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap, filter_below, filter_above)
+    options = use_options(current, folder, gaps_type, kmers, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,coherence_range, passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap, filter_below, filter_above)
 
 
     
@@ -1289,7 +1301,7 @@ if __name__ == "__main__":
     if RANDOMSEED % 2 == 0:
         RANDOMSEED += 1
      
-    start = time.time()
+    start_total = time.time()
     #=================== if simulation analysis ======================
     if sim_diverge is not None:
         simulation(current, folder, options)
@@ -1315,6 +1327,6 @@ if __name__ == "__main__":
         print(f"> TopicContml tree is written into file 'best.tre'")
     else:
         single_run(showtree,options)
-    end = time.time()
-    print(f"\n> Elapsed time = {end - start}\n")
+    end_total = time.time()
+    print(f"\n> Elapsed time = {end_total - start_total}\n")
     citations(options)
