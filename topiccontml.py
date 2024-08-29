@@ -817,7 +817,7 @@ def topicmodeling(options):
 
 
     #mypool = multiprocessing.cpu_count() -1
-    print("\nmultilocus LDA is running ...\n")
+    print("\nmultilocus LDA is running ...")
     print("number of cores to use:",mypool)
     start_lda = time.time()
     with Pool(mypool) as p, tqdm(total=num_loci) as pbar:
@@ -825,7 +825,7 @@ def topicmodeling(options):
             process_locus, args=args[i], callback=lambda _: pbar.update(1)) for i in range(num_loci)]
         results = [r.get() for r in res]
     end_lda = time.time()
-    print(f"\n> LDA run time = {end_lda - start_lda}\n")
+    print(f"> LDA run time = {end_lda - start_lda}")
 
     if coherence_range:
         if kmers:
@@ -833,7 +833,7 @@ def topicmodeling(options):
         else:
             topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, kprime_loci, words_time_loci = zip(*results)
             kprime_loci = [t for t in kprime_loci if t!=None]
-            print(f"\nkprime_loci = {kprime_loci}")
+            print(f"> optimal kmer lengths across loci = {kprime_loci}")
 
         num_topics_loci = [t for t in num_topics_loci if t!=None]
         coherencevalues_loci = [t for t in coherencevalues_loci if t!=None]
@@ -866,11 +866,11 @@ def topicmodeling(options):
         else:
             topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, kprime_loci, words_time_loci = zip(*results)
             kprime_loci = [t for t in kprime_loci if t!=None]
-            print(f"\nkprime_loci = {kprime_loci}")
+            print(f"> optimal kmer across loci = {kprime_loci}")
            
     print(f"> extracting words across loci time = {sum(words_time_loci)}")
-    print(f"\nnumber of words across loci before filtering = {dictionary_before_filtering_loci}")
-    print(f"\nnumber of words across loci after filtering = {dictionary_after_filtering_loci}")
+    print(f"> number of words across loci before filtering = {dictionary_before_filtering_loci}")
+    print(f"> number of words across loci after filtering = {dictionary_after_filtering_loci}")
     
     
     #-----------------------map topic using pyLDAvis ------------------------
@@ -892,7 +892,7 @@ def topicmodeling(options):
     taxa_names_loci  = [t for t in taxa_names_loci if t!=None]
     num_loci = np.sum(real_loci)
     miss = np.sum(miss)
-    print("\nmissed loci out of:",miss,num_loci)
+    print("> missed loci out of:",miss,num_loci)
     if DEBUG:
         print(f"\ntaxa_names_loci = {taxa_names_loci}")
     taxa_names_loci_sets = [set(l) for l in  taxa_names_loci]
@@ -973,11 +973,11 @@ def run_contml(infile):
         contmlinput = f'g\nj\n{contmljumble}\n{contmltimes}\ny'
         f.write(contmlinput)
         
-    print("\n\n\nContml is running ...\n")
+    print("\n\nContml is running ...")
     start_contml = time.time()
     os.system(f'cat contmlinput | {PROGRAMPATH}contml2 -> contml2.log')
     end_contml = time.time()
-    print(f"> Contml run time = {end_contml - start_contml}\n")
+    print(f"> Contml run time = {end_contml - start_contml}")
     
     #read the outtree file
     with open('outtree', 'r') as f:
@@ -1101,7 +1101,7 @@ def single_run(show=False, options={}):
     if show:
         #Figtree
         os.system(f"{PROGRAMPATH}figtree outtree")
-    print('Effective loci use:', num_loci)
+    print(F"\n> Effective loci use = {num_loci}")
 
     return ourtree
         
@@ -1277,9 +1277,9 @@ if __name__ == "__main__":
         kmers = kmers
         kmers = list(map(int, kmers.split(',')))
         if len(kmers)>1:    # range of kmers given by user
-            print("kmers list = ",list(range(kmers[0],kmers[1],kmers[2])))
+            print("kmer length list = ",list(range(kmers[0],kmers[1],kmers[2])))
         elif len(kmers)==1: # one kmer given by user
-            print("kmers list = ", kmers)
+            print("kmer length list = ", kmers)
     print('====================================')
     
     include_names = read_inexfiles(include_file)
@@ -1328,5 +1328,5 @@ if __name__ == "__main__":
     else:
         single_run(showtree,options)
     end_total = time.time()
-    print(f"\n> Elapsed time = {end_total - start_total}\n")
+    print(f"> Elapsed time = {end_total - start_total}\n")
     citations(options)
