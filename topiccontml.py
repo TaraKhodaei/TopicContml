@@ -25,17 +25,15 @@ import time
 from itertools import chain
 from collections import Counter
 
-
 import pyLDAvis
 import pyLDAvis.gensim_models as gensimvis
 from gensim.models import CoherenceModel
 import shutil
+import math
 #---------------------------------------------------
 # most important global variables are defined in __main__
 DEBUG = False
 #---------------------------------------------------
-
-
 
 def citations(options):
     print(" --------------------------------------------------------------------------------- ")
@@ -44,13 +42,13 @@ def citations(options):
     print("| Khodaei, M., Edwards, S. Beerli, P. (2023). Multilocus Phylogeny Estimation     |")
     print("|     Using Probabilistic Topic Modeling, Biorxiv doi: xxxx                       |")
     print("| Blei, D. M., Ng A. Y, and Jordan, M. I. (2003). Latent Dirichlet allocation.    |")
-    print("|     Journal of machine Learning research, 3:993--1022                            |")
+    print("|     Journal of machine Learning research, 3:993--1022                           |")
     print("| Felsenstein, J. (2005). PHYLIP (Phylogeny Inference Package) version 3.6.       |")
     print("|     Distributed by the author. Department of Genome Sciences, University        |")
     print("|     of Washington, Seattle. (https://phylipweb.github.io/phylip/)               |")
     print("| Rehurek, R., and Sojka, P. (2010). Software framework for topic modelling with  |")
     print("|     large corpora. In proceedings of LREC 2010 Workshop on New Challenges       |")
-    print("|     for NLP Frameworks, Valletta, Malta, pp.45--50.                              |")
+    print("|     for NLP Frameworks, Valletta, Malta, pp.45--50.                             |")
     print("|     (http://is.muni.cz/publication/884893/en)                                   |")
     if bootstrap!= 'none':
         print("| Sukumaran, J. and Holder, M. T. (2010). DendroPy: a Python library for          |")
@@ -70,9 +68,13 @@ def myparser():
     parser.add_argument('-m','--merging', dest='merging',
                         default=None, action='store',type=int,
                         help='Merge sequences that start with the same m letters [e.g. population or species labels].')
+#    parser.add_argument('-kr','--kmer_range', dest='kmer_range',
+#                        default='2,10,2', action='store',
+#                        help='range of kmers extraction, lowerbound,max+1,step [for example: 2,10,2 leads to non overlapping k-mers: 2,4,6,8')
+
     parser.add_argument('-kr','--kmer_range', dest='kmer_range',
-                        default='2,10,2', action='store',
-                        help='range of kmers extraction, lowerbound,max+1,step [for example: 2,10,2 leads to non overlapping k-mers: 2,4,6,8')
+                        nargs='?', const='2,10,2', default=None,
+                        help='range of kmers extraction: [lowerbound,max+1,step]. Default is 2,10,2 which leads to k-mers of lengths: 2,4,6,8')
     parser.add_argument('-kt','--kmer_type', dest='kmers_type',
                         default='not_overlap', action='store',type=str,
                         help='default "not_overlap": extract kmers without overlapping. String "overlap": extract kmers with overlapping.')
@@ -116,7 +118,6 @@ def myparser():
                         default=1000, action='store', type=int,
                         help='Number of cpu cores to use for locus-parallel runs, default is system max.')
 
-
     #gensim LDA arguments:
     parser.add_argument('-nt','--num_topics', dest='num_topics',
                         default=None, action='store', type=int,
@@ -128,37 +129,45 @@ def myparser():
                         default=100, action='store', type=int,
                         help='Maximum number of iterations through the corpus when inferring the topic distribution of a corpus. Defult value is 100 iterations.')
     parser.add_argument('-p','--passes', dest='passes',
-                        default=50, action='store', type=int,
-                        help='Number of passes through the corpus during training. Defult value is 50.')
+                        default=5, action='store', type=int,
+                        help='Number of passes through the corpus during training. Defult value is 5.')
     parser.add_argument('-cs','--chunksize', dest='chunksize',
-                        default=20, action='store', type=int,
-                        help='Number of documents to be used in each training chunk. Defult value is 20.')
+                        default=2000, action='store', type=int,
+                        help='Number of documents to be used in each training chunk. Defult value is 2000.')
     parser.add_argument('-ee','--eval_every', dest='eval_every',
                         default=1, action='store', type=int,
                         help='Log perplexity is estimated every that many updates. Defult value is 1.')
     parser.add_argument('-ue','--update_every', dest='update_every',
-                        default=5, action='store', type=int,
-                        help='Number of documents to be iterated through for each update. Defult value is 5.')
+                        default=1, action='store', type=int,
+                        help='Number of documents to be iterated through for each update. Defult value is 1.')
     parser.add_argument('-al','--alpha', dest='alpha',
-                        default='1',
+                        default='auto',
                         help='a priori belief on document-topic distribution. It can be: (1) scalar for a symmetric prior over document-topic distribution, (2) 1D array of length equal to num_topics to denote an asymmetric user defined prior for each topic. (3) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"asymmetric": a fixed normalized asymmetric prior of 1.0 / (topic_index + sqrt(num_topics)),"auto":Learns an asymmetric prior from the corpus')
     parser.add_argument('-et','--eta', dest='eta',
                         default='auto',
                         help='a priori belief on topic-word distribution. It can be: (1) scalar for a symmetric prior over  topic-word distribution, (2) 1D array of length equal to num_words to denote an asymmetric user defined prior for each word, (3) matrix of shape (num_topics, num_words) to assign a probability for each word-topic combination. (4) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"auto": Learns an asymmetric prior from the corpus.')
-                            
+                        
+    parser.add_argument('-fb','--filter_below', dest='filter_below',
+                        default=2, action='store', type=int,
+                        help='Filter out tokens that appear in less than filter_below documents (absolute number) . Defult value is 2')                      
+    parser.add_argument('-fa','--filter_above', dest='filter_above',
+                        default=.5, action='store', type=float,
+                        help='Filter out tokens that appear in more than filter_above documents (fraction of total corpus size, not absolute number). Defult value is 0.5')
+    
+    
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
-        
+    
     return args
     
 
 #====================================================================================
-def use_options(current, folder, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations, num_topics, coherence_range,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap):
+def use_options(current, folder, gaps_type, kmer_range, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations, num_topics, coherence_range,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap, filter_below, filter_above):
     options={}
     options['current'] = current
     options['folder'] = folder
     options['gaps_type']=gaps_type
+    options['kmer_range'] = kmer_range
     options['kmers_type'] = kmers_type
-
     options['bootstrap'] = bootstrap
     options['nbootstrap'] = nbootstrap
     options['datainput'] = datainput
@@ -179,6 +188,8 @@ def use_options(current, folder, gaps_type, kmers_type, bootstrap, nbootstrap, d
     options['include_names'] = include_names
     options['exclude_names'] = exclude_names
     options['tmap'] = tmap
+    options['filter_below'] = filter_below
+    options['filter_above'] = filter_above
     return options
 
 #====================================================================================
@@ -188,8 +199,46 @@ def parse_coherence_range(coherence_range):
         return list(range(start, limit, step))
     except ValueError:
         raise ValueError("coherence_range must be in the format 'start,limit,step' with integer values.")
-
         
+#=================================================================================
+def compute_coherence_values(dictionary, corpus, docs, id2word, coherencerange, options):
+    chunksize = options['chunksize']
+    alpha = options['alpha']
+    eta = options['eta']
+    iterations = options['iterations']
+    passes = options['passes']
+    eval_every = options['eval_every']
+    update_every = options['update_every']
+
+    """
+    Compute c_v coherence for various number of topics
+
+    Parameters:
+    ----------
+    dictionary : Gensim dictionary
+    corpus : Gensim corpus
+    docs : List of input documents
+    limit : Max num of topics
+    start : starting num of topics
+    step : stepping through the range of topics by #step
+
+    Returns:
+    -------
+    model_list : List of LDA topic models
+    coherence_values : Coherence values corresponding to the LDA model with respective number of topics
+    """
+    coherence_values = []
+    model_list = []
+    for numtopics in coherencerange:
+        model = LdaModel(corpus=corpus, id2word=id2word, chunksize=chunksize, \
+                     alpha=alpha, eta=eta, \
+                     iterations=iterations, num_topics=numtopics, \
+                     passes=passes, eval_every=eval_every, minimum_probability=0, update_every=update_every )
+        model_list.append(model)
+        coherencemodel = CoherenceModel(model=model, texts=docs, dictionary=dictionary, coherence='u_mass')
+        coherence_values.append(coherencemodel.get_coherence())
+    return model_list, coherence_values, coherencerange
+    
 #====================================================================================
 def plot_coherence_values(coherencevalues_loci, coherencerange_loci, subplots_per_row=1):
     """
@@ -250,60 +299,123 @@ def plot_coherence_values(coherencevalues_loci, coherencerange_loci, subplots_pe
     
     
 #====================================================================================
-#Tokenize Documents
-def tokenize(seq_list, k, gaps_type, kmers_type):  #gaps:rm_row/rm_com     #kmers_type:overlap/not_overlap
-    docs = []
+def tokenize(seq_list, k, kmers_type):
+    """
+    Tokenizes a list of sequences into k-mers based on the specified k-mers type.
+
+    Parameters:
+    seq_list (list of str): List of DNA sequences to be tokenized.
+    k (int): Length of the k-mers.
+    kmers_type (str): Type of k-mers to generate; either 'overlap' or 'not_overlap'.
+
+    Returns:
+    list of list of str: A list of documents, where each document is a list of k-mers from a sequence.
+    """
+    docs = []  # List to hold the tokenized documents
+
+    # Generate overlapping k-mers
     if kmers_type == 'overlap':
         for seq in seq_list:
-            doc=[]
+            doc = []
             for i in range(len(seq) - k + 1):
-                kmer = seq[i:i+k]
+                kmer = seq[i:i + k]
                 doc.append(kmer)
             docs.append(doc)
+
+    # Generate non-overlapping k-mers
     elif kmers_type == 'not_overlap':
         for seq in seq_list:
-            doc = [seq[i:i+k] for i in range(0, len(seq), k)]
+            doc = [seq[i:i + k] for i in range(0, len(seq), k)]
             docs.append(doc)
+
     return docs
+    
+#====================================================================================
+def kmer_docs(sequence, kmerrange, options):
+    """
+    Generates concatenated k-mer documents from sequences across a range of k-mer lengths.
 
+    Parameters:
+    sequence (list of str): List of DNA sequences to be tokenized.
+    kmerrange (range or list of int): Range or list of k-mer lengths to consider.
+    options (dict): Contains options like 'kmers_type' (either 'overlap' or 'not_overlap').
+
+    Returns:
+    list of list of str: List of documents, where each document is a concatenated list of k-mers.
+    """
+    kmers_type = options['kmers_type']  # Get the k-mers type from options
+    docs = []
+    for k in kmerrange:
+        tokenize_k = tokenize(sequence, k, kmers_type)  # Tokenize sequence with current k
+        if len(docs) > 0:
+            # Concatenate new k-mers to existing documents
+            docs = [docs[i] + tokenize_k[i] for i in range(len(tokenize_k))]
+        else:
+            docs = tokenize_k  # Initialize docs with the first set of k-mers
+
+    return docs  # Return the list of concatenated k-mer documents
+#====================================================================================
+def calculate_kprime(n, q=0.01, sigma={'G', 'C', 'A', 'T'}):
+    """
+    Compute the optimal k'  to minimize the probability of observing a random k-mer.
+    Parameters:
+    - n (int): sequence size.
+    - q (float): Desired probability (default is 0.01).
+    - sigma (set): Alphabet of k-mer characters (default is {'G', 'C', 'A', 'T'}).
+    
+    Returns:
+    - int: Optimal k'.
+    """
+    # Calculate the size of the alphabet |Σ|
+    sigma_size = len(sigma)
+    
+    # Apply the formula
+    kprime = math.ceil(math.log(n * (1 - q) / q, sigma_size))
+    
+    return kprime
 
 #====================================================================================
-def read_data(current, folder, num_loci,prefix='locus',suffix='.txt', include_names=set([]), exclude_names=set([])):
-    labels=[]
-    sequences=[]
-    varsitess=[]
-    seti = set(include_names)
-    sete = set(exclude_names)
-    real_loci = 0
-    for i in range(num_loci):
-        #Extract labels and sequences:
-        locus_i = prefix+str(i)+suffix
-        locus = os.path.join(current,folder,locus_i)        
-        label,sequence,varsites = phylip.readData(locus, ttype)
-        setl = set(label)
-        iok = (setl.intersection(seti) == seti)
-        if iok:
-            real_loci += 1
-            setle = setl.intersection(sete)
-            setl  = setl.difference(setle)
-            labelidx = [label.index(i) for i in setl]
-            label = [label[i] for i in labelidx]
-            sequence = [sequence[i] for i in labelidx]
+def kmerprime_docs(sequence, options):
+    """
+    Tokenize sequences into k-mers using a k' value calculated from the average sequence length.
+    
+    Parameters:
+    - seq_list (list of str): List of sequences to be tokenized.
+    - kmers_type (str): Type of k-mer generation ('overlap' for overlapping k-mers,
+      'not_overlap' for non-overlapping k-mers).
 
-            if DEBUG:
-                print(f"len(label) = {len(label)}")
-                print(f"len(sequence) = {len(sequence)}")
-            labels.append(label)
-            sequences.append(sequence)
-            varsitess.append(varsites)
-            labels = [[x.lower() for x in label] for label in labels]
-    return [labels,sequences,varsitess,real_loci]
+    Returns:
+    - docs (list of list of str): List of tokenized documents, where each document is a list of k-mers.
+    - kprime (int): The k' value used for all sequences.
+    """
+    kmers_type = options['kmers_type']
+    docs = []  # List to hold the tokenized documents
+    
+    # Calculate the average length of all sequences
+    avg_length = int(sum(len(seq) for seq in sequence) / len(sequence))
+    
+    # Calculate k' using the average length
+    kprime = calculate_kprime(avg_length)
 
+    # Generate overlapping k-mers
+    if kmers_type == 'overlap':
+        for seq in sequence:
+            doc = []
+            for i in range(len(seq) - kprime + 1):
+                kmer = seq[i:i + kprime]
+                doc.append(kmer)
+            docs.append(doc)
+
+    # Generate non-overlapping k-mers
+    elif kmers_type == 'not_overlap':
+        for seq in sequence:
+            doc = [seq[i:i + kprime] for i in range(0, len(seq), kprime)]
+            docs.append(doc)
+            
+    return docs, kprime
 
 #====================================================================================
-def read_one_data(current, folder, locus,options):
-    if DEBUG:
-        print(f"current = {current}")
+def read_one_data(current, folder, locus, options):
     prefix = options['prefix']
     suffix = options['suffix']
     ttype = options['ttype']
@@ -443,7 +555,6 @@ def read_nexus(nexus_file, ttype):
                 
     return [labels,sequences,varsitess,taxpartition,taxpartition_names]
 
-
 #====================================================================================
 # Use this to read labels from files for exclude or include operations and return as sets
 def read_inexfiles(file_name):
@@ -452,31 +563,6 @@ def read_inexfiles(file_name):
     # contains a name one by line
     with open(file_name, 'r') as f:
         return set([line.rstrip() for line in f])
-
-
-#====================================================================================
-# create kmers
-def kmer_docs(label, sequence, varsites, kmerrange, options):
-    gaps_type = options['gaps_type']
-    kmers_type = options['kmers_type']
-    docs=[]
-    miss = 0
-    for k in kmerrange:
-        tokenize_k = tokenize(sequence, k, gaps_type, kmers_type)
-        if len(docs)>0:
-            docs =[docs[i]+tokenize_k[i] for i in range(len(tokenize_k))]
-        else:
-            docs = tokenize_k
-    if DEBUG:
-        taxa_names = label
-        count = 0
-        for doc in docs:
-            count += len(doc)
-        print(f"Number of all words in docs = {count}")
-        print(f"len(taxa_names) = {len(taxa_names)} ")
-        print(f"taxa_names = {taxa_names} ")
-    return docs
-
 
 #====================================================================================
 #Merge the sequences labels with given number
@@ -535,52 +621,32 @@ def merge_documents(options, label, docs,taxpartition,taxpartition_names):
         docs = docs_merged
         return taxa_names, docs
         
-
-#=================================================================================
-#In each locus, for given corpus of documents (seqs) and given list of different number of topics (coherencerange) compute the coherence values
-def compute_coherence_values(dictionary, corpus, docs, id2word, coherencerange, options):
-    chunksize = options['chunksize']
-    alpha = options['alpha']
-    eta = options['eta']
-    iterations = options['iterations']
-    passes = options['passes']
-    eval_every = options['eval_every']
-    update_every = options['update_every']
-
+#====================================================================================
+def get_full_topic_distribution(doc_bow, model, num_topics):
     """
-    Compute c_v coherence for various number of topics
-
-    Parameters:
-    ----------
-    dictionary : Gensim dictionary
-    corpus : Gensim corpus
-    docs : List of input documents
-    limit : Max num of topics
-    start : starting num of topics
-    step : stepping through the range of topics by #step
-
-    Returns:
-    -------
-    model_list : List of LDA topic models
-    coherence_values : Coherence values corresponding to the LDA model with respective number of topics
+    Function to get the full topic distribution for a document, by setting missing topics to 0 probability
     """
-    coherence_values = []
-    model_list = []
-    for numtopics in coherencerange:
-        model = LdaModel(corpus=corpus, id2word=id2word, chunksize=chunksize, \
-                     alpha=alpha, eta=eta, \
-                     iterations=iterations, num_topics=numtopics, \
-                     passes=passes, eval_every=eval_every, minimum_probability=0, update_every=update_every )
-        model_list.append(model)
-        coherencemodel = CoherenceModel(model=model, texts=docs, dictionary=dictionary, coherence='u_mass')
-        coherence_values.append(coherencemodel.get_coherence())
-    return model_list, coherence_values, coherencerange
-
-  
+    topic_dist = model.get_document_topics(doc_bow, minimum_probability=0)
+    # Ensure all topics are included, set missing topics to 0 probability
+    topic_dict = dict(topic_dist)
+    full_topic_dist = [(topic_id, topic_dict.get(topic_id, 0.0)) for topic_id in range(num_topics)]
+    return full_topic_dist  
+        
 #====================================================================================
 def training(taxa_names, docs, options):
+    """
+    Train an LDA model on the provided documents, optionally optimizing the number of topics using coherence.
+
+    Parameters:
+    taxa_names (list): List of taxa names corresponding to the documents.
+    docs (list of lists): Tokenized documents (each document is a list of words).
+    options (dict): Dictionary of training parameters, including LDA model options and filtering thresholds.
+
+    Returns:
+    list: Contains various elements such as topics, taxa names, model details, and dictionary information.
+    """
     # Define ambiguous letters to be removed
-    ambiguous_letters_to_remove = ['n']
+    ambiguous_letters_to_remove = ['n']   #???
     # Remove words with specific ambiguous letters
     docs = [
         [word for word in doc if all(letter not in word for letter in ambiguous_letters_to_remove)]
@@ -597,13 +663,23 @@ def training(taxa_names, docs, options):
     eta = options['eta']
     tmap = options['tmap']
     num_topics = options['num_topics']
+    filter_below = options['filter_below']
+    filter_above = options['filter_above']
     coherence_range = options['coherence_range']
     
+    dictionary_before_filtering = len(dictionary)
+    
     #--------------- Filtering: remove rare and common tokens ---------------
-    dictionary.filter_extremes(no_below=2, no_above=0.5)
-    if DEBUG:
-        print(f"\nDictionary after filtering:\n{dictionary}")
-        
+    """
+    filter_extremes: dictionary.filter_extremes(no_below=5, no_above=0.5, keep_n=100000) (default)
+    Filter out tokens that appear in
+    (1)less than no_below documents (absolute number) or
+    (2)more than no_above documents (fraction of total corpus size, not absolute number).
+    After (1) and (2), keep only the first keep_n most frequent tokens (or keep all if None), the default is 100000.
+    """
+    dictionary.filter_extremes(no_below=filter_below, no_above=filter_above)
+    dictionary_after_filtering = len(dictionary)
+    
     if len(dictionary)<1:
         if DEBUG:
             print("ZERO SIZED DICTIONARY")
@@ -621,9 +697,8 @@ def training(taxa_names, docs, options):
     temp = dictionary[0]
     id2word = dictionary.id2token
     
-    
     if coherence_range is not None:
-        coherencerange = parse_coherence_range(coherence_range)    #this gives a list like [2, 6, 10, 14, 18, 22, 26] for start,limit,step=2,30,4
+       	coherencerange = parse_coherence_range(coherence_range)    #this gives a list like [2, 6, 10, 14, 18, 22, 26] for start,limit,step=2,30,4
         
         model_list, coherence_values, coherencerange = compute_coherence_values(dictionary, corpus, docs, id2word, coherencerange, options)
         
@@ -633,35 +708,32 @@ def training(taxa_names, docs, options):
     
     else:
         model = LdaModel(corpus=corpus, id2word=id2word, chunksize=chunksize, \
-                         alpha=alpha, eta=eta, \
-                         iterations=iterations, num_topics=num_topics, \
-                         passes=passes, eval_every=eval_every, minimum_probability=0, update_every=update_every )
-    #--------------------- Print topics/words frequencies -------------------
-    if DEBUG:
-        for idx, topic in model.print_topics(-1):
-            print("Topic: {} \nWords: {}\n".format(idx, topic))
-                
-    #---------------- Assigning the topics to the documents -----------------
-    docs_tuples = model[corpus]
-                
-    #--------------------- topics list for current locus --------------------
-    topics = [[y for (x,y) in model[corpus[i]]] for i in range(len(corpus))]
-   
+                        alpha=alpha, eta=eta, \
+                        iterations=iterations, num_topics=num_topics, \
+                        passes=passes, eval_every=eval_every, minimum_probability=0, update_every=update_every )
+
+    # Get the full topic distributions for all documents
+    docs_tuples = [get_full_topic_distribution(doc_bow, model, model.num_topics) for doc_bow in corpus]
+
+    # Extract topics list for each document
+    topics = [[y for (x, y) in doc_topic_dist] for doc_topic_dist in docs_tuples]
+
     
     if coherence_range:
-        return [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange]
+        return [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering]
     else:
-        return [topics, taxa_names, miss, model, corpus, dictionary]
+        return [topics, taxa_names, miss, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering]
         
         
 #====================================================================================
-def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, kmerrange, options):
+def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, options):
         
     datainput = options['datainput']
     nbootstrap = options['nbootstrap']
     bootstrap = options['bootstrap']
     gaps_type = options['gaps_type']
     coherence_range = options['coherence_range']
+    kmer_range = options['kmer_range']
 
     if datainput=="folder":
         if label == []: #assume we need to read the data for each locus now and have not done that beforehand
@@ -684,8 +756,14 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         #Convert List of lists to list of Strings again
         sequence = [''.join(ele) for ele in seq_matrix_cleaned]
         
-    if label != None:    
-        docs = kmer_docs(label, sequence, varsites, kmerrange, options)
+    if label != None:
+        if kmer_range:
+            kmerrange = range(kmer_range[0],kmer_range[1],kmer_range[2])
+#            print("kmerrange = ",list(kmerrange))
+            docs = kmer_docs(sequence, kmerrange, options)
+        else:
+            docs, kprime = kmerprime_docs(sequence, options)
+        
     
         if bootstrap == 'kmer' and nbootstrap>0:
             docs = [np.random.choice(docs[i],size=len(docs[i]),replace=True) for i in range(len(docs)) ]
@@ -694,12 +772,10 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         taxa_names, docs = merge_documents(options, label, docs, taxpartition,taxpartition_names)
         
         if coherence_range:
-#            [topics,taxa_names,miss,num_topics,coherence_values,coherencerange] = training(taxa_names, docs, options)
-            [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange] = training(taxa_names, docs, options)
+            [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering] = training(taxa_names, docs, options)
 
         else:
-#            [topics,taxa_names,miss] = training(taxa_names, docs, options)
-            [topics, taxa_names, miss, model, corpus, dictionary] = training(taxa_names, docs, options)
+            [topics, taxa_names, miss, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering] = training(taxa_names, docs, options)
 
             
         if topics == [] or topics == None:
@@ -707,31 +783,34 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         if taxa_names == [] or taxa_names == None:
             taxa_names = None
             
+        
         if coherence_range:
-#            return [topics, taxa_names, miss, real_locus, num_topics, coherence_values, coherencerange]
-            return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange]
+            if kmer_range:
+                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering]
+            else:
+                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, kprime]
         else:
-#            return [topics,taxa_names,miss,real_locus]
-            return [topics,taxa_names,miss,real_locus, model, corpus, dictionary]
+            if kmer_range:
+                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering]
+            else:
+                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering, kprime]
     else:
-        return [None, None, 0, 0, 0, 0, 0]   #?
-
+        return [None, None, 0, 0, 0, 0, 0, 0, 0]   #???
 
 #====================================================================================
 def topicmodeling(options):
     global num_loci
     datainput = options['datainput']
     
-    kmerrange = range(kmer_range_list[0],kmer_range_list[1],kmer_range_list[2])
-    print("kmerrange= ",list(kmerrange))
-    
+
     if datainput=="folder":
-        args = [(i, [],[], [], [], [], kmerrange,  options) for i in range(num_loci)]
+        args = [(i, [],[], [], [], [], options) for i in range(num_loci)]
     
     elif datainput=="nexus_file":
         loci = read_nexus(nexus_file, ttype)
         labels,sequences,varsitess,taxpartition,taxpartition_names = loci
-        args = [(i, labels[i], sequences[i], varsitess[i],taxpartition,taxpartition_names, kmerrange, options) for i in range(num_loci)]
+        args = [(i, labels[i], sequences[i], varsitess[i],taxpartition,taxpartition_names, options) for i in range(num_loci)]
+
 
     #mypool = multiprocessing.cpu_count() -1
     print("Number of cores to use:",mypool)
@@ -741,9 +820,14 @@ def topicmodeling(options):
         results = [r.get() for r in res]
 
 
-
     if coherence_range:
-        topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci = zip(*results)
+        if kmer_range:
+            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci = zip(*results)
+        else:
+            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, kprime_loci = zip(*results)
+            kprime_loci = [t for t in kprime_loci if t!=None]
+            print(f"\nkprime_loci = {kprime_loci}")
+
         num_topics_loci = [t for t in num_topics_loci if t!=None]
         coherencevalues_loci = [t for t in coherencevalues_loci if t!=None]
         coherencerange_loci = [t for t in coherencerange_loci if t!=None]
@@ -751,9 +835,10 @@ def topicmodeling(options):
         print(f"coherencerange_loci = {coherencerange_loci}")
         print(f"num_topics_loci = {num_topics_loci}")
         
+        
         #plot the coherence values in each locus:
         plot_coherence_values(coherencevalues_loci, coherencerange_loci, subplots_per_row=3)
-        
+        '''
         #-----------------------map topic using pyLDAvis ------------------------
         if tmap:
             folder_name = 'pyLDAvis_plots_loci'
@@ -766,11 +851,36 @@ def topicmodeling(options):
                 vis_data = gensimvis.prepare(model_loci[i], corpus_loci[i], dictionary_loci[i], mds='mmds')
                 visfile = os.path.join(folder_name, f'topicsmap_locus{i}.html')
                 pyLDAvis.save_html(vis_data, visfile)
-
+        '''
         
     else:
-        topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci = zip(*results)
+        if kmer_range:
+            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci = zip(*results)
+        else:
+            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, kprime_loci = zip(*results)
+            kprime_loci = [t for t in kprime_loci if t!=None]
+            print(f"\nkprime_loci = {kprime_loci}")
+           
+    print(f"length of dictionary before filtering in loci = {dictionary_before_filtering_loci}")
+    print(f"length of dictionary after filtering in loci = {dictionary_after_filtering_loci}")
+    
+    
+    #-----------------------map topic using pyLDAvis ------------------------
+    if tmap:
+        folder_name = 'pyLDAvis_plots_loci'
+        if os.path.exists(folder_name):
+            # Empty the folder if it exists
+            shutil.rmtree(folder_name)
+        os.makedirs(folder_name)
+        
+        for i in range(len(model_loci)):
+            vis_data = gensimvis.prepare(model_loci[i], corpus_loci[i], dictionary_loci[i], mds='mmds')
+            visfile = os.path.join(folder_name, f'topicsmap_locus{i}.html')
+            pyLDAvis.save_html(vis_data, visfile)
+     #----------------------------------------------------------------------           
+
     topics_loci = [t for t in topics_loci if t!=None]
+        
     taxa_names_loci  = [t for t in taxa_names_loci if t!=None]
     num_loci = np.sum(real_loci)
     miss = np.sum(miss)
@@ -828,12 +938,11 @@ def uncommonresolve(l, i, numtopics):
         return l[i]
 #====================================================================================
 def infile_func(topics_loci, taxa_names, num_loci, numsoftopics):
-#    print(f"topics_loci = {topics_loci}")
     if DEBUG:
         print(f"num_loci = {num_loci}")
     taxa_names_limited = [x[:10] for x in taxa_names]      #CONTML accepts population names lass than 10 letters
     num_pop= len(topics_loci)
-    with  open(INFILE, "w") as f:
+    with  open("INFILE", "w") as f:
         f.write('     {}    {}\n'.format(num_pop, num_loci))
         if coherence_range:
             f.write(' '.join(map(str, numsoftopics)) + ' ')
@@ -842,10 +951,8 @@ def infile_func(topics_loci, taxa_names, num_loci, numsoftopics):
         f.write('\n')
         for i in range(num_pop):
             myname = taxa_names[i]
-#            f.write(f'{myname:<15}{" ".join(map(str, topics_loci[i]))}\n')
-
             # Adjust the precision (number of decimal places) as needed, here set to 8
-            formatted_values = " ".join(f"{x:.8f}" for x in topics_loci[i])
+            formatted_values = " ".join(f"{x:.15f}" for x in topics_loci[i])
             f.write(f'{myname:<15}{formatted_values}\n')
     f.close()
 
@@ -856,16 +963,15 @@ def run_contml(infile):
     contmltimes  = 10
     with open('contmlinput','w') as f:
         contmlinput = f'g\nj\n{contmljumble}\n{contmltimes}\ny'
-        #contmlinput = f'g\n'
         f.write(contmlinput)
-    print("Contml is running...")
+    print("\nContml is running...")
     os.system(f'cat contmlinput | {PROGRAMPATH}contml2 -> contml2.log')
     
     #read the outtree file
     with open('outtree', 'r') as f:
         tree = f.read().replace('\n', ' ')
     return tree
-
+    
 #====================================================================================
 def run_neighbor(infile):
     os.system('rm outfile outtree')
@@ -920,15 +1026,15 @@ def simulation(current, folder, options):
                 taxa_names, topics_loci, miss, num_topics_loci = topicmodeling(options)
             else:
                 taxa_names, topics_loci, miss = topicmodeling(options)
-                
+              
             #for each locus remove last column from topic matrix
             topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
-            
             
             #concatenation of the topics for all loci
             topics_loci_concatenated = topics_loci_missingLast[0]
             for i in range(1,len(topics_loci_missingLast)):
                 topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
+
             #generate infile
             infile_func(topics_loci_concatenated, taxa_names, num_loci)
             if not useneighbor:
@@ -937,19 +1043,18 @@ def simulation(current, folder, options):
             else:
                 shutil.copy(infile,infile+"savecopy")
                 ourtree = run_neighbor(infile)
-            print(ourtree)
+                
+            if DEBUG:
+                print(f"outtree = {ourtree}")
             
             our_tree = dendropy.Tree.get(data=ourtree,schema="newick",taxon_namespace=tns)
             our_tree.encode_bipartitions()
             distance=treecompare.unweighted_robinson_foulds_distance(true_tree, our_tree, is_bipartitions_updated=True)
             distances.append(distance)
-            #Figtree
-            #os.system(f"{PROGRAMPATH}figtree outtree")
         count_equaltrue.append(distances.count(0))
             
     np.savetxt('trueAgreement_simulation{}'.format(diverge_time), count_equaltrue,  fmt='%s')
     print(f"\nResults of agreement with true tree using RF-distanc is witten to the file 'trueAgreement_simulation{diverge_time}'")
-
 
 #====================================================================================
 # a single analysis that shows the tree using figtree with show=True
@@ -957,6 +1062,7 @@ def single_run(show=False, options={}):
     global num_loci
 
     taxa_names, topics_loci, miss, numsoftopics = topicmodeling(options)
+                
     #for each locus remove last column from topic matrix
     topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
         
@@ -966,7 +1072,7 @@ def single_run(show=False, options={}):
         topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
         if DEBUG:
             print(f'topics_loci_concatenated =\n{topics_loci_concatenated}')
-        
+    
     #generate infile
     infile_func(topics_loci_concatenated, taxa_names, num_loci-miss, numsoftopics)
 
@@ -976,14 +1082,16 @@ def single_run(show=False, options={}):
     else:
         shutil.copy(infile,infile+"savecopy")
         ourtree = run_neighbor(infile)
-    print(f"outtree = {ourtree}")
+        
+    if DEBUG:
+        print(f"outtree = {ourtree}")
+    
     if show:
         #Figtree
         os.system(f"{PROGRAMPATH}figtree outtree")
     print('Effective loci use:', num_loci)
 
     return ourtree
-
         
 #====================================================================================
 def bootstrap_sequences(sequences):     #All loci
@@ -999,7 +1107,6 @@ def bootstrap_sequences(sequences):     #All loci
         newsequences.append(locusnewseq)
     return newsequences
     
-    
 #====================================================================================
 def bootstrap_sequence_one_locus(sequence):     #one locus
     num = len(sequence)
@@ -1011,8 +1118,6 @@ def bootstrap_sequence_one_locus(sequence):     #one locus
         newsequence.append(newseq)
     return newsequence
             
-
-
 #====================================================================================
 def bootstrap_run(bootstrap, options):
     global num_loci
@@ -1021,7 +1126,6 @@ def bootstrap_run(bootstrap, options):
 
     nbootstrap = options['nbootstrap']
     bootstrap = options['bootstrap']
-#    print(f"bootstrapping based on '{bootstrap}'")
     
     for bi in range(nbootstrap):
         print(f"\nBootstrapping number '{bi}'")
@@ -1040,11 +1144,12 @@ def bootstrap_run(bootstrap, options):
         infile_func(topics_loci_concatenated, taxa_names, num_loci-miss)
 
         if not useneighbor:
-            #run CONTML                                                                                                                    
+            #run CONTML
             ourtree = run_contml(infile)
         else:
             shutil.copy(infile,infile+"savecopy")
             ourtree = run_neighbor(infile)
+        
         print(f"Bootstrap tree #{bi} = {ourtree}")
         outtrees.append(ourtree)
         
@@ -1078,10 +1183,11 @@ if __name__ == "__main__":
     showtree = args.showtree
     tmap = args.tmap
     max_threads = args.max_threads
+    useneighbor = args.useneighbor # if true use neighbor if false use contml [default]
     mypool = multiprocessing.cpu_count() -1
     if max_threads < mypool:
         mypool = max_threads
-    useneighbor = args.useneighbor # if true use neighbor if false use contml [default]
+    
     #gensim LDA arguments:
     num_topics = args.num_topics
     coherence_range = args.coherence_range
@@ -1092,6 +1198,10 @@ if __name__ == "__main__":
     update_every = args.update_every
     alpha = args.alpha
     eta = args.eta
+    filter_below = args.filter_below
+    filter_above = args.filter_above
+    kmer_range = args.kmer_range
+        
     if alpha.isdigit():
         alpha = int(alpha)
     if eta.isdigit():
@@ -1105,7 +1215,7 @@ if __name__ == "__main__":
     
         
     if coherence_range is not None:
-        if coherence_range == '':  # Handle case where '-cr' is provided without a value
+        if coherence_range == '':  # Handle the case where '-cr' is provided without a value
             coherence_range = '2,20,4'
         else:
             coherence_range = coherence_range
@@ -1121,12 +1231,16 @@ if __name__ == "__main__":
     print(f"chunksize = {chunksize}")
     print(f"eval_every = {eval_every}")
     print(f"update_every = {update_every}")
-    print(f"type(alpha) = {type(alpha)}")
-    print(f"type(eta) = {type(eta)}")
     print(f"alpha = {alpha}")
     print(f"eta = {eta}")
+    print(f"filter_below = {filter_below}")
+    print(f"filter_above = {filter_above}")
     print(f"kmers_type = {kmers_type}")
-                                
+    
+    if gaps_type is None:
+        print(f"gaps_type = {gaps_type} ===> we did NOT REMOVE gaps")
+    else:
+        print(f"gaps_type = {gaps_type} ===> we REMOVED gaps")
     
     if DEBUG:
         print(f"\nnum_topics={num_topics}")
@@ -1144,19 +1258,29 @@ if __name__ == "__main__":
     else:
         ttype = 'STANDARD'
         filetype = 'PHYLIP'
+        
 
-    kmer_range_list = list(map(int, args.kmer_range.split(',')))
-    print(f"kmer_range_list = {kmer_range_list }")
+    print(f"kmer_range = {kmer_range}")
+    if kmer_range is not None:
+        if kmer_range == '':  # Handle the case where '-kr' is provided without a value
+            kmer_range = '2,10,2'
+        else:
+            kmer_range = kmer_range
+        kmer_range = list(map(int, kmer_range.split(',')))
+        print("kmers list = ",list(range(kmer_range[0],kmer_range[1],kmer_range[2])))
         
     
     include_names = read_inexfiles(include_file)
     exclude_names = read_inexfiles(exclude_file)
     
-    options = use_options(current, folder, gaps_type, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,coherence_range, passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap)
+    options = use_options(current, folder, gaps_type, kmer_range, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,coherence_range, passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap, filter_below, filter_above)
 
+
+    
     # sets name for data interaction with phylip programs contml2 or neighbor
     INFILE = "infile"
     infile = INFILE
+    
     #After cloning the repository, in topiccontml.py modify the PROGRAMPATH to the path that FigTree and CONTML are installed
     PROGRAMPATH = '~/bin/'
     
