@@ -735,6 +735,7 @@ def topicmodeling(options):
 
     #mypool = multiprocessing.cpu_count() -1
     print("Number of cores to use:",mypool)
+    
     with Pool(mypool) as p, tqdm(total=num_loci) as pbar:
         res = [p.apply_async(
             process_locus, args=args[i], callback=lambda _: pbar.update(1)) for i in range(num_loci)]
