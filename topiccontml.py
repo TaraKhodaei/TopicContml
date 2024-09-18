@@ -3,7 +3,6 @@
 # (c) Tara Khodaei and Peter Beerli 2023
 # github: khodaei
 #Import Libraries
-#TEST
 import numpy as np
 import multiprocessing
 from  tqdm import tqdm
