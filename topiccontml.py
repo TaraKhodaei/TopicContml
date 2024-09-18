@@ -944,12 +944,66 @@ def uncommonresolve(l, i, numtopics):
         return [1.0/numtopics for i in range(numtopics)]
     else:
         return l[i]
+        
+#====================================================================================
+def find_and_modify_duplicates_decimal(input_list, decimal_places):
+    # Dictionary to store the indexes of each element
+    index_dict = {}
+    # Convert input list to strings with specified decimal places for comparison
+    formatted_list = [f"{x:.{decimal_places}f}" for x in input_list]
+    
+    # Iterate over the list with index
+    for index, element in enumerate(formatted_list):
+        # If the element is already in the dictionary, append the index
+        if element in index_dict:
+            index_dict[element].append(index)
+        else:
+            # Otherwise, create a new entry with the index in a list
+            index_dict[element] = [index]
+    modify_formatted_list = formatted_list[:]
+    position = -1
+    # Modify duplicates by adding decimal values
+    for key, indexes in index_dict.items():
+        # Skip the first occurrence, start modifying from the second one
+        num = 1
+        for i in range(1, len(indexes)):
+            # Convert the formatted string to a list to modify the specific decimal position
+            modify_key = list(key)
+            new_digit = str(int(modify_key[position]) + num)
+            modify_key[position] = new_digit
+            # Reconstruct the modified value as a string
+            modified_key = ''.join(modify_key)
+            modify_formatted_list[indexes[i]] = modified_key
+            num +=1
+    return modify_formatted_list
+
+#====================================================================================
+def modify_infile(nested_list, decimal_places):
+    #print(f"nested_list = {nested_list}")
+    
+    # Create a deep copy to modify
+    modify_nestedlist = [sublist[:] for sublist in nested_list]
+    
+    # Loop over each index of the sublists
+    for index in range(len(modify_nestedlist[0])):
+        values_count = {}  # To track occurrences of each value
+        column = [sublist[index] for sublist in modify_nestedlist]
+        modified_column = find_and_modify_duplicates_decimal(column, decimal_places)
+        
+        # Replacing the first column
+        for i in range(len(modify_nestedlist)):
+            modify_nestedlist[i][index] = modified_column[i]
+            
+    return modify_nestedlist
+    
 #====================================================================================
 def infile_func(topics_loci, taxa_names, num_loci, numsoftopics):
+    modified_topics_loci = modify_infile(topics_loci, 15)
     if DEBUG:
         print(f"num_loci = {num_loci}")
     taxa_names_limited = [x[:10] for x in taxa_names]      #CONTML accepts population names lass than 10 letters
     num_pop= len(topics_loci)
+        
     with  open("INFILE", "w") as f:
         f.write('     {}    {}\n'.format(num_pop, num_loci))
         if coherence_range:
@@ -959,8 +1013,7 @@ def infile_func(topics_loci, taxa_names, num_loci, numsoftopics):
         f.write('\n')
         for i in range(num_pop):
             myname = taxa_names[i]
-            # Adjust the precision (number of decimal places) as needed, here set to 8
-            formatted_values = " ".join(f"{x:.15f}" for x in topics_loci[i])
+            formatted_values = " ".join(f"{x}" for x in modified_topics_loci[i])
             f.write(f'{myname:<15}{formatted_values}\n')
     f.close()
 
