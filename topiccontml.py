@@ -122,10 +122,10 @@ def myparser():
                         nargs='?', const='2,20,4', default=None,
                         help='Compute coherence for various number of topics in range of [start, limit, step]. Defult is 2,20,4, which means to compute coherence for topics number of 2,6,10,14,18')
     parser.add_argument('-i','--iterations', dest='iterations',
-                        default=100, action='store', type=int,
+                        default=500, action='store', type=int,
                         help='Maximum number of iterations through the corpus when inferring the topic distribution of a corpus. Defult value is 100 iterations.')
     parser.add_argument('-p','--passes', dest='passes',
-                        default=5, action='store', type=int,
+                        default=50, action='store', type=int,
                         help='Number of passes through the corpus during training. Defult value is 5.')
     parser.add_argument('-cs','--chunksize', dest='chunksize',
                         default=2000, action='store', type=int,
@@ -979,8 +979,6 @@ def find_and_modify_duplicates_decimal(input_list, decimal_places):
 
 #====================================================================================
 def modify_infile(nested_list, decimal_places):
-    #print(f"nested_list = {nested_list}")
-    
     # Create a deep copy to modify
     modify_nestedlist = [sublist[:] for sublist in nested_list]
     
