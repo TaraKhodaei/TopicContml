@@ -1193,7 +1193,8 @@ def bootstrap_run(bootstrap, options):
     for bi in range(nbootstrap):
         print(f"\nBootstrapping number '{bi}'")
         count_boot += 1
-        taxa_names, topics_loci, miss = topicmodeling(options)
+        #taxa_names, topics_loci, miss = topicmodeling(options)
+        taxa_names, topics_loci, miss, numsoftopics = topicmodeling(options)
         
         #for each locus remove last column from topic matrix
         topics_loci_missingLast = [[item[i][:-1] for i in range(len(item))] for item in topics_loci]
@@ -1204,7 +1205,8 @@ def bootstrap_run(bootstrap, options):
             topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
             
         #generate infile
-        infile_func(topics_loci_concatenated, taxa_names, num_loci-miss)
+        #infile_func(topics_loci_concatenated, taxa_names, num_loci-miss)
+        infile_func(topics_loci_concatenated, taxa_names, num_loci-miss, numsoftopics)
 
         if not useneighbor:
             #run CONTML
