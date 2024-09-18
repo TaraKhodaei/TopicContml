@@ -945,12 +945,13 @@ def uncommonresolve(l, i, numtopics):
     else:
         return l[i]
         
-#====================================================================================
+#=======================================sep142024====================================
 def find_and_modify_duplicates_decimal(input_list, decimal_places):
     # Dictionary to store the indexes of each element
     index_dict = {}
     # Convert input list to strings with specified decimal places for comparison
     formatted_list = [f"{x:.{decimal_places}f}" for x in input_list]
+    #print(f"formatted = {formatted_list}")
     
     # Iterate over the list with index
     for index, element in enumerate(formatted_list):
@@ -977,7 +978,7 @@ def find_and_modify_duplicates_decimal(input_list, decimal_places):
             num +=1
     return modify_formatted_list
 
-#====================================================================================
+
 def modify_infile(nested_list, decimal_places):
     #print(f"nested_list = {nested_list}")
     
@@ -987,18 +988,24 @@ def modify_infile(nested_list, decimal_places):
     # Loop over each index of the sublists
     for index in range(len(modify_nestedlist[0])):
         values_count = {}  # To track occurrences of each value
+        #print(f"\n\nindex = {index}")
         column = [sublist[index] for sublist in modify_nestedlist]
+        #print(f"column = {column}")
         modified_column = find_and_modify_duplicates_decimal(column, decimal_places)
+        #print(f"modified_column = {modified_column}")
         
         # Replacing the first column
         for i in range(len(modify_nestedlist)):
             modify_nestedlist[i][index] = modified_column[i]
-            
+
     return modify_nestedlist
     
-#====================================================================================
+
 def infile_func(topics_loci, taxa_names, num_loci, numsoftopics):
+    #print(f"topics_loci = {topics_loci}")
     modified_topics_loci = modify_infile(topics_loci, 15)
+    #print(f"modified_topics_loci = {modified_topics_loci}")
+
     if DEBUG:
         print(f"num_loci = {num_loci}")
     taxa_names_limited = [x[:10] for x in taxa_names]      #CONTML accepts population names lass than 10 letters
@@ -1016,6 +1023,28 @@ def infile_func(topics_loci, taxa_names, num_loci, numsoftopics):
             formatted_values = " ".join(f"{x}" for x in modified_topics_loci[i])
             f.write(f'{myname:<15}{formatted_values}\n')
     f.close()
+#====================================================================================
+#def infile_func(topics_loci, taxa_names, num_loci, numsoftopics):
+#    print(f"topics_loci = {topics_loci}")
+##    print(f"topics_loci = {topics_loci:.30f}")
+#    if DEBUG:
+#        print(f"num_loci = {num_loci}")
+#    taxa_names_limited = [x[:10] for x in taxa_names]      #CONTML accepts population names lass than 10 letters
+#    num_pop= len(topics_loci)
+#    with  open("INFILE", "w") as f:
+#        f.write('     {}    {}\n'.format(num_pop, num_loci))
+#        if coherence_range:
+#            f.write(' '.join(map(str, numsoftopics)) + ' ')
+#        else:
+#            f.write('{} '.format(num_topics)*num_loci)
+#        f.write('\n')
+#        for i in range(num_pop):
+#            myname = taxa_names[i]
+#            # Adjust the precision (number of decimal places) as needed, here set to 8
+##            formatted_values = " ".join(f"{x:.15f}" for x in topics_loci[i])
+#            formatted_values = " ".join(f"{x:.30f}" for x in topics_loci[i])
+#            f.write(f'{myname:<15}{formatted_values}\n')
+#    f.close()
 
 #====================================================================================
 def run_contml(infile):
