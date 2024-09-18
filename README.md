@@ -34,7 +34,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 ## Arguments
 
 **-h, --help**
-> Show this help message and exi  
+> Show this help message and exit  
 
 <br/>
 
