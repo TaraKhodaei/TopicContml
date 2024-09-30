@@ -642,7 +642,7 @@ def training(taxa_names, docs, options):
     list: Contains various elements such as topics, taxa names, model details, and dictionary information.
     """
     # Define ambiguous letters to be removed
-    ambiguous_letters_to_remove = ['n']   #???
+    ambiguous_letters_to_remove = ['n','N']   #???
     # Remove words with specific ambiguous letters
     docs = [
         [word for word in doc if all(letter not in word for letter in ambiguous_letters_to_remove)]
@@ -680,7 +680,8 @@ def training(taxa_names, docs, options):
         if DEBUG:
             print("ZERO SIZED DICTIONARY")
         miss += 1
-        return [None,None,miss]
+        #return [None,None,miss]
+        return [None, None,miss,0,0,0,0,0,0,0,0,0]
 
     #---------------------- Vectorize data: Bag-of-words --------------------
     corpus = [dictionary.doc2bow(doc) for doc in docs]
@@ -718,7 +719,7 @@ def training(taxa_names, docs, options):
     if coherence_range:
         return [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs]
     else:
-        return [topics, taxa_names, miss, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering, docs]
+        return [topics, taxa_names, miss, model, corpus, dictionary, num_topics,0,0,dictionary_before_filtering, dictionary_after_filtering, docs]
         
         
 #====================================================================================
@@ -736,7 +737,7 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
             label, sequence, varsites, real_locus  = read_one_data(options['current'], options['folder'], i, options)
             
     if sequence == [] or sequence == None:
-        return [None, None, 0, 0]
+        return [None, None, 0, 0, 0, 0, 0, 0, 0,0,0,0]   #???
                 
     if bootstrap == 'seq' and nbootstrap>0:
         sequence = bootstrap_sequences_one_locus(sequence)
@@ -746,30 +747,30 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         
     
     elif gaps_type == 'rm_col':
-
-        #---------------------test----------------------
-        # Determine the length of the longest string to check each position
-        max_length = max(len(s) for s in sequence)
-
-        # Create a nested list where each sublist will store the string indices with hyphens at each position
-        position_hyphen_indices = []
-
-        # Iterate through each character position up to the length of the longest string
-        for pos in range(max_length):
-            current_position_indices = []  # List to store indices of strings with a hyphen at this position
-            for idx, string in enumerate(sequence):
-                # Check if the position is valid within the string length and if the character is a hyphen
-                if pos < len(string) and string[pos] == '-':
-                    current_position_indices.append(idx)
-            # Append the list of indices for this position (empty if no hyphen at this position)
-            position_hyphen_indices.append(current_position_indices)
-        
-        # Filter to report only positions where there are no hyphens (empty lists)
-        positions_without_hyphen = [i for i, hyphen_indices in enumerate(position_hyphen_indices) if not hyphen_indices]
-
-        # Return the positions without any hyphen
-        print(f"Locus {i}:\npositions_without_hyphen = {positions_without_hyphen}")
-        #---------------------test----------------------
+        if DEBUG:
+            #---------------------test----------------------
+            # Determine the length of the longest string to check each position
+            max_length = max(len(s) for s in sequence)
+            
+            # Create a nested list where each sublist will store the string indices with hyphens at each position
+            position_hyphen_indices = []
+            
+            # Iterate through each character position up to the length of the longest string
+            for pos in range(max_length):
+                current_position_indices = []  # List to store indices of strings with a hyphen at this position
+                for idx, string in enumerate(sequence):
+                    # Check if the position is valid within the string length and if the character is a hyphen
+                    if pos < len(string) and string[pos] == '-':
+                        current_position_indices.append(idx)
+                        # Append the list of indices for this position (empty if no hyphen at this position)
+                        position_hyphen_indices.append(current_position_indices)
+                        
+                        # Filter to report only positions where there are no hyphens (empty lists)
+                        positions_without_hyphen = [i for i, hyphen_indices in enumerate(position_hyphen_indices) if not hyphen_indices]
+                        
+                        # Return the positions without any hyphen
+                        print(f"Locus {i}:\npositions_without_hyphen = {positions_without_hyphen}")
+                        #---------------------test----------------------
 
 
         # String List to Column Character Matrix Using zip() + map()
@@ -778,8 +779,10 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         seq_matrix_cleaned = np.array([col for col in seq_matrix.T if '-' not in col]).T
         #Convert List of lists to list of Strings again
         sequence = [''.join(ele) for ele in seq_matrix_cleaned]
-        
-    
+    #@@@`
+    if sequence == [] or sequence == None:
+        return [None, None, 0, 0, 0, 0, 0, 0, 0,0,0,0]   #???
+    #@@@
     if label != None:
         start_docs = time.time()
         if kmers:
@@ -804,7 +807,8 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
             [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs] = training(taxa_names, docs, options)
 
         else:
-            [topics, taxa_names, miss, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering, docs] = training(taxa_names, docs, options)
+            zzzzz = training(taxa_names, docs, options)
+            [topics, taxa_names, miss, model, corpus, dictionary, numtopics, dummy1, dummy2,dictionary_before_filtering, dictionary_after_filtering, docs] = zzzzz
 
         
         if topics == [] or topics == None:
@@ -825,7 +829,7 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
                 return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering,docs, kprime, words_time]
         
     else:
-        return [None, None, 0, 0, 0, 0, 0, 0, 0]   #???
+        return [None, None, 0, 0, 0, 0, 0, 0, 0,0,0,0]   #???
 
 #====================================================================================
 def topicmodeling(options):
