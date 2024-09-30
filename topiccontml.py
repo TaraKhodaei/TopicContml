@@ -716,9 +716,9 @@ def training(taxa_names, docs, options):
 
     
     if coherence_range:
-        return [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering]
+        return [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs]
     else:
-        return [topics, taxa_names, miss, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering]
+        return [topics, taxa_names, miss, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering, docs]
         
         
 #====================================================================================
@@ -743,15 +743,41 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
  
     if gaps_type == 'rm_row':
         sequence = [seq.replace('-', '') for seq in sequence]
-
+        
+    
     elif gaps_type == 'rm_col':
+
+        #---------------------test----------------------
+        # Determine the length of the longest string to check each position
+        max_length = max(len(s) for s in sequence)
+
+        # Create a nested list where each sublist will store the string indices with hyphens at each position
+        position_hyphen_indices = []
+
+        # Iterate through each character position up to the length of the longest string
+        for pos in range(max_length):
+            current_position_indices = []  # List to store indices of strings with a hyphen at this position
+            for idx, string in enumerate(sequence):
+                # Check if the position is valid within the string length and if the character is a hyphen
+                if pos < len(string) and string[pos] == '-':
+                    current_position_indices.append(idx)
+            # Append the list of indices for this position (empty if no hyphen at this position)
+            position_hyphen_indices.append(current_position_indices)
+        
+        # Filter to report only positions where there are no hyphens (empty lists)
+        positions_without_hyphen = [i for i, hyphen_indices in enumerate(position_hyphen_indices) if not hyphen_indices]
+
+        # Return the positions without any hyphen
+        print(f"Locus {i}:\npositions_without_hyphen = {positions_without_hyphen}")
+        #---------------------test----------------------
+
+
         # String List to Column Character Matrix Using zip() + map()
         seq_matrix = np.transpose(list(map(list, zip(*sequence))))
         #remove columns if the column has an element '-'
         seq_matrix_cleaned = np.array([col for col in seq_matrix.T if '-' not in col]).T
         #Convert List of lists to list of Strings again
         sequence = [''.join(ele) for ele in seq_matrix_cleaned]
-        
         
     
     if label != None:
@@ -765,10 +791,9 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         else:
             docs, kprime = kmerprime_docs(sequence, options)
         
-    
         if bootstrap == 'kmer' and nbootstrap>0:
             docs = [np.random.choice(docs[i],size=len(docs[i]),replace=True) for i in range(len(docs)) ]
-            
+                
         end_docs = time.time()
         words_time = end_docs - start_docs
 #        print(f"\n> extract words run time = {end_docs - start_docs}\n")
@@ -776,12 +801,12 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         taxa_names, docs = merge_documents(options, label, docs, taxpartition,taxpartition_names)
         
         if coherence_range:
-            [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering] = training(taxa_names, docs, options)
+            [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs] = training(taxa_names, docs, options)
 
         else:
-            [topics, taxa_names, miss, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering] = training(taxa_names, docs, options)
+            [topics, taxa_names, miss, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering, docs] = training(taxa_names, docs, options)
 
-            
+        
         if topics == [] or topics == None:
             topics = None
         if taxa_names == [] or taxa_names == None:
@@ -790,14 +815,15 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         
         if coherence_range:
             if kmers:
-                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, words_time]
+                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs, words_time]
             else:
-                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, kprime, words_time]
+                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs,  kprime, words_time]
         else:
             if kmers:
-                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering, words_time]
+                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering,docs, words_time]
             else:
-                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering, kprime, words_time]
+                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering,docs, kprime, words_time]
+        
     else:
         return [None, None, 0, 0, 0, 0, 0, 0, 0]   #???
 
@@ -819,6 +845,7 @@ def topicmodeling(options):
     #mypool = multiprocessing.cpu_count() -1
     print("\nmultilocus LDA is running ...")
     print("number of cores to use:",mypool)
+    
     start_lda = time.time()
     with Pool(mypool) as p, tqdm(total=num_loci) as pbar:
         res = [p.apply_async(
@@ -829,9 +856,9 @@ def topicmodeling(options):
 
     if coherence_range:
         if kmers:
-            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, words_time_loci = zip(*results)
+            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, docs_loci, words_time_loci = zip(*results)
         else:
-            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, kprime_loci, words_time_loci = zip(*results)
+            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, docs_loci, kprime_loci, words_time_loci = zip(*results)
             kprime_loci = [t for t in kprime_loci if t!=None]
             print(f"> optimal kmer lengths across loci = {kprime_loci}")
 
@@ -862,12 +889,13 @@ def topicmodeling(options):
         
     else:
         if kmers:
-            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, words_time_loci = zip(*results)
+            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, docs_loci, words_time_loci = zip(*results)
         else:
-            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, kprime_loci, words_time_loci = zip(*results)
+            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, docs_loci, kprime_loci, words_time_loci = zip(*results)
             kprime_loci = [t for t in kprime_loci if t!=None]
             print(f"> optimal kmer across loci = {kprime_loci}")
-           
+      
+      
     print(f"> extracting words across loci time = {sum(words_time_loci)}")
     print(f"> number of words across loci before filtering = {dictionary_before_filtering_loci}")
     print(f"> number of words across loci after filtering = {dictionary_after_filtering_loci}")
@@ -1002,7 +1030,7 @@ def infile_func(topics_loci, taxa_names, num_loci, numsoftopics):
     taxa_names_limited = [x[:10] for x in taxa_names]      #CONTML accepts population names lass than 10 letters
     num_pop= len(topics_loci)
         
-    with  open("INFILE", "w") as f:
+    with  open("infile", "w") as f:
         f.write('     {}    {}\n'.format(num_pop, num_loci))
         if coherence_range:
             f.write(' '.join(map(str, numsoftopics)) + ' ')
@@ -1184,7 +1212,6 @@ def bootstrap_sequence_one_locus(sequence):     #one locus
 #====================================================================================
 def bootstrap_run(bootstrap, options):
     global num_loci
-    count_boot = 1
     outtrees=[]
 
     nbootstrap = options['nbootstrap']
@@ -1192,7 +1219,6 @@ def bootstrap_run(bootstrap, options):
     
     for bi in range(nbootstrap):
         print(f"\nBootstrapping number '{bi}'")
-        count_boot += 1
         #taxa_names, topics_loci, miss = topicmodeling(options)
         taxa_names, topics_loci, miss, numsoftopics = topicmodeling(options)
         
@@ -1333,6 +1359,9 @@ if __name__ == "__main__":
             print("kmer length list = ",list(range(kmers[0],kmers[1],kmers[2])))
         elif len(kmers)==1: # one kmer given by user
             print("kmer length list = ", kmers)
+            
+    if bootstrap!= 'none':
+        print("bootstrap = ", bootstrap)
     print('====================================')
     
     include_names = read_inexfiles(include_file)
