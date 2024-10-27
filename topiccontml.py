@@ -52,7 +52,7 @@ def citations(options):
     print("|     (http://is.muni.cz/publication/884893/en)                                   |")
     if bootstrap!= 'none':
         print("| Sukumaran, J. and Holder, M. T. (2010). DendroPy: a Python library for          |")
-        print("|     phylogenetic computing, Bioinformatics, 26:1569--1571.                       |")
+        print("|     phylogenetic computing, Bioinformatics, 26:1569--1571.                      |")
         print("|     (https://dendropy.org/)                                                     |")
     print(" --------------------------------------------------------------------------------- ")
 
@@ -113,6 +113,9 @@ def myparser():
     parser.add_argument('-threads','--threads', dest='max_threads',
                         default=1000, action='store', type=int,
                         help='Number of cpu cores to use for locus-parallel runs, default is system max.')
+    parser.add_argument('-amb','--ambiguous_letters', dest='ambiguous_letters',
+                        nargs='?', const='n,N,?', default=None,
+                        help='ambiguous letters to be removed. The default is n and N letters')
 
     #gensim LDA arguments:
     parser.add_argument('-nt','--num_topics', dest='num_topics',
@@ -157,7 +160,7 @@ def myparser():
     
 
 #====================================================================================
-def use_options(current, folder, gaps_type, kmers, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations, num_topics, coherence_range,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap, filter_below, filter_above):
+def use_options(current, folder, gaps_type, kmers, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations, num_topics, coherence_range,passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap, filter_below, filter_above, ambiguous_letters):
     options={}
     options['current'] = current
     options['folder'] = folder
@@ -186,6 +189,7 @@ def use_options(current, folder, gaps_type, kmers, kmers_type, bootstrap, nboots
     options['tmap'] = tmap
     options['filter_below'] = filter_below
     options['filter_above'] = filter_above
+    options['ambiguous_letters'] = ambiguous_letters
     return options
 
 #====================================================================================
@@ -641,15 +645,16 @@ def training(taxa_names, docs, options):
     Returns:
     list: Contains various elements such as topics, taxa names, model details, and dictionary information.
     """
-    # Define ambiguous letters to be removed
-    ambiguous_letters_to_remove = ['n','N']   #???
-    # Remove words with specific ambiguous letters
-    docs = [
-        [word for word in doc if all(letter not in word for letter in ambiguous_letters_to_remove)]
-        for doc in docs]
+    ambiguous_letters = options['ambiguous_letters']
+    if ambiguous_letters:
+        # Remove words with specific ambiguous letters
+        docs = [[word for word in doc if all(letter not in word for letter in ambiguous_letters)] for doc in docs]
     
+    #We might have empty docs for some loci. "miss" is dealling with them. For example, it can happen when we remove the gaps from seqs in the locus by column. If we have few seqs with many gaps, it might result in  an empty docs for that locus.
     miss = 0
+    
     dictionary = Dictionary(docs)
+    #print(f"TEST ===> dictionary = {dictionary}")
     chunksize = options['chunksize']
     iterations = options['iterations']
     passes = options['passes']
@@ -677,11 +682,11 @@ def training(taxa_names, docs, options):
     dictionary_after_filtering = len(dictionary)
     
     if len(dictionary)<1:
+        print("ZERO SIZED DICTIONARY")
         if DEBUG:
             print("ZERO SIZED DICTIONARY")
         miss += 1
-        #return [None,None,miss]
-        return [None, None,miss,0,0,0,0,0,0,0,0,0]
+        return [None, None, miss, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     #---------------------- Vectorize data: Bag-of-words --------------------
     corpus = [dictionary.doc2bow(doc) for doc in docs]
@@ -719,12 +724,13 @@ def training(taxa_names, docs, options):
     if coherence_range:
         return [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs]
     else:
-        return [topics, taxa_names, miss, model, corpus, dictionary, num_topics,0,0,dictionary_before_filtering, dictionary_after_filtering, docs]
+        return [topics, taxa_names, miss, model, corpus, dictionary, num_topics, 0, 0, dictionary_before_filtering, dictionary_after_filtering, docs]
         
         
 #====================================================================================
 def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, options):
-        
+    
+    miss = 0
     datainput = options['datainput']
     nbootstrap = options['nbootstrap']
     bootstrap = options['bootstrap']
@@ -735,9 +741,10 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
     if datainput=="folder":
         if label == []: #assume we need to read the data for each locus now and have not done that beforehand
             label, sequence, varsites, real_locus  = read_one_data(options['current'], options['folder'], i, options)
-            
+    
     if sequence == [] or sequence == None:
-        return [None, None, 0, 0, 0, 0, 0, 0, 0,0,0,0]   #???
+        miss += 1
+        return [None, None, miss, real_locus, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
                 
     if bootstrap == 'seq' and nbootstrap>0:
         sequence = bootstrap_sequences_one_locus(sequence)
@@ -747,14 +754,14 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         
     
     elif gaps_type == 'rm_col':
-        if DEBUG:
-            #---------------------test----------------------
+        if DEBUG:    #test
+            #-------------------------------------------
             # Determine the length of the longest string to check each position
             max_length = max(len(s) for s in sequence)
-            
+
             # Create a nested list where each sublist will store the string indices with hyphens at each position
             position_hyphen_indices = []
-            
+
             # Iterate through each character position up to the length of the longest string
             for pos in range(max_length):
                 current_position_indices = []  # List to store indices of strings with a hyphen at this position
@@ -762,15 +769,15 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
                     # Check if the position is valid within the string length and if the character is a hyphen
                     if pos < len(string) and string[pos] == '-':
                         current_position_indices.append(idx)
-                        # Append the list of indices for this position (empty if no hyphen at this position)
-                        position_hyphen_indices.append(current_position_indices)
-                        
-                        # Filter to report only positions where there are no hyphens (empty lists)
-                        positions_without_hyphen = [i for i, hyphen_indices in enumerate(position_hyphen_indices) if not hyphen_indices]
-                        
-                        # Return the positions without any hyphen
-                        print(f"Locus {i}:\npositions_without_hyphen = {positions_without_hyphen}")
-                        #---------------------test----------------------
+                # Append the list of indices for this position (empty if no hyphen at this position)
+                position_hyphen_indices.append(current_position_indices)
+            
+            # Filter to report only positions where there are no hyphens (empty lists)
+            positions_without_hyphen = [i for i, hyphen_indices in enumerate(position_hyphen_indices) if not hyphen_indices]
+
+            # Return the positions without any hyphen
+            print(f"Locus {i}:\npositions_without_hyphen = {positions_without_hyphen}")
+            #-------------------------------------------
 
 
         # String List to Column Character Matrix Using zip() + map()
@@ -779,10 +786,11 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
         seq_matrix_cleaned = np.array([col for col in seq_matrix.T if '-' not in col]).T
         #Convert List of lists to list of Strings again
         sequence = [''.join(ele) for ele in seq_matrix_cleaned]
-    #@@@`
+
     if sequence == [] or sequence == None:
-        return [None, None, 0, 0, 0, 0, 0, 0, 0,0,0,0]   #???
-    #@@@
+        miss += 1
+        return [None, None, miss, real_locus, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
     if label != None:
         start_docs = time.time()
         if kmers:
@@ -799,37 +807,35 @@ def process_locus(i, label, sequence, varsites,taxpartition,taxpartition_names, 
                 
         end_docs = time.time()
         words_time = end_docs - start_docs
-#        print(f"\n> extract words run time = {end_docs - start_docs}\n")
 
         taxa_names, docs = merge_documents(options, label, docs, taxpartition,taxpartition_names)
         
+
         if coherence_range:
             [topics, taxa_names, miss, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs] = training(taxa_names, docs, options)
-
         else:
-            zzzzz = training(taxa_names, docs, options)
-            [topics, taxa_names, miss, model, corpus, dictionary, numtopics, dummy1, dummy2,dictionary_before_filtering, dictionary_after_filtering, docs] = zzzzz
+            myresult = training(taxa_names, docs, options)
+            [topics, taxa_names, miss, model, corpus, dictionary, numtopics, dummy1, dummy2, dictionary_before_filtering, dictionary_after_filtering, docs] = myresult
 
         
         if topics == [] or topics == None:
             topics = None
         if taxa_names == [] or taxa_names == None:
             taxa_names = None
-            
-        
+    
         if coherence_range:
             if kmers:
-                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs, words_time]
+                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs, None, words_time]
             else:
-                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs,  kprime, words_time]
+                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, num_topics, coherence_values, coherencerange, dictionary_before_filtering, dictionary_after_filtering, docs, kprime, words_time]
         else:
             if kmers:
-                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering,docs, words_time]
+                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, None, None, None, dictionary_before_filtering, dictionary_after_filtering, docs, None, words_time]
             else:
-                return [topics,taxa_names,miss,real_locus, model, corpus, dictionary, dictionary_before_filtering, dictionary_after_filtering,docs, kprime, words_time]
-        
+                return [topics, taxa_names, miss, real_locus, model, corpus, dictionary, None, None, None, dictionary_before_filtering, dictionary_after_filtering, docs, kprime, words_time]
     else:
-        return [None, None, 0, 0, 0, 0, 0, 0, 0,0,0,0]   #???
+        return [None, None, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
 
 #====================================================================================
 def topicmodeling(options):
@@ -860,7 +866,7 @@ def topicmodeling(options):
 
     if coherence_range:
         if kmers:
-            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, docs_loci, words_time_loci = zip(*results)
+            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, docs_loci, dummy, words_time_loci = zip(*results)
         else:
             topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, num_topics_loci, coherencevalues_loci, coherencerange_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, docs_loci, kprime_loci, words_time_loci = zip(*results)
             kprime_loci = [t for t in kprime_loci if t!=None]
@@ -890,12 +896,12 @@ def topicmodeling(options):
                 visfile = os.path.join(folder_name, f'topicsmap_locus{i}.html')
                 pyLDAvis.save_html(vis_data, visfile)
         '''
-        
+
     else:
         if kmers:
-            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, docs_loci, words_time_loci = zip(*results)
+            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, dummy1, dummy2, dummy3, dictionary_before_filtering_loci, dictionary_after_filtering_loci, docs_loci, dummy4, words_time_loci = zip(*results)
         else:
-            topics_loci,taxa_names_loci,miss, real_loci, model_loci, corpus_loci, dictionary_loci, dictionary_before_filtering_loci, dictionary_after_filtering_loci, docs_loci, kprime_loci, words_time_loci = zip(*results)
+            topics_loci, taxa_names_loci, miss, real_loci, model_loci, corpus_loci, dictionary_loci, dummy1, dummy2, dummy3, dictionary_before_filtering_loci, dictionary_after_filtering_loci, docs_loci, kprime_loci, words_time_loci = zip(*results)
             kprime_loci = [t for t in kprime_loci if t!=None]
             print(f"> optimal kmer across loci = {kprime_loci}")
       
@@ -917,16 +923,22 @@ def topicmodeling(options):
             vis_data = gensimvis.prepare(model_loci[i], corpus_loci[i], dictionary_loci[i], mds='mmds')
             visfile = os.path.join(folder_name, f'topicsmap_locus{i}.html')
             pyLDAvis.save_html(vis_data, visfile)
-     #----------------------------------------------------------------------           
-
+     #----------------------------------------------------------------------
+     
+    #Discard the loci that are empty
     topics_loci = [t for t in topics_loci if t!=None]
-        
+    
+    #Discard the taxa_names_loci that are empty
     taxa_names_loci  = [t for t in taxa_names_loci if t!=None]
+    
     num_loci = np.sum(real_loci)
     miss = np.sum(miss)
     print("> missed loci out of:",miss,num_loci)
+    
     if DEBUG:
         print(f"\ntaxa_names_loci = {taxa_names_loci}")
+
+
     taxa_names_loci_sets = [set(l) for l in  taxa_names_loci]
     common_taxa_names = list(set.intersection(*taxa_names_loci_sets))    #common taxa among loci
     uncommon_taxa_names  =  list(set.union(*taxa_names_loci_sets) - set.intersection(*taxa_names_loci_sets)) #uncommon taxa among loci
@@ -935,8 +947,7 @@ def topicmodeling(options):
         print("\nALL:", list(alltaxa))
         print("\nCOMMON:",common_taxa_names)
         print("\nNOT COMMON:", uncommon_taxa_names)
-     
-     
+          
     common_taxa_names_loci_indx = [[l.index(c) for c in common_taxa_names] for l in taxa_names_loci]
     uncommon_taxa_names_loci_indx = [[uncommoncheck(l,c) for c in uncommon_taxa_names] for l in taxa_names_loci]
     if DEBUG:
@@ -1152,7 +1163,6 @@ def simulation(current, folder, options):
     print(f"\nResults of agreement with true tree using RF-distanc is witten to the file 'trueAgreement_simulation{diverge_time}'")
 
 #====================================================================================
-# a single analysis that shows the tree using figtree with show=True
 def single_run(show=False, options={}):
     global num_loci
 
@@ -1203,13 +1213,13 @@ def bootstrap_sequences(sequences):     #All loci
     return newsequences
     
 #====================================================================================
-def bootstrap_sequence_one_locus(sequence):     #one locus
+def bootstrap_sequences_one_locus(sequence):     #one locus
     num = len(sequence)
     nsites = len(sequence[0])
     pick = np.random.randint(0,nsites,nsites)
     newsequence=[]
     for n in range(num):
-        newseq = "".join([locus[n][i] for i in  pick])
+        newseq = "".join([sequence[n][i] for i in  pick])
         newsequence.append(newseq)
     return newsequence
             
@@ -1223,7 +1233,6 @@ def bootstrap_run(bootstrap, options):
     
     for bi in range(nbootstrap):
         print(f"\nBootstrapping number '{bi}'")
-        #taxa_names, topics_loci, miss = topicmodeling(options)
         taxa_names, topics_loci, miss, numsoftopics = topicmodeling(options)
         
         #for each locus remove last column from topic matrix
@@ -1235,7 +1244,6 @@ def bootstrap_run(bootstrap, options):
             topics_loci_concatenated = [a+b for a, b in zip(topics_loci_concatenated, topics_loci_missingLast[i]) ]
             
         #generate infile
-        #infile_func(topics_loci_concatenated, taxa_names, num_loci-miss)
         infile_func(topics_loci_concatenated, taxa_names, num_loci-miss, numsoftopics)
 
         if not useneighbor:
@@ -1296,6 +1304,7 @@ if __name__ == "__main__":
     filter_below = args.filter_below
     filter_above = args.filter_above
     kmers = args.kmers
+    ambiguous_letters = args.ambiguous_letters
         
     if alpha.isdigit():
         alpha = int(alpha)
@@ -1354,8 +1363,6 @@ if __name__ == "__main__":
         ttype = 'STANDARD'
         filetype = 'PHYLIP'
         
-
-
     if kmers is not None:
         kmers = kmers
         kmers = list(map(int, kmers.split(',')))
@@ -1366,15 +1373,18 @@ if __name__ == "__main__":
             
     if bootstrap!= 'none':
         print("bootstrap = ", bootstrap)
+        
+    if ambiguous_letters is not None:
+        ambiguous_letters = list(ambiguous_letters.split(','))
+        print(f"ambiguous letters to be removed = {ambiguous_letters} " )
+        
     print('====================================')
     
     include_names = read_inexfiles(include_file)
     exclude_names = read_inexfiles(exclude_file)
     
-    options = use_options(current, folder, gaps_type, kmers, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,coherence_range, passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap, filter_below, filter_above)
+    options = use_options(current, folder, gaps_type, kmers, kmers_type, bootstrap, nbootstrap, datainput, merging, chunksize, iterations,num_topics,coherence_range, passes, eval_every, update_every, alpha, eta, prefix, suffix, ttype, filetype, include_names, exclude_names, tmap, filter_below, filter_above, ambiguous_letters)
 
-
-    
     # sets name for data interaction with phylip programs contml2 or neighbor
     INFILE = "infile"
     infile = INFILE
