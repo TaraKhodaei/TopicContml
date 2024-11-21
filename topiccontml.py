@@ -70,7 +70,7 @@ def myparser():
                         help='Merge sequences that start with the same m letters [e.g. population or species labels].')
     parser.add_argument('-k','--kmers', dest='kmers',
                         nargs='?', const='2,10,2', default=None,
-                        help='If you command "-k kmer_value", it process with that one kmer_value. If you command "-k min,max,step", it conciders "range min,max,step" to peocess with multiple kmer length in the range. If you command "-k" without any value, it conciders range 2,10,2 which leads to k-mers of lengths: 2,4,6,8. Without the option "-k" it considers optimal kmer length for documnets. ')
+                        help='Specifies the k-mer length(s) to use in processing. If you use -k kmer_value, the program processes with that specific k-mer length. If you provide -k min,max,step, the program considers a range of k-mer lengths starting from min to max with the given step. For example, -k 2,10,2 results in k-mer lengths of 2, 4, 6, and 8. If you use -k without any value, it defaults to the range 2,10,2. If the -k option is omitted entirely, the program determines an optimal k-mer length for document, which is our recommendation. ')
     parser.add_argument('-kt','--kmer_type', dest='kmers_type',
                         default='not_overlap', action='store',type=str,
                         help='default "not_overlap": extract kmers without overlapping. String "overlap": extract kmers with overlapping.')
@@ -115,7 +115,7 @@ def myparser():
                         help='Number of cpu cores to use for locus-parallel runs, default is system max.')
     parser.add_argument('-amb','--ambiguous_letters', dest='ambiguous_letters',
                         nargs='?', const='n,N,?', default=None,
-                        help='ambiguous letters to be removed. The default is n and N letters')
+                        help='Specifies ambiguous letters to be removed. K-mers containing any of these letters are filtered out before analysis. If -amb is provided without specifying letters, the default set n,N,? is used. To specify a custom set of ambiguous letters, such as N,?, -, use -amb N,\?, -.')
 
     #gensim LDA arguments:
     parser.add_argument('-nt','--num_topics', dest='num_topics',
