@@ -120,12 +120,17 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-nt NUM_TOPICS, --num_topics NUM_TOPICS**
-> Number of topics. Defult value is 5 topics.
+> Specifies the number of latent topics to extract from the training corpus. The default value is 5.
+
+<br/>
+
+**-cr COHERENCE_RANGE, --coherence_range COHERENCE_RANGE**
+> Specifies a range to compute coherence for different numbers of topics, given as [start, limit, step]. If -cr is used without specifying a range, the default is 2,20,4, which computes coherence for topic numbers 2, 6, 10, 14, and 18.
 
 <br/>
 
 **-i ITERATIONS, --iterations ITERATIONS**
-> Maximum number of iterations through the corpus when inferring the topic distribution of a corpus. Defult value is 1000 iterations.
+> Specifies the maximum number of iterations through the corpus when inferring the topic distribution. The default value is 500 iterations.
 
 <br/>
 
@@ -135,7 +140,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-cs CHUNKSIZE, --chunksize CHUNKSIZE**
-> Number of documents to be used in each training chunk. Defult value is 20.
+> Number of documents to be used in each training chunk. Defult value is 2000..
 
 <br/>
 
