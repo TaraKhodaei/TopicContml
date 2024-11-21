@@ -1,6 +1,6 @@
 <div align="center"><img src="images/workflow_new.jpg" width="600"/></div>
 <div align="center">
-  <iframe src="images/workflow_new.pdf" width="600" height="400"></iframe>
+  <iframe src="images/workflow.pdf" width="600" height="400"></iframe>
 </div>
 
 <br/> 
