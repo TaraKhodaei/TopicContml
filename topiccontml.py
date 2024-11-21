@@ -125,8 +125,8 @@ def myparser():
                         nargs='?', const='2,20,4', default=None,
                         help='Specifies a range to compute coherence for different numbers of topics, given as [start, limit, step]. If -cr is used without specifying a range, the default is 2,20,4, which computes coherence for topic numbers 2, 6, 10, 14, and 18.')
     parser.add_argument('-i','--iterations', dest='iterations',
-                        default=500, action='store', type=int,
-                        help='Specifies the maximum number of iterations through the corpus when inferring the topic distribution. The default value is 500 iterations.')
+                        default=1000, action='store', type=int,
+                        help='Specifies the maximum number of iterations through the corpus when inferring the topic distribution. The default value is 1000 iterations.')
     parser.add_argument('-p','--passes', dest='passes',
                         default=50, action='store', type=int,
                         help='Number of passes through the corpus during training. Defult value is 5.')
