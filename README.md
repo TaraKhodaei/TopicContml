@@ -274,27 +274,17 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 ## Bootstrap Analysis
 
 ### TopicContml Bootstrap
-we apply TopicContml to the aligned dataset using 1000 bootstrap replicates and report the majority-rule consensus trees (output `bootstrap_majority.tre`). We also map the bootstrap replicates onto the best topology tree found by TopicContml as the reference tree  (output `bootstrap_target_best.tre`).<br/>
-We do the same bootstrap analysis to the unaligned dataset. 
+Consider the provided dataset "loci_birds". we apply TopicContml to do bootstrapping using 1000 bootstrap replicates. It gerenerates the majority-rule consensus trees (output `bootstrap_majority.tre`).<br/> 
 > * **Aligned Dataset:** 
->> Loci Folder
 >> ```
->> python topiccontml.py -f loci_birds -m 3 -nl 14 -nb 1000 -show
->> ```
->> Nexus File
->> ```
->> python topiccontml.py -nf myfile.nex -m 3 -nl 14 -nb 1000 -show
+>> python topiccontml.py -e -f loci_birds -m 3 -nl 14 -nb 1000 -al 1 -show
 >> ```
 >
 > * **Unaligned Dataset:** 
->> Loci Folder
 >> ```
->> python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14 -nb 1000 -show
+>> python topiccontml.py -e -f loci_birds -m 3 -nl 14 -nb 1000 -al 1 -gt rm_row -show    
 >> ```
->> Nexus File
->> ```
->> python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14 -nb 1000 -show
->> ```
+
 
 
 ### SVDquartets Bootstrap
