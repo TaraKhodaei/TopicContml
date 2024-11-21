@@ -68,9 +68,17 @@ def myparser():
     parser.add_argument('-m','--merging', dest='merging',
                         default=None, action='store',type=int,
                         help='Merge sequences that start with the same m letters [e.g. population or species labels].')
+                        
+                                kmers = list(map(int, kmers.split(',')))
+        if len(kmers)>1:    # range of kmers given by user
+            print("kmer length list = ",list(range(kmers[0],kmers[1],kmers[2])))
+        elif len(kmers)==1: # one kmer given by user
+            print("kmer length list = ", kmers)
+            
+            
     parser.add_argument('-k','--kmers', dest='kmers',
                         nargs='?', const='2,10,2', default=None,
-                        help='range of kmers extraction: [lowerbound,max+1,step]. Default is 2,10,2 which leads to k-mers of lengths: 2,4,6,8')
+                        help='If you command "-k kmer_value", it process with that one kmer_value. If you command "-k min,max,step", it conciders "range min,max,step" to peocess with multiple kmer length in the range. If you command "-k" without any value, it conciders range 2,10,2 which leads to k-mers of lengths: 2,4,6,8. Without the option "-k" it considers optimal kmer length for documnets, which is our recommendation. ')
     parser.add_argument('-kt','--kmer_type', dest='kmers_type',
                         default='not_overlap', action='store',type=str,
                         help='default "not_overlap": extract kmers without overlapping. String "overlap": extract kmers with overlapping.')
