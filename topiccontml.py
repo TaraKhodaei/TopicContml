@@ -120,13 +120,13 @@ def myparser():
     #gensim LDA arguments:
     parser.add_argument('-nt','--num_topics', dest='num_topics',
                         default=None, action='store', type=int,
-                        help='Number of requested latent topics to be extracted from the training corpus. Defult value is 5 topics.')
+                        help='Specifies the number of latent topics to extract from the training corpus. The default value is 5.')
     parser.add_argument('-cr','--coherence_range', dest='coherence_range',
                         nargs='?', const='2,20,4', default=None,
-                        help='Compute coherence for various number of topics in range of [start, limit, step]. Defult is 2,20,4, which means to compute coherence for topics number of 2,6,10,14,18')
+                        help='Specifies a range to compute coherence for different numbers of topics, given as [start, limit, step]. If -cr is used without specifying a range, the default is 2,20,4, which computes coherence for topic numbers 2, 6, 10, 14, and 18.')
     parser.add_argument('-i','--iterations', dest='iterations',
                         default=500, action='store', type=int,
-                        help='Maximum number of iterations through the corpus when inferring the topic distribution of a corpus. Defult value is 100 iterations.')
+                        help='Specifies the maximum number of iterations through the corpus when inferring the topic distribution. The default value is 500 iterations.')
     parser.add_argument('-p','--passes', dest='passes',
                         default=50, action='store', type=int,
                         help='Number of passes through the corpus during training. Defult value is 5.')
@@ -141,17 +141,16 @@ def myparser():
                         help='Number of documents to be iterated through for each update. Defult value is 1.')
     parser.add_argument('-al','--alpha', dest='alpha',
                         default='auto',
-                        help='a priori belief on document-topic distribution. It can be: (1) scalar for a symmetric prior over document-topic distribution, (2) 1D array of length equal to num_topics to denote an asymmetric user defined prior for each topic. (3) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"asymmetric": a fixed normalized asymmetric prior of 1.0 / (topic_index + sqrt(num_topics)),"auto":Learns an asymmetric prior from the corpus')
+                        help='A priori belief on document-topic distribution. It can be: (1) scalar for a symmetric prior over document-topic distribution, (2) 1D array of length equal to num_topics to denote an asymmetric user defined prior for each topic. (3) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"asymmetric": a fixed normalized asymmetric prior of 1.0 / (topic_index + sqrt(num_topics)),"auto":Learns an asymmetric prior from the corpus')
     parser.add_argument('-et','--eta', dest='eta',
                         default='auto',
-                        help='a priori belief on topic-word distribution. It can be: (1) scalar for a symmetric prior over  topic-word distribution, (2) 1D array of length equal to num_words to denote an asymmetric user defined prior for each word, (3) matrix of shape (num_topics, num_words) to assign a probability for each word-topic combination. (4) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"auto": Learns an asymmetric prior from the corpus.')
-                        
+                        help='A priori belief on topic-word distribution. It can be: (1) scalar for a symmetric prior over  topic-word distribution, (2) 1D array of length equal to num_words to denote an asymmetric user defined prior for each word, (3) matrix of shape (num_topics, num_words) to assign a probability for each word-topic combination. (4) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"auto": Learns an asymmetric prior from the corpus.')
     parser.add_argument('-fb','--filter_below', dest='filter_below',
                         default=2, action='store', type=int,
-                        help='Filter out tokens that appear in less than filter_below documents (absolute number) . Defult value is 2')                      
+                        help='Filter out tokens that appear in less than filter_below documents (absolute number) . Defult value is 2.')
     parser.add_argument('-fa','--filter_above', dest='filter_above',
                         default=.5, action='store', type=float,
-                        help='Filter out tokens that appear in more than filter_above documents (fraction of total corpus size, not absolute number). Defult value is 0.5')
+                        help='Filter out tokens that appear in more than filter_above documents (fraction of total corpus size, not absolute number). Defult value is 0.5.')
     
     
     args = parser.parse_args(args=None if sys.argv[1:] else ['--help'])
