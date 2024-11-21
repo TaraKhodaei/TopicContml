@@ -225,7 +225,7 @@ full Phylip version is here: <a html="https://phylipweb.github.io/phylip/">https
 > mkdir -p ~/bin
 > ```
 
-#### `FigTree`
+#### * `FigTree`
 > If you do not have figtree on your computer we suggest to install figtree so that you can call it from the commandline.
 > - Download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a> <br/>
 > - Install figtree (on macs move figtree.app to the /Application folder) <br/>
