@@ -40,12 +40,12 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-e, --extended**
-> If the phylip dataset is in the extended format, use this. 
+> Indicates that the PHYLIP dataset is in the extended format. Use this option if your dataset uses the extended format, but note that individual names are still limited to a maximum of 10 characters.
  
 <br/>
 
 **-gt GAPS_TYPE, --gaps_type GAPS_TYPE**
-> String "rm_row": removes gaps(-) in each sequence by the row. String "rm_col": romoves the column if there is at least one gap(-) in that column. Otherwise, it does not make changes in sequences.
+> Specifies how gaps (-) in the sequence data should be handled. If set to "rm_row", gaps are removed within each sequence row, meaning gaps in individual sequences are stripped out. If set to "rm_col", columns (sites) containing at least one gap in any sequence are entirely removed from the dataset. If this option is not provided, gaps are included in the analysis by default.
 
 <br/>
 
