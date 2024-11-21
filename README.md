@@ -256,7 +256,6 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 > ```
 
 ### Dataset of FASTA Files
-#### Unassemblede Reads
 > * **Unassemblede Reads**
 >> If you have unassembled FASTA read files, you first need to generate the specified number of loci (n) using the provided loci.py script.
 >> For example, in our study, the PacBio dataset contained 100,000 reads for each of 12 species in the folder pacbio_reads. We generated a loci folder pacbio_loci with 100 loci using the following command:
@@ -268,6 +267,12 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 >> python topiccontml.py -k 20 -nl 100 -i 500 -f pacbio_loci -threads 1
 >> ```
 > * **Complete Genome**
+>> If you have complete genome FASTA files, you first need to generate the specified number of loci (n) using the provided loci.py script.
+>> For example, in our study, we had 59 complete genome from Ebola virus in folder "ebola_genomes", we generate one locus from them in
+>> output folder "ebola_loci" using 
+>>```
+>>python loci.py -fg 1 -if ebola_genomes -of ebola_loci
+>>```
 
 ### Bird Dataset
 > The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
