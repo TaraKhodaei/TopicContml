@@ -183,7 +183,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
     ```
    This should also trigger the installation of numpy and scipy.
    
-   For more information, see link html="https://radimrehurek.com/gensim/index.html">https://radimrehurek.com/gensim/index.html
+   For more information, see link <a html="https://radimrehurek.com/gensim/index.html">https://radimrehurek.com/gensim/index.html</a>
    
 3. `dendropy`:
     ```
