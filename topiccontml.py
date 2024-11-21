@@ -61,61 +61,61 @@ def myparser():
     parser = argparse.ArgumentParser(description='generates topic frequencies for the dataset to be applied as an input to CONTML to generate the phylogeny')
     parser.add_argument('-e','--extended', dest='phylip_type',
                         default=None, action='store_true',
-                        help='If the phylip dataset is in the extended format, use this [individual names are still limited to a max of 15 characters].')
+                        help='Indicates that the PHYLIP dataset is in the extended format. Use this option if your dataset uses the extended format, but note that individual names are still limited to a maximum of 10 characters.')
     parser.add_argument('-gt','--gaps_type', dest='gaps_type',
                         default=None, action='store',type=str,
-                        help='String "rm_row": removes gaps(-) in each sequence (by row). String "rm_col": removes site columns thathave at least one gap(-). Without this option the gaps(-) are included.')
+                        help='Specifies how gaps (-) in the sequence data should be handled. If set to "rm_row", gaps are removed within each sequence row, meaning gaps in individual sequences are stripped out. If set to "rm_col", columns (sites) containing at least one gap in any sequence are entirely removed from the dataset. If this option is not provided, gaps are included in the analysis by default.')
     parser.add_argument('-m','--merging', dest='merging',
                         default=None, action='store',type=int,
-                        help='Merge sequences that start with the same m letters [e.g. population or species labels].')
+                        help='Specifies the number of leading characters (m) to consider when merging sequences. Sequences that share the same first m characters are combined into a single sequence. This option is typically used for grouping sequences based on population or species labels. If not specified, no merging occurs. ')
     parser.add_argument('-k','--kmers', dest='kmers',
                         nargs='?', const='2,10,2', default=None,
                         help='Specifies the k-mer length(s) to use in processing. If you use -k kmer_value, the program processes with that specific k-mer length. If you provide -k min,max,step, the program considers a range of k-mer lengths starting from min to max with the given step. For example, -k 2,10,2 results in k-mer lengths of 2, 4, 6, and 8. If you use -k without any value, it defaults to the range 2,10,2. If the -k option is omitted entirely, the program determines an optimal k-mer length for document, which is our recommendation. ')
     parser.add_argument('-kt','--kmer_type', dest='kmers_type',
                         default='not_overlap', action='store',type=str,
-                        help='default "not_overlap": extract kmers without overlapping. String "overlap": extract kmers with overlapping.')
+                        help='Specifies how k-mers are extracted from the sequences. The default value is "not_overlap", which extracts k-mers without overlaps. If set to "overlap", k-mers are extracted with overlapping.')
     parser.add_argument('-f','--folder', dest='folder',
                         default=None, action='store',  type=str,
-                        help='the folder that contains loci data in separate text files called "locus0.txt", "locus1.txt", ...')
+                        help='Specifies the folder containing the loci data. The folder should include separate text files named in the format locus0.txt, locus1.txt, and so on.')
     parser.add_argument('-nf','--nexus_file', dest='nexus_file',
                         default=None, action='store',  type=str,
-                        help='the nexus file that contains the multiloci data')
+                        help='Specifies the Nexus file containing the multilocus data.')
     parser.add_argument('-nl','--num_loci', dest='num_loci',
                         default=1, action='store', type=int,
-                        help='number of loci')
+                        help='Specifies the number of loci to process. The default value is 1.')
     parser.add_argument('-sd','--siminfile_diverge_time', dest='sim_diverge',
                         default=None, action='store',
                         help='To do siminfile analysis for the folder with the given float number')
     parser.add_argument('-nb','--num_bootstrap', dest='num_bootstrap',
                         default=0, action='store', type=int,
-                        help='number of bootstrap replicates')
+                        help='Specifies the number of bootstrap replicates to perform. The default value is 0.')
     parser.add_argument('-bt','--bootstrap_type', dest='bootstrap_type',
                         default='kmer', action='store',type=str,
-                        help='default "kmer": do the bootsrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootsrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the ccase the sequences have the same lengths)')
+                        help='Specifies the type of bootstrap method to use. The default is "kmer", which selects x k-mers randomly from each document of x k-mers. Use "seq" to select x columns randomly from aligned sequences of the same length. Note that "seq" works only if all sequences have the same length.')
     parser.add_argument('-incl','--include', dest='include_file',
                         default=None, action='store',  type=str,
-                        help='the include file contains a list of names that must be analyzed')
+                        help='Specifies a file containing a list of names to be included in the analysis.')
     parser.add_argument('-excl','--exclude', dest='exclude_file',
                         default=None, action='store',  type=str,
-                        help='the exclude file contains a list of names that should not be analyzed')
+                        help='Specifies a file containing a list of names to be excluded from the analysis.')
     parser.add_argument('-force','--force', dest='force',
                         default=False, action='store_true',
-                        help='this forces to use all species using an uninformative topicfrequency for missings')
+                        help='Forces the inclusion of all species by using an uninformative topic frequency for any missing data.')
     parser.add_argument('-show','--showtree', dest='showtree',
                         default=False, action='store_true',
-                        help='uses figtree to show the tree')
+                        help='Displays the tree using FigTree.')
     parser.add_argument('-neighbor','--neighbor', dest='useneighbor',
                         default=False, action='store_true',
-                        help='uses Neighbor-Joining (neighbor) instead of contml')
+                        help='Enables the use of Neighbor-Joining (neighbor) instead of Contml.')
     parser.add_argument('-tmap', dest='tmap',
                         default=False, action='store_true',
-                        help='uses pyLDAvis to map the topics')
+                        help='Uses pyLDAvis to visualize and map the topics.')
     parser.add_argument('-threads','--threads', dest='max_threads',
                         default=1000, action='store', type=int,
-                        help='Number of cpu cores to use for locus-parallel runs, default is system max.')
+                        help='Specifies the number of CPU cores to use for locus-parallel runs. The default is the maximum number of cores available on the system.')
     parser.add_argument('-amb','--ambiguous_letters', dest='ambiguous_letters',
                         nargs='?', const='n,N,?', default=None,
-                        help='Specifies ambiguous letters to be removed. K-mers containing any of these letters are filtered out before analysis. If -amb is provided without specifying letters, the default set n,N,? is used. To specify a custom set of ambiguous letters, such as N,?, -, use -amb N,\?, -.')
+                        help='Specifies ambiguous letters to be removed. K-mers containing these letters are filtered out before analysis. If -amb is used without specifying letters, the default set (n,N,?) is applied. To provide a custom set, pass the desired letters as an argument (e.g., -amb N,\?, -).)
 
     #gensim LDA arguments:
     parser.add_argument('-nt','--num_topics', dest='num_topics',
