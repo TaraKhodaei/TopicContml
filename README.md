@@ -177,7 +177,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 ## Installation and Requirements
 
 * you most likely will need to install several **packages** for example: <br/>
-1. `gensim`:
+1. `gensim` (for topic modeling):
     ```
     conda install gensim       
     ```
@@ -185,14 +185,18 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
    
    For more information, see link <a html="https://radimrehurek.com/gensim/index.html">https://radimrehurek.com/gensim/index.html</a>
    
-3. `dendropy`:
+2. `dendropy`(for bootstrapping):
     ```
     conda install -c bioconda dendropy
     ```
     $\normalsize{\color{grey}{\textsf{For more information, see link }}}$ <a html="https://dendropy.org/">https://dendropy.org/</a>
-4. `matplotlib`:
+3. `matplotlib` (for visualization):
     ```
     conda install matplotlib
+    ```
+4. Additional dependencies:
+    ```
+    conda install numpy scipy pandas pyldavis
     ```
 * **`CONTML`**: You will need to compile a customized version of `CONTML`, we call it `CONTML2` because if you want to run bootstrap the standard contml may fail if two individuals have the same frequencies, the custom version allows for that, it also uses a default of 15 characters for the individual names. We suggest that you create bin directory in your homedirectory and place the binaries there. The full Phylip version is here: <a html="https://phylipweb.github.io/phylip/">https://phylipweb.github.io/phylip/</a>
 
