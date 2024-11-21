@@ -21,12 +21,13 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 ## Usage
 
-    topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-kr KMER_RANGE] [-kt KMER_TYPE] 
-                    [-f FOLDER] [-nf NEXUS_File] [-nl NUM_LOCI] [-sd SIM_DIVERGE] 
-                    [-nb NUM_BOOTSTRAP] [-bt BOOTSTRAP_TYPE] [incl INCLUDE_FILE] 
-                    [excl EXCLUDE_FILE] [-force] [-show]
-                    [-nt NUM_TOPICS] [-i ITERATIONS] [-p PASSES] [-cs CHUNKSIZE] 
-                    [-ee EVAL_EVERY] [-ue UPDATE_EVERY] [-al ALPHA] [-et ETA]  
+    topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-k KMERS] [-kt KMER_TYPE] [-f FOLDER]
+                    [-nf NEXUS_File] [-nl NUM_LOCI] [-sd SIM_DIVERGE] [-nb NUM_BOOTSTRAP] 
+                    [-bt BOOTSTRAP_TYPE] [incl INCLUDE_FILE] [excl EXCLUDE_FILE]
+                    [-force] [-show] [-tmap] [-threads] [-amb AMBIGUOUG_LETTERS]
+                    [-nt NUM_TOPICS] [-cr COHERENCE_RANGE] [-i ITERATIONS] [-p PASSES] 
+                    [-cs CHUNKSIZE] [-ee EVAL_EVERY] [-ue UPDATE_EVERY] [-al ALPHA] [-et ETA]
+                    [-fb FILTER_BELOW] [-fa FITER_ABOVE]
                         
 
 
