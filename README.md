@@ -262,6 +262,10 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 >>```
 >>python loci.py -fr 100 -if pacbio_reads -of pacbio_loci
 >>```
+>>Then we generted phylogenetic tree using:
+>> ```
+>> python topiccontml.py -k 20 -nl 100 -i 500 -f pacbio_loci -threads 1
+>> ```
 > * **Complete Genome**
 
 ### Bird Dataset
