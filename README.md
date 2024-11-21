@@ -256,6 +256,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 > ```
 
 ### Dataset of FASTA Files
+#### Unassemblede Reads
 > * **Unassemblede Reads**
 >> If you have unassembled FASTA read files, you first need to generate the specified number of loci (n) using the provided loci.py script.
 >> For example, in our study, the PacBio dataset contained 100,000 reads for each of 12 species in the folder pacbio_reads. We generated a loci folder pacbio_loci with 100 loci using the following command:
