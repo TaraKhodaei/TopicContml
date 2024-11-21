@@ -246,13 +246,16 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 ## Application to Datasets
-> **$\color{orange}{\textsf{NOTE}}$** <br/>
+
+### Dataset of Loci
 > The  dataset of sequences should be in the directory in a folder. Inside the folder, loci should be in separate text files called "`loci0.txt`", "`loci1.txt`", .... that follow the Phylip syntax.
 >  Each locus text file should have the following basic structure:
 > ```
 > ntax nchar 
 > labels + sequences
 > ```
+
+### Dataset of Unassemblede Reads
 
 ### Bird Dataset
 > The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
