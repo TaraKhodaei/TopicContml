@@ -210,11 +210,11 @@ full Phylip version is here: <a html="https://phylipweb.github.io/phylip/">https
 > cd phylip-part-3.69/src
 > make contml
 > ```
-> $\normalsize{\color{grey}{\textsf{If this fails you will need to see whether you can use one of the makefiles supplied using:}}}$
+> If this fails you will need to see whether you can use one of the makefiles supplied using:
 > ```
 > make -f makefile... contml
 > ```
-> $\normalsize{\color{grey}{\textsf{If that fails talk to someone to help compile a C program for your computer.}}}$
+> If that fails talk to someone to help compile a C program for your computer.
 >
 > You may need to use this once:
 > ```
@@ -226,14 +226,14 @@ full Phylip version is here: <a html="https://phylipweb.github.io/phylip/">https
 > ```
 
 #### `FigTree`
-If you do not have figtree on your computer we suggest to install figtree so that you can call it from the commandline.
-    > - Download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a> <br/>
-    > - Install figtree (on macs move figtree.app to the /Application folder) <br/>
-    > - create a script 'figtree' with this content: <br/>
-    > !/bin/sh <br/>
-    > in the distribution of figtree is a also a jar file perhaps you simply put that somewhere and reference it here, or then use something like below that uses te jarfile from the application java -Xms64m -Xmx512m -jar /Applications/FigTree\ v1.4.4.app/Contents/Resources/Java/figtree.jar $*
-    > - move that figtree into your ~/bin folder and make sure figtree is executable, for example:
-    > chmod +x ~/bin/figtree
+> If you do not have figtree on your computer we suggest to install figtree so that you can call it from the commandline.
+> - Download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a> <br/>
+> - Install figtree (on macs move figtree.app to the /Application folder) <br/>
+> - create a script 'figtree' with this content: <br/>
+> !/bin/sh <br/>
+> in the distribution of figtree is a also a jar file perhaps you simply put that somewhere and reference it here, or then use something like below that uses te jarfile from the application java -Xms64m -Xmx512m -jar /Applications/FigTree\ v1.4.4.app/Contents/Resources/Java/figtree.jar $*
+> - move that figtree into your ~/bin folder and make sure figtree is executable, for example:
+> chmod +x ~/bin/figtree
 
 * After cloning the repository, in `topiccontml.py` modify the `PROGRAMPATH` to the path that FigTree and CONTML are installed.
 
