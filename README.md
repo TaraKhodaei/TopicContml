@@ -265,32 +265,6 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 >> ntax nchar 
 >> labels + sequences
 >> ```
->
-> * **NEXUS file**
->> In this case, the dataset of sequences are in a NEXUS file (e.g. "myfile.nex"). 
->> ```
->> python topiccontml.py -nf myfile.nex -m 3 -gt rm_row -nl 14 -show
->> ```
->> 
->> **$\color{orange}{\textsf{NOTE}}$** <br/>
->>  NEXUS file and blocks should have the following basic structure:
->> ```
->> #nexus
->> 
->> begin data;
->>       dimensions ntax=... nchar=...;
->>       format datatype=dna missing=? gap=-;
->>       matrix
->> labels + sequences
->> ;
->> end;
->> begin sets;
->>       charpartition ...
->> end;
->> begin sets;
->>       taxpartition ...
->> end;
->> ```
 
 
 <br/>
