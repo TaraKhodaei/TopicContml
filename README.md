@@ -267,24 +267,12 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 >> python topiccontml.py -k 20 -nl 100 -i 500 -f pacbio_loci -threads 1
 >> ```
 > * **Complete Genome**
->> If you have complete genome FASTA files, you first need to generate the specified number of loci (n) using the provided loci.py script.
->> For example, in our study, we had 59 complete genome from Ebola virus in folder "ebola_genomes", we generate one locus from them in
->> output folder "ebola_loci" using 
+>> If you have complete genome FASTA files, you first need to generate the specified number of loci (n) using the loci.py script.
+>> For example, in our study, we had 59 complete genomes from the Ebola virus stored in the folder ebola_genomes. We generated one locus
+>> from these genomes in the output folder ebola_loci using the following command: 
 >>```
 >>python loci.py -fg 1 -if ebola_genomes -of ebola_loci
 >>```
-
-### Bird Dataset
-> The bird sequences are collected from 14 loci and 9 different locations. For each locus, the length of each sequence varies from 288 to 418 base pairs, and the number of sequences varies from 78 to 92 individuals. <br/>
->
-> * **loci Folder**
->> In this case, the dataset of sequences are in a folder (e.g. "loci_birds"). <br/>
-    In each locus, we merge the words from the same location (e.g. using 3 first letters) and then apply LDA.
->> ```
->> python topiccontml.py -f loci_birds -m 3 -gt rm_row -nl 14 -show
->> ```
->> <div align="center"><img src="images/experiment1_birds.jpg" width="300"/></div>
->> 
 
 
 
@@ -299,6 +287,7 @@ Consider the provided dataset "loci_birds". we apply TopicContml to do bootstrap
 > ```
 > python topiccontml.py -e -f loci_birds -m 3 -nl 14 -nb 1000 -al 1 -show
 > ```
+> As you noticed, in each locus, we merge the words from the same location (using 3 first letters) and then apply LDA.
 >
 > * **Unaligned Dataset:** 
 > ```
