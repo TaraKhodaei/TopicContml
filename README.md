@@ -130,7 +130,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-i ITERATIONS, --iterations ITERATIONS**
-> Specifies the maximum number of iterations through the corpus when inferring the topic distribution. The default value is 500 iterations.
+> Specifies the maximum number of iterations through the corpus when inferring the topic distribution. The default value is 1000 iterations.
 
 <br/>
 
