@@ -276,14 +276,14 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 ### TopicContml Bootstrap
 Consider the provided dataset "loci_birds". we apply TopicContml to do bootstrapping using 1000 bootstrap replicates. It gerenerates the majority-rule consensus trees (output `bootstrap_majority.tre`).<br/> 
 > * **Aligned Dataset:** 
->> ```
->> python topiccontml.py -e -f loci_birds -m 3 -nl 14 -nb 1000 -al 1 -show
->> ```
+> ```
+> python topiccontml.py -e -f loci_birds -m 3 -nl 14 -nb 1000 -al 1 -show
+> ```
 >
 > * **Unaligned Dataset:** 
->> ```
->> python topiccontml.py -e -f loci_birds -m 3 -nl 14 -nb 1000 -al 1 -gt rm_row -show    
->> ```
+> ```
+> python topiccontml.py -e -f loci_birds -m 3 -nl 14 -nb 1000 -al 1 -gt rm_row -show    
+> ```
 
 
 
