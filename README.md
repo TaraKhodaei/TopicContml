@@ -21,10 +21,10 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 ## Usage
 
-    topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-k KMERS] [-kt KMER_TYPE] [-f FOLDER]
-                    [-nf NEXUS_File] [-nl NUM_LOCI] [-sd SIM_DIVERGE] [-nb NUM_BOOTSTRAP] 
-                    [-bt BOOTSTRAP_TYPE] [incl INCLUDE_FILE] [excl EXCLUDE_FILE]
-                    [-force] [-show] [-tmap] [-threads] [-amb AMBIGUOUG_LETTERS]
+    topiccontml.py [-h] [-e] [-gt GAPS_TYPE] [-m MERGING] [-k KMERS] [-kt KMER_TYPE] 
+                    [-f FOLDER][-nl NUM_LOCI] [-nb NUM_BOOTSTRAP] [-bt BOOTSTRAP_TYPE] 
+                    [incl INCLUDE_FILE] [excl EXCLUDE_FILE][-force] [-show] [-tmap] 
+                    [-threads] [-amb AMBIGUOUG_LETTERS]
                     [-nt NUM_TOPICS] [-cr COHERENCE_RANGE] [-i ITERATIONS] [-p PASSES] 
                     [-cs CHUNKSIZE] [-ee EVAL_EVERY] [-ue UPDATE_EVERY] [-al ALPHA] [-et ETA]
                     [-fb FILTER_BELOW] [-fa FITER_ABOVE]
@@ -54,8 +54,8 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 <br/>
 
-**-kr KMER_RANGE, --kmer_range KMER_RANGE**
-> Range of kmers extraction, lowerbound,max+1,step [for example: 2,10,2 leads to non overlapping k-mers: 2,4,6,8']
+**-kr KMERS, --kmers KMERS**
+> Specifies the k-mer length(s) to use in processing. If you use -k kmer_value, the program processes with that specific k-mer length. If you provide -k min,max,step, the program considers a range of k-mer lengths starting from min to max with the given step. For example, -k 2,10,2 results in k-mer lengths of 2, 4, 6, and 8. If you use -k without any value, it defaults to the range 2,10,2. If the -k option is omitted entirely, the program determines an optimal k-mer length for document, which is our recommendation.
 
 <br/>
 
@@ -69,21 +69,10 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 
 <br/>
 
-**-nf NEXUS_File, --nexus_file NEXUS_File**
-> The NEXUS file that contains the multiloci data.
-
-<br/>
-
 **-nl NUM_LOCI, --num_loci NUM_LOCI**
 > Number of loci
 
 <br/>
-
-**-sd SIM_DIVERGE, --siminfile_diverge_time SIM_DIVERGE**
-> To do siminfile analysis for the folder with the given float number of sim_diverge
-
-<br/>
-
 
 **-nb NUM_BOOTSTRAP, --num_bootstrap NUM_BOOTSTRAP**
 > Number of bootstrap replicates
