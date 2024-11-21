@@ -35,7 +35,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 ## Arguments
 
 **-h, --help**
-> Show this help message and exit  
+> Show this help message and exit.  
 
 <br/>
 
@@ -70,37 +70,52 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-nl NUM_LOCI, --num_loci NUM_LOCI**
-> Number of loci
+> Number of loci.
 
 <br/>
 
 **-nb NUM_BOOTSTRAP, --num_bootstrap NUM_BOOTSTRAP**
-> Number of bootstrap replicates
+> Number of bootstrap replicates.
 
 <br/>
 
 **-bt BOOTSTRAP_TYPE, --bootstrap_type BOOTSTRAP_TYPE**
-> Default "kmer": do the bootstrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootstrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the case the sequences have the same lengths)
+> Default "kmer": do the bootstrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootstrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the case the sequences have the same lengths).
 
 <br/>
 
 **-incl INCLUDE_FILE, --include INCLUDE_FILE**
-> The include file contains a list of names that must be analyzed
+> The include file contains a list of names that must be analyzed.
 
 <br/>
 
 **-excl EXCLUDE_FILE, --exclude EXCLUDE_FILE**
-> The exclude file contains a list of names that should not be analyzed
+> The exclude file contains a list of names that should not be analyzed.
 
 <br/>
 
 **-force , --force**
-> This forces to use all species using an uninformative topicfrequency for missings
+> This forces to use all species using an uninformative topicfrequency for missings.
 
 <br/>
 
 **-show , --showtree**
-> Uses figtree to show the tree
+> Uses figtree to show the tree.
+
+<br/>
+
+**-tmap**
+> uses pyLDAvis to map the topics.
+
+<br/>
+
+**-threads**
+> Number of cpu cores to use for locus-parallel runs, default is system max.
+
+<br/>
+
+**-amb , --ambiguous_letters**
+> Specifies ambiguous letters to be removed. K-mers containing any of these letters are filtered out before analysis. If -amb is provided without specifying letters, the default set n,N,? is used. To specify a custom set of ambiguous letters, such as N,?, -, use -amb N,\?, -.
 
 <br/>
 
