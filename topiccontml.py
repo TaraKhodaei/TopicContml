@@ -1414,6 +1414,7 @@ if __name__ == "__main__":
             for tr in outtrees:
                 btrees.write(tr+'\n')
                 
+        start_sumtree = time.time()
         print(f"\nBootstrap trees using SumTrees")
         os.system(f"sumtrees.py --set-edges=support --decimals=0 --percentages --output-tree-filepath=bootstrap_target_best.tre --target=best.tre bootstrap_replicates.tre -q")
         os.system(f"sumtrees.py --set-edges=support --decimals=0 --percentages --output-tree-filepath=bootstrap_majority.tre bootstrap_replicates.tre -q")
@@ -1421,6 +1422,8 @@ if __name__ == "__main__":
         print(f"\n> Bootstrap trees are written into files 'bootstrap_target_best.tre' and 'bootstrap_majority.tre'")
         print(f"> Bootstrap replicates are written into file 'bootstrap_replicates.tre'")
         print(f"> TopicContml tree is written into file 'best.tre'")
+        end_sumtree = time.time()
+        print(f"> sumtree run time = {end_sumtree - start_sumtree}")
     else:
         single_run(showtree,options)
     end_total = time.time()
