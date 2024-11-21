@@ -150,7 +150,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-al ALPHA, --alpha ALPHA**
-> A priori belief on document-topic distribution. It can be: (1) scalar for a symmetric prior over document-topic distribution, (2) 1D array of length equal to num_topics to denote an asymmetric user defined prior for each topic. (3) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"asymmetric": a fixed normalized asymmetric prior of 1.0 / (topic_index + sqrt(num_topics)),"auto":Learns an asymmetric prior from the corpus
+> A priori belief on document-topic distribution. It can be: (1) scalar for a symmetric prior over document-topic distribution, (2) 1D array of length equal to num_topics to denote an asymmetric user defined prior for each topic. (3) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"asymmetric": a fixed normalized asymmetric prior of 1.0 / (topic_index + sqrt(num_topics)),"auto":Learns an asymmetric prior from the corpus.
 
 <br/>
 
@@ -158,6 +158,16 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 > A priori belief on topic-word distribution. It can be: (1) scalar for a symmetric prior over  topic-word distribution, (2) 1D array of length equal to num_words to denote an asymmetric user defined prior for each word, (3) matrix of shape (num_topics, num_words) to assign a probability for each word-topic combination. (4) Alternatively default prior strings:"symmetric": a fixed symmetric prior of 1.0 / num_topics,"auto": Learns an asymmetric prior from the corpus.
 
 <br/>
+
+**-fb FILTER_BELOW, --filter_below FILTER_BELOW**
+> Filter out tokens that appear in less than filter_below documents (absolute number) . Defult value is 2.
+
+<br/>
+
+**-fa FILTER_ABOVE, --filter_above FILTER_ABOVE**
+> Filter out tokens that appear in more than filter_above documents (fraction of total corpus size, not absolute number). Defult value is 0.5.
+
+> <br/>
 
 ## Installation and Requirements
 
