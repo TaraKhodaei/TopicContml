@@ -50,7 +50,7 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-m MERGING, --merging MERGING**
-> Merge sequences that start with the same number of MERGING letters.
+> Specifies the number of leading characters (m) to consider when merging sequences. Sequences that share the same first m characters are combined into a single sequence. This option is typically used for grouping sequences based on population or species labels. If not specified, no merging occurs.
 
 <br/>
 
@@ -60,62 +60,62 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 <br/>
 
 **-kt KMER_TYPE, --kmer_type KMER_TYPE**
-> Default "not_overlap": extract kmers without overlapping. String "overlap": extract kmers with overlapping.
+> Specifies how k-mers are extracted from the sequences. The default value is "not_overlap", which extracts k-mers without overlaps. If set to "overlap", k-mers are extracted with overlapping.
 
 <br/>
 
 **-f FOLDER, --folder FOLDER**
-> The folder that contains loci data in separate text files called "locus0.txt", "locus1.txt", ...
+> Specifies the folder containing the loci data. The folder should include separate text files named in the format locus0.txt, locus1.txt, and so on.
 
 <br/>
 
 **-nl NUM_LOCI, --num_loci NUM_LOCI**
-> Number of loci.
+> Specifies the number of loci to process. The default value is 1.
 
 <br/>
 
 **-nb NUM_BOOTSTRAP, --num_bootstrap NUM_BOOTSTRAP**
-> Number of bootstrap replicates.
+> Specifies the number of bootstrap replicates to perform. The default value is 0.
 
 <br/>
 
 **-bt BOOTSTRAP_TYPE, --bootstrap_type BOOTSTRAP_TYPE**
-> Default "kmer": do the bootstrap by randomly choosing  x kmers in each document of x kmers. String "seq": do the bootstrap by randomly choosing  x columns  of aligned sequences with the same length of x ("seq" works only in the case the sequences have the same lengths).
+> Specifies the type of bootstrap method to use. The default is "kmer", which selects x k-mers randomly from each document of x k-mers. Use "seq" to select x columns randomly from aligned sequences of the same length. Note that "seq" works only if all sequences have the same length.
 
 <br/>
 
 **-incl INCLUDE_FILE, --include INCLUDE_FILE**
-> The include file contains a list of names that must be analyzed.
+> Specifies a file containing a list of names to be included in the analysis.
 
 <br/>
 
 **-excl EXCLUDE_FILE, --exclude EXCLUDE_FILE**
-> The exclude file contains a list of names that should not be analyzed.
+> Specifies a file containing a list of names to be excluded from the analysis.
 
 <br/>
 
 **-force , --force**
-> This forces to use all species using an uninformative topicfrequency for missings.
+> Forces the inclusion of all species by using an uninformative topic frequency for any missing data.
 
 <br/>
 
 **-show , --showtree**
-> Uses figtree to show the tree.
+> Displays the tree using FigTree.
 
 <br/>
 
 **-tmap**
-> uses pyLDAvis to map the topics.
+> Uses pyLDAvis to visualize and map the topics.
 
 <br/>
 
 **-threads**
-> Number of cpu cores to use for locus-parallel runs, default is system max.
+> Specifies the number of CPU cores to use for locus-parallel runs. The default is the maximum number of cores available on the system.
 
 <br/>
 
 **-amb , --ambiguous_letters**
-> Specifies ambiguous letters to be removed. K-mers containing any of these letters are filtered out before analysis. If -amb is provided without specifying letters, the default set n,N,? is used. To specify a custom set of ambiguous letters, such as N,?, -, use -amb N,\?, -.
+> Specifies ambiguous letters to be removed. K-mers containing these letters are filtered out before analysis. If -amb is used without specifying letters, the default set (n,N,?) is applied. To provide a custom set, pass the desired letters as an argument (e.g., -amb N,\?, -).
 
 <br/>
 
