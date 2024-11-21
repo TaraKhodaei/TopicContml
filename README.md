@@ -203,28 +203,28 @@ Python package **TopicContml** uses $k$-mers and probabilistic topic modeling, a
 > may fail if two individuals have the same frequencies, the custom version allows for that, it also uses a default of 15 characters for
 > the individual names. We suggest that you create bin directory in your homedirectory and place the binaries there. The full Phylip
 > version is here: <a html="https://phylipweb.github.io/phylip/">https://phylipweb.github.io/phylip/</a>
-
-    Go into the directory <yourpath> of TopicContml. Use this commandline snippet to compile the custom version of Contml:
-    ```
-    cd  <yourpath>/TopicContml/
-    unzip phylip-part-3.69.zip  
-    cd phylip-part-3.69/src
-    make contml
-    ```
-    $\normalsize{\color{grey}{\textsf{If this fails you will need to see whether you can use one of the makefiles supplied using:}}}$
-    ```
-    make -f makefile... contml
-    ```
-    $\normalsize{\color{grey}{\textsf{If that fails talk to someone to help compile a C program for your computer.}}}$
-    
-    You may need to use this once: 
-    ```
-    cp contml ~/bin/contml2
-    ```
-    If ~/bin does not exist then do:
-    ```
-    mkdir -p ~/bin
-    ```
+>
+> Go into the directory <yourpath> of TopicContml. Use this commandline snippet to compile the custom version of Contml:
+> ```
+> cd  <yourpath>/TopicContml/
+> unzip phylip-part-3.69.zip
+> cd phylip-part-3.69/src
+> make contml
+> ```
+> $\normalsize{\color{grey}{\textsf{If this fails you will need to see whether you can use one of the makefiles supplied using:}}}$
+> ```
+> make -f makefile... contml
+> ```
+> $\normalsize{\color{grey}{\textsf{If that fails talk to someone to help compile a C program for your computer.}}}$
+>
+> You may need to use this once:
+> ```
+> cp contml ~/bin/contml2
+> ```
+> If ~/bin does not exist then do:
+> ```
+> mkdir -p ~/bin
+> ```
   
 * **`FigTree`**: If you do not have figtree on your computer we suggest to install figtree so that you can call it from the commandline.
     > - Download Figtree from here <a html="https://github.com/rambaut/figtree/releases">https://github.com/rambaut/figtree/releases</a> <br/>
