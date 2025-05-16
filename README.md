@@ -325,6 +325,6 @@ TopicContml is licensed under a [MIT License](https://github.com/TaraKhodaei/Top
 If you use TopicContml software for publications, please cite this:
 
     Khodaei, M., Edwards, S. V., & Beerli, P. (2025). ”Estimating Genome-wide Phylogenies Using Probabilistic Topic
-    Modeling.” Systematic Biology, syaf015.  
+    Modeling.” Systematic Biology, syaf015. [https://doi.org/10.1093/sysbio/syaf015]
                             
 
