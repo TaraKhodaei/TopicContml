@@ -115,7 +115,7 @@ def myparser():
                         help='Specifies the number of CPU cores to use for locus-parallel runs. The default is the maximum number of cores available on the system.')
     parser.add_argument('-amb','--ambiguous_letters', dest='ambiguous_letters',
                         nargs='?', const='n,N,?', default=None,
-                        help='Specifies ambiguous letters to be removed. K-mers containing these letters are filtered out before analysis. If -amb is used without specifying letters, the default set (n,N,?) is applied. To provide a custom set, pass the desired letters as an argument (e.g., -amb N,\?, -).)
+                        help='Specifies ambiguous letters to be removed. K-mers containing these letters are filtered out before analysis. If -amb is used without specifying letters, the default set (n,N,?) is applied. To provide a custom set, pass the desired letters as an argument (e.g., -amb N,\?, -).')
 
     #gensim LDA arguments:
     parser.add_argument('-nt','--num_topics', dest='num_topics',
