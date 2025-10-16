@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # MIT License
 # (c) Tara Khodaei and Peter Beerli 2023
-# github: khodaei
+# github: https://github.com/TaraKhodaei/TopicContml.git
 #Import Libraries
 import numpy as np
 import multiprocessing
@@ -36,7 +36,7 @@ DEBUG = False
 #---------------------------------------------------
 
 def citations(options):
-    print(" --------------------------------------------------------------------------------- ")
+    print("+ ---------------------------------------------------------------------------------+ ")
     print("| If you use this software for publications please cite these:                    |")
     print("|                                                                                 |")
     print("| Khodaei, M., Edwards, S. Beerli, P. (2025). Estimating Genome-wide Phylogenies  |")
@@ -54,7 +54,7 @@ def citations(options):
         print("| Sukumaran, J. and Holder, M. T. (2010). DendroPy: a Python library for          |")
         print("|     phylogenetic computing, Bioinformatics, 26:1569--1571.                      |")
         print("|     (https://dendropy.org/)                                                     |")
-    print(" --------------------------------------------------------------------------------- ")
+    print("+---------------------------------------------------------------------------------+")
 
 def myparser():
     import argparse
@@ -115,7 +115,7 @@ def myparser():
                         help='Specifies the number of CPU cores to use for locus-parallel runs. The default is the maximum number of cores available on the system.')
     parser.add_argument('-amb','--ambiguous_letters', dest='ambiguous_letters',
                         nargs='?', const='n,N,?', default=None,
-                        help='Specifies ambiguous letters to be removed. K-mers containing these letters are filtered out before analysis. If -amb is used without specifying letters, the default set (n,N,?) is applied. To provide a custom set, pass the desired letters as an argument (e.g., -amb N,\?, -).')
+                        help='Specifies ambiguous letters to be removed. K-mers containing these letters are filtered out before analysis. If -amb is used without specifying letters, the default set (n,N,?) is applied. To provide a custom set, pass the desired letters as an argument (e.g., -amb N,?, -).')
 
     #gensim LDA arguments:
     parser.add_argument('-nt','--num_topics', dest='num_topics',
